@@ -1,0 +1,30 @@
+---
+title: "README"
+author: "Paul Gittings"
+date: "30/08/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Weather station loction
+
+The BOM_weather_station_locations contins the raw data obtained from ?
+
+stations.xlsx - is a copy of Bom_weather_stations_download2014728_export.xlsx (with non-data rows removed manually )
+
+createStationDF.R - will process the sations.xlsx file into an R dataframe, it will extract just the QLD data and rename problematic column/variables names and then write the data frame to qldStations.rds.  TODO:  looks like the file contains historic stations, probably need to remove stations with an End year prior to the period covered by our data.
+
+haversine.R - contains a function to calculate the distance between two lat/long locations in metres
+
+closestStations.R - contains a function which will load the qldStations.rds and locate the nearest 3 weather stations to the supplied lat/long location, the distance column will indicate how far away the sations are (in metres)
+
+```{r closestStations Example}
+source("closestStations.R")
+
+stations <- closestStations(-27.51511, 153.0306 )
+print(glimpse(stations))
+```
+
