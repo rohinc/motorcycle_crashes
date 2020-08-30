@@ -2,7 +2,9 @@
 title: "README"
 author: "Paul Gittings"
 date: "30/08/2020"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -21,10 +23,12 @@ haversine.R - contains a function to calculate the distance between two lat/long
 
 closestStations.R - contains a function which will load the qldStations.rds and locate the nearest 3 weather stations to the supplied lat/long location, the distance column will indicate how far away the sations are (in metres)
 
-```{r closestStations Example}
+```{r closestStations Example, message=FALSE}
 source("closestStations.R")
 
 stations <- closestStations(-27.51511, 153.0306 )
-print(glimpse(stations))
+
+print(stations)
+
 ```
 
