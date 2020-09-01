@@ -20,8 +20,8 @@ closestStations <- function(latitude, longitude)
   tempStations <- qldStations
   tempStations <- mutate(tempStations, distance=haversine(latitude, longitude, Lat, Lon))
   tempStations <- tempStations[order(tempStations$distance),]
-  return( tempStations[1:3,] )
   
+  return( tempStations[1:3,] )
 }
 
 testClosestStations <- function()

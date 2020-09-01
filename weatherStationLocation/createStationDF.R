@@ -15,15 +15,16 @@ setupPackage <- function( packageName, loud=FALSE ) {
   library(packageName, character.only=TRUE, verbose = loud)
 }
 
+
 setupPackage("tidyverse")
 
 # readin the xlsx file (note: expected that header and tail lines will already have been removed)
-stationsDF <- readxl::read_excel("stations.xlsx")
+stationsDF <- readxl::read_excel("weatherStationLocation/stations.xlsx")
 
 # remove spaces and other special characers from column names
 names(stationsDF)<-str_replace_all(names(stationsDF), c(" " = "_" , "," = "", "\\(" = "" , "\\)" = ""))
 
 # get just the Qld data
-qldStations <- filter(stationsDF, STA == 'QLD')
+qldStations <- filter(stationsDF, STA == 'QLD' & (End == '..' | End >= '2010'))
 
-saveRDS(qldStations, "qldStations.rds")
+saveRDS(qldStations, "weatherStationLocation/qldStations.rds")
