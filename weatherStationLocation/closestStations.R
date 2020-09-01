@@ -10,10 +10,10 @@ setupPackage <- function( packageName, loud=FALSE ) {
 setupPackage("tidyverse")
 
 # get the haversine.R method
-source("haversine.R")
+source("weatherStationLocation/haversine.R")
 
 # load stations
-qldStations <- readRDS("qldStations.rds")
+qldStations <- readRDS("weatherStationLocation/qldStations.rds")
 
 closestStations <- function(latitude, longitude)
 {
