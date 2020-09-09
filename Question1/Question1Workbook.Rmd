@@ -1,5 +1,5 @@
 ---
-title: "Question1"
+title: "Workbook to investigate Question 1"
 author: "Paul Gittings"
 date: "09/09/2020"
 output: html_document
@@ -9,12 +9,47 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Workbook to investigate the question 1:
+```{r packages and libraries}
 
-* Does a relationship exist between the nature of the crash and the crash severity in motorcycle accidents?
+# function to load library, will first attempt to load package if not present
+setupPackage <- function( packageName, loud=FALSE ) {
+  if (!require(packageName, character.only=TRUE)) {
+    install.packages(packageName, verbose = loud)
+  } 
+  library(packageName, character.only=TRUE, verbose = loud)
+}
 
-Questions:
+setupPackage("tidyverse")
 
-* What is meant by the nature of the crash?  
-* What is meant by the severity of the accident?  fatal vs non-fatal? but if so how do we do that since the dataset only seems to be for fatal accidents?
+```
 
+# Intro
+
+The question to be investigated is: Does a relationship exist between the nature of the crash and the crash severity in motorcycle accidents?
+
+
+
+```{r load dataset}
+ crashDF <- read_rds("../datasets/main.Rds")
+```
+
+```{r get column names}
+col_names <- names(crashDF)
+print(col_names)
+```
+```{r get attribute values}
+unique(crashDF$Crash_Severity)
+#TODO:: turn Crash_Severity into an ordinal - property damage only, Minor Injury, Medical treatment, Hospitalisation, Fatal
+
+unique(crashDF$Crash_Nature)
+
+#NOTE: Crash_Sevrity ~ Crash_Nature is predicting an ordinal factor based on a nominal one
+```
+```{r simple plot}
+
+ggplot(crashDF, aes(x=Crash_Severity)) +
+  geom_bar(stat="count") +
+  facet_wrap(~Crash_Nature) +
+  theme(axis.text.x = element_text(angle = 90))
+
+```

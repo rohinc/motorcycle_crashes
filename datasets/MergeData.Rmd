@@ -1,0 +1,162 @@
+---
+title: "Refined R code"
+author: "William Feng"
+date: "04/09/2020"
+output: html_document
+---
+
+# NOTES TO READ B4 STARTING
+# CURRENTLY THERE'S AN ERROR there is a problem when we joined the rainfall data to the main set
+
+-----------------------------------------------
+
+# Getting data directly from the GitHub
+```{r}
+library(readr)
+locations_station <- read_csv("weather/locations_station.csv")
+station_list <- read_csv("weather/station_list.csv")
+monthly_avg <- read_csv("weather/monthly_avg.csv")
+```
+
+Current state of data 
+GPS coords - found in station_list
+Rainfall amount - monthly_avg
+Distance calculations & fatality data - locations_station
+
+# Prepping data for the merging
+1) Station list - extract site ID and GPS coords for QLD only
+```{r, message=FALSE}
+library(dplyr)
+station_list <- filter(station_list, station_list$STA=='QLD') 
+station_list <- station_list[, -c(2:5, 8)]
+```
+
+2) Monthly Avg
+```{r}
+monthly_avg <- monthly_avg[, -c(3)]
+```
+
+3) Location_station - already cleaned on GitHub (Showing only QLD and motorcycles > 0) - see #-ed part for raw dataset
+```{r}
+locations_station <- locations_station[, -c(13,14,18:21,23:25,27,28,47,49:53)]
+```
+
+
+# Primary Key dataset merging 
+
+station_list PK is Site
+monthly_avg PK is bom_id
+
+```{r}
+# merging station_list with monthly avg first
+colnames(monthly_avg)
+monthly_avg <- monthly_avg %>% rename('Site' = 'bom_id') 
+```
+Interim/proxy table
+```{r}
+station_rain <- full_join(station_list, monthly_avg, by = "Site")
+station_rain <- na.omit(station_rain)
+```
+
+Merge proxy table with main locations_station dataset
+```{r}
+main <- full_join(locations_station, station_rain, by = c("Crash_Year" = "Year", "Crash_Month" = "Month_name", "site_id_1" = "Site"))
+# joins the data set by year, month and site name. 
+```
+
+```{r}
+main <- na.omit(main) # filters all NAs produced by the join 
+```
+
+```{r save dataset to rds file}
+# save the data frame as an Rds object, reload with: df <- read_rds("main.Rds")
+write_rds(main, "main.Rds")
+```
+# Exploratory 
+```{r}
+str(main)
+```
+# data spans 2001 - 2018, defines scope of the dataset 
+```{r}
+summary(main$Crash_Year) 
+```
+# find number of crashes per year and plot on simple graph 
+```{r, message=FALSE}
+library(sqldf)
+year_count = sqldf("SELECT DISTINCT COUNT(Crash_Year) FROM main GROUP BY Crash_Year")
+```
+
+```{r}
+table(main$Crash_Year)
+```
+
+# Plot crash year on x axis vs count on y axis 
+```{r}
+Year = c(2001:2018)
+Count = unlist(year_count, use.names=FALSE)
+plot(Year, Count)
+Crash = cbind(Year, Count)
+Crash = as.data.frame(Crash)
+```
+Prettify the above graph using ggplot2
+```{r, message=FALSE}
+library(ggplot2)
+ggplot(Crash, aes(x=Year, y=Count)) + 
+  geom_point() + 
+  geom_smooth() + 
+  scale_x_continuous(breaks=c(2001:2018), labels=c(2001:2018)) +
+  labs(x = "Year", y= "Count", title = "Number of Motorcycle Crashes by Year")
+```
+
+# ERROR there is a problem when we joined the rainfall data to the main set
+
+# Feasibility check - Does the average|total rainfall of the month increase fatalities? 
+```{r}
+#summary(main$rainfall) 
+```
+
+```{r}
+table(main$Crash_Month, main$Crash_Year)
+```
+
+
+```{r}
+#onth_count <- sqldf("SELECT DISTINCT COUNT(Crash_Month), SUM(rainfall), Crash_Year, Crash_Month FROM main WHERE Crash_Year = 2002 GROUP BY Crash_Month")
+#ggplot(main, aes())
+```
+
+
+# First attempt at Leaflet location plotting 
+## with crash coords layer + weather station coords layer + (future) chloropeth average rainfall 
+```{r}
+library(leaflet)
+library(leaflet.extras)
+library(leaflet.providers)
+leaflet(main) %>% 
+  addProviderTiles(providers$Stamen.Toner, group = "Black and white") %>% 
+  
+  addTiles(options = providerTileOptions(noWrap = TRUE), group="Colour") %>% 
+  
+  addMarkers(
+    lng = ~Crash_Longitude_GDA94, 
+    lat = ~Crash_Latitude_GDA94,
+    clusterOptions = markerClusterOptions(),
+    label = ~Crash_Severity,
+    group = "Crash"
+  ) %>%
+  addMarkers(
+    lng = ~Lon, 
+    lat = ~Lat,
+    clusterOptions = markerClusterOptions(),
+    label = ~site_name_1,
+    group = "Weather Station"
+  ) %>%
+  addLayersControl(
+    baseGroups = c("Black and white","Colour"),
+    overlayGroups = c("Crash", "Weather Station"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+```
+
+
