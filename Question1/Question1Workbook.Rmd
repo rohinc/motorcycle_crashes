@@ -1,0 +1,20 @@
+---
+title: "Question1"
+author: "Paul Gittings"
+date: "09/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Workbook to investigate the question 1:
+
+* Does a relationship exist between the nature of the crash and the crash severity in motorcycle accidents?
+
+Questions:
+
+* What is meant by the nature of the crash?  
+* What is meant by the severity of the accident?  fatal vs non-fatal? but if so how do we do that since the dataset only seems to be for fatal accidents?
+
