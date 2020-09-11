@@ -176,4 +176,5 @@ result %>% focus(names(result)[5])
 
 Correlation analysis doesn't reveal any correlation of any strength between severity of accident and the nature of the accident. The Highest positive correlation is 0.12 between Head On accidents and Fatalities, however this i not a significant correlation. All remaining correlations are above -0.01 and below 0.01  which are no correlation at all.
 
-Go back to the engineering level and introduce a new variable non_fatal.
+
+TODO: Go back to the engineering level and introduce a new variable non_fatal_accidents and see if that correlation's exist for it. 
