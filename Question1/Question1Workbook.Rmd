@@ -14,13 +14,14 @@ knitr::opts_chunk$set(echo = TRUE)
 # function to load library, will first attempt to load package if not present
 setupPackage <- function( packageName, loud=FALSE ) {
   if (!require(packageName, character.only=TRUE)) {
-    install.packages(packageName, verbose = loud)
+    install.packages(packageName, verbose = loud, dependencies = TRUE)
   } 
   library(packageName, character.only=TRUE, verbose = loud)
 }
 
 setupPackage("tidyverse")
 setupPackage("fastDummies")
+setupPackage("PerformanceAnalytics")
 
 ```
 
@@ -64,6 +65,7 @@ ggplot(crashDF) +
     theme(axis.text.x = element_text(angle = 90)) +
     xlab("Crash Nature")
 ```
+Looking at the obe plot, would it make sense to roll oup some of the Crash_Nature levels, say from "Hit Parked Vehicle" and all those to it's left?
 
 ```{r total accidents by crash severity}
 
@@ -79,6 +81,8 @@ Steps taken:
 
 * Turn Crash_Severity into an ordinal factor.
 * create dummy attributes for Crash_Nature
+* all columnm names renamed to replace spaces with "_".
+
 
 NOTE: from this point on analysis should use the q1CrashDF  dataframe
 
@@ -96,16 +100,45 @@ if( (!forceDfRebuild) & file.exists(q1DfFileName)) {
   # creat extra dummy columns for the Crash_Nature - should we drop the first one? 
   #     remove_first_dummy = TRUE
   q1CrashDF <- fastDummies::dummy_cols(crashDF, select_columns= "Crash_Nature")
- 
+  names(q1CrashDF)<-str_replace_all(names(q1CrashDF), c(" " = "_" , "," = "", "-"="_" ))
+  names(q1CrashDF)<-str_replace_all(names(q1CrashDF), c("___" = "_"  ))
+  
   # may not need this as we have Count_Fatal, Count_Hospitalisation etc 
   q1CrashDF$Crash_Severity <- factor(q1CrashDF$Crash_Severity, c("Property damage only",
         "Minor injury",  "Medical treatment", "Hospitalisation", "Fatal"), ordered=TRUE)
   
-
+  print(names(q1CrashDF))
    
   write_rds(q1CrashDF, q1DfFileName)
   
 }
   
 
+```
+
+# Additional EDA
+
+```{r correlation matrix}
+my_data <- select(q1CrashDF,  Count_Casualty_Fatality, Count_Casualty_Hospitalised,
+                  Count_Casualty_MedicallyTreated, Count_Casualty_MinorInjury,
+                  Crash_Nature_Angle, Crash_Nature_Collision_miscellaneous,
+                  Crash_Nature_Fall_from_vehicle, Crash_Nature_Head_on,
+                  Crash_Nature_Hit_animal, Crash_Nature_Hit_object,
+                  Crash_Nature_Hit_parked_vehicle, Crash_Nature_Hit_pedestrian,
+                  Crash_Nature_Non_collision_miscellaneous, Crash_Nature_Overturned,
+                  Crash_Nature_Rear_end, Crash_Nature_Sideswipe,
+                  Crash_Nature_Struck_by_external_load
+                  )
+chart.Correlation(my_data, histogram=TRUE, pch=19)
+
+my_data <- select(q1CrashDF,  Count_Casualty_Fatality, 
+                  Crash_Nature_Angle, Crash_Nature_Collision_miscellaneous,
+                  Crash_Nature_Fall_from_vehicle, Crash_Nature_Head_on,
+                  Crash_Nature_Hit_animal, Crash_Nature_Hit_object,
+                  Crash_Nature_Hit_parked_vehicle, Crash_Nature_Hit_pedestrian,
+                  Crash_Nature_Non_collision_miscellaneous, Crash_Nature_Overturned,
+                  Crash_Nature_Rear_end, Crash_Nature_Sideswipe,
+                  Crash_Nature_Struck_by_external_load
+                  )
+chart.Correlation(my_data, histogram=TRUE, pch=19)
 ```
