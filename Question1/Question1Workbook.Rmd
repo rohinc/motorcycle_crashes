@@ -20,6 +20,7 @@ setupPackage <- function( packageName, loud=FALSE ) {
 }
 
 setupPackage("tidyverse")
+setupPackage("fastDummies")
 
 ```
 
@@ -27,10 +28,10 @@ setupPackage("tidyverse")
 
 The question to be investigated is: Does a relationship exist between the nature of the crash and the crash severity in motorcycle accidents?
 
-
+Load the main crash data set and assign it to crashDF. EDA should reference crashDF
 
 ```{r load dataset}
- crashDF <- read_rds("../datasets/main.Rds")
+  crashDF <- read_rds("../datasets/main.Rds")
 ```
 
 # EDA
@@ -62,4 +63,49 @@ ggplot(crashDF) +
     geom_bar(aes(x = forcats::fct_infreq(Crash_Nature), fill = Crash_Severity)) +
     theme(axis.text.x = element_text(angle = 90)) +
     xlab("Crash Nature")
+```
+
+```{r total accidents by crash severity}
+
+ggplot(crashDF) +
+    geom_bar(aes(x = forcats::fct_infreq(Crash_Severity), fill = Crash_Nature)) +
+    theme(axis.text.x = element_text(angle = 90)) +
+    xlab("Crash Severity")
+```
+
+# Engineer Data
+
+Steps taken:
+
+* Turn Crash_Severity into an ordinal factor.
+* create dummy attributes for Crash_Nature
+
+NOTE: from this point on analysis should use the q1CrashDF  dataframe
+
+```{r engineer variables}
+# will check to see if we previously saved away the engineered data set and load it 
+# rather than re-engineering the main crash data again.
+# NOTE: this means that if additional engineering code is added the saved copy of q1CrashDF.Rds
+# should be deleted OR the forceDfRebuild variable should be set to TRUE.
+forceDfRebuild <- TRUE
+q1DfFileName <-"q1CrashDF.Rds"
+
+if( (!forceDfRebuild) & file.exists(q1DfFileName)) {
+  q1CrashDF <- read_rds(q1DfFileName)
+} else {
+  # creat extra dummy columns for the Crash_Nature - should we drop the first one? 
+  #     remove_first_dummy = TRUE
+  q1CrashDF <- fastDummies::dummy_cols(crashDF, select_columns= "Crash_Nature")
+ 
+  # may not need this as we have Count_Fatal, Count_Hospitalisation etc 
+  q1CrashDF$Crash_Severity <- factor(q1CrashDF$Crash_Severity, c("Property damage only",
+        "Minor injury",  "Medical treatment", "Hospitalisation", "Fatal"), ordered=TRUE)
+  
+
+   
+  write_rds(q1CrashDF, q1DfFileName)
+  
+}
+  
+
 ```
