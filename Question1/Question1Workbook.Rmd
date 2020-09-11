@@ -195,4 +195,4 @@ corrData <- select(q1CrashDF,  non_fatal_accident,
  result %>% focus(names(result)[2])
 ```
 
-No stil low corrlation. It would seem that the nature of an accident by itself has no correlation to the crash severity. However as can seen by the histograms at the start of the document a large number of accidents are the result of specific types of accidents, namly a collusion at an angle and riders falling off. It is not clear if riders fall off as a result of some other accident type.
+Correlation still low. It would seem that the nature of an accident by itself has no correlation to the crash severity. However as can seen by the histograms at the start of the document a large number of accidents are the result of specific types of accidents, namly a collusion at an angle and riders falling off. It is not clear if riders fall off as a result of some other accident type.
