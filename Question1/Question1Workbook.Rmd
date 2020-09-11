@@ -23,6 +23,7 @@ setupPackage("tidyverse")
 setupPackage("fastDummies")
 setupPackage("PerformanceAnalytics")
 setupPackage("corrr")
+setupPackage("magrittr")
 
 ```
 
@@ -108,7 +109,7 @@ if( (!forceDfRebuild) & file.exists(q1DfFileName)) {
   q1CrashDF$Crash_Severity <- factor(q1CrashDF$Crash_Severity, c("Property damage only",
         "Minor injury",  "Medical treatment", "Hospitalisation", "Fatal"), ordered=TRUE)
   
-  #q1CrashDF %<>% mutate(non_fatal_acciedent = Count_Casualty_Fatality==0)
+  q1CrashDF %<>% mutate(non_fatal_accident = Count_Casualty_Fatality==0)
   print(names(q1CrashDF))
    
   write_rds(q1CrashDF, q1DfFileName)
@@ -178,3 +179,18 @@ Correlation analysis doesn't reveal any correlation of any strength between seve
 
 
 TODO: Go back to the engineering level and introduce a new variable non_fatal_accidents and see if that correlation's exist for it. 
+
+```{r correlation for non-fatal accidents}
+corrData <- select(q1CrashDF,  non_fatal_accident,
+                  Crash_Nature_Angle, Crash_Nature_Collision_miscellaneous,
+                  Crash_Nature_Fall_from_vehicle, Crash_Nature_Head_on,
+                  Crash_Nature_Hit_animal, Crash_Nature_Hit_object,
+                  Crash_Nature_Hit_parked_vehicle, Crash_Nature_Hit_pedestrian,
+                  Crash_Nature_Non_collision_miscellaneous, Crash_Nature_Overturned,
+                  Crash_Nature_Rear_end, Crash_Nature_Sideswipe,
+                  Crash_Nature_Struck_by_external_load
+                  )
+ result <- corrData %>% correlate()
+ 
+ result %>% focus(names(result)[2])
+```
