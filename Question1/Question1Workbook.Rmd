@@ -33,6 +33,8 @@ The question to be investigated is: Does a relationship exist between the nature
  crashDF <- read_rds("../datasets/main.Rds")
 ```
 
+# EDA
+
 ```{r get column names}
 col_names <- names(crashDF)
 print(col_names)
@@ -45,11 +47,19 @@ unique(crashDF$Crash_Nature)
 
 #NOTE: Crash_Sevrity ~ Crash_Nature is predicting an ordinal factor based on a nominal one
 ```
-```{r simple plot}
+```{r historgram crash severity by carsh nature}
 
 ggplot(crashDF, aes(x=Crash_Severity)) +
   geom_bar(stat="count") +
   facet_wrap(~Crash_Nature) +
   theme(axis.text.x = element_text(angle = 90))
 
+```
+
+```{r total accidents by crash nature}
+
+ggplot(crashDF) +
+    geom_bar(aes(x = forcats::fct_infreq(Crash_Nature), fill = Crash_Severity)) +
+    theme(axis.text.x = element_text(angle = 90)) +
+    xlab("Crash Nature")
 ```
