@@ -22,6 +22,7 @@ setupPackage <- function( packageName, loud=FALSE ) {
 setupPackage("tidyverse")
 setupPackage("fastDummies")
 setupPackage("PerformanceAnalytics")
+setupPackage("corrr")
 
 ```
 
@@ -107,6 +108,7 @@ if( (!forceDfRebuild) & file.exists(q1DfFileName)) {
   q1CrashDF$Crash_Severity <- factor(q1CrashDF$Crash_Severity, c("Property damage only",
         "Minor injury",  "Medical treatment", "Hospitalisation", "Fatal"), ordered=TRUE)
   
+  #q1CrashDF %<>% mutate(non_fatal_acciedent = Count_Casualty_Fatality==0)
   print(names(q1CrashDF))
    
   write_rds(q1CrashDF, q1DfFileName)
@@ -118,7 +120,7 @@ if( (!forceDfRebuild) & file.exists(q1DfFileName)) {
 
 # Additional EDA
 
-```{r correlation matrix}
+```{r correlation matrix 1 - all}
 my_data <- select(q1CrashDF,  Count_Casualty_Fatality, Count_Casualty_Hospitalised,
                   Count_Casualty_MedicallyTreated, Count_Casualty_MinorInjury,
                   Crash_Nature_Angle, Crash_Nature_Collision_miscellaneous,
@@ -130,7 +132,10 @@ my_data <- select(q1CrashDF,  Count_Casualty_Fatality, Count_Casualty_Hospitalis
                   Crash_Nature_Struck_by_external_load
                   )
 chart.Correlation(my_data, histogram=TRUE, pch=19)
+```
 
+
+```{r correlattion matrix 2: fatalities}
 my_data <- select(q1CrashDF,  Count_Casualty_Fatality, 
                   Crash_Nature_Angle, Crash_Nature_Collision_miscellaneous,
                   Crash_Nature_Fall_from_vehicle, Crash_Nature_Head_on,
@@ -142,3 +147,33 @@ my_data <- select(q1CrashDF,  Count_Casualty_Fatality,
                   )
 chart.Correlation(my_data, histogram=TRUE, pch=19)
 ```
+Above correlation matrixes are too small, but the results don't look that good. Let's try a text based approach to get the correltions.
+
+```{r alterative to correlation graphs}
+corrData <- select(q1CrashDF,  Count_Casualty_Fatality, Count_Casualty_Hospitalised,
+                  Count_Casualty_MedicallyTreated, Count_Casualty_MinorInjury,
+                  Crash_Nature_Angle, Crash_Nature_Collision_miscellaneous,
+                  Crash_Nature_Fall_from_vehicle, Crash_Nature_Head_on,
+                  Crash_Nature_Hit_animal, Crash_Nature_Hit_object,
+                  Crash_Nature_Hit_parked_vehicle, Crash_Nature_Hit_pedestrian,
+                  Crash_Nature_Non_collision_miscellaneous, Crash_Nature_Overturned,
+                  Crash_Nature_Rear_end, Crash_Nature_Sideswipe,
+                  Crash_Nature_Struck_by_external_load
+                  )
+ result <- corrData %>% correlate()
+ 
+  
+ result %>% focus(names(result)[2])  # Can't seem to be able to use Count_Casulaty_Fatality directly?
+ 
+result %>% focus(names(result)[3])
+ 
+result %>% focus(names(result)[4])
+
+result %>% focus(names(result)[5])
+  
+
+```
+
+Correlation analysis doesn't reveal any correlation of any strength between severity of accident and the nature of the accident. The Highest positive correlation is 0.12 between Head On accidents and Fatalities, however this i not a significant correlation. All remaining correlations are above -0.01 and below 0.01  which are no correlation at all.
+
+Go back to the engineering level and introduce a new variable non_fatal.
