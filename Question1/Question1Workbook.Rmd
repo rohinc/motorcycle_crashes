@@ -81,9 +81,13 @@ ggplot(crashDF) +
 
 Steps taken:
 
-* Turn Crash_Severity into an ordinal factor.
-* create dummy attributes for Crash_Nature
+* Created Crash_Severity_Fac  which is an ordinal factor version of Crash_Severity
+* Created Crash_Severity_Num which is a numeric version of Crash_Severity_Fac
+* created dummy attributes for Crash_Nature
 * all columnm names renamed to replace spaces with "_".
+* created non_fatal_accident column, equals 1 for a non-fatal accident, 0 for a fatal accident
+* created Crash_Nature_Num as a numeric version of Crash_Nature
+
 
 
 NOTE: from this point on analysis should use the q1CrashDF  dataframe
@@ -106,10 +110,15 @@ if( (!forceDfRebuild) & file.exists(q1DfFileName)) {
   names(q1CrashDF)<-str_replace_all(names(q1CrashDF), c("___" = "_"  ))
   
   # may not need this as we have Count_Fatal, Count_Hospitalisation etc 
-  q1CrashDF$Crash_Severity <- factor(q1CrashDF$Crash_Severity, c("Property damage only",
+  q1CrashDF$Crash_Severity_Fac <- factor(q1CrashDF$Crash_Severity, c("Property damage only",
         "Minor injury",  "Medical treatment", "Hospitalisation", "Fatal"), ordered=TRUE)
   
+  # numeric version of Crash_Severity_Fac
+  q1CrashDF$Crash_Severity_Num <- as.numeric(q1CrashDF$Crash_Severity_Fac)
+  
   q1CrashDF %<>% mutate(non_fatal_accident = Count_Casualty_Fatality==0)
+  
+  q1CrashDF$Crash_Nature_Num <- as.numeric(factor(q1CrashDF$Crash_Nature))
   print(names(q1CrashDF))
    
   write_rds(q1CrashDF, q1DfFileName)
@@ -203,7 +212,7 @@ Just in case I'm doing things wrong with the above correlation let's look at a c
 
 ```{r chi-squared test}
 
-chisq.test(q1CrashDF$Crash_Severity, q1CrashDF$Crash_Nature, correct=FALSE)
+chisq.test(q1CrashDF$Crash_Severity_Fac, q1CrashDF$Crash_Nature, correct=FALSE)
 
 ```
 
@@ -211,21 +220,20 @@ Given the low p value the chi-squared test does imply that the Nature and Severi
 
 ```{r quick glm model}
 
-# re-encode Crash_Severity as numeric
-modelData <- q1CrashDF
-modelData$Crash_Severity <- as.numeric(q1CrashDF$Crash_Severity)
-modelData$Crash_Nature <- as.numeric(as.factor(q1CrashDF$Crash_Nature))
 
 #  split data into 70% train 30% test.
 trainSize <- floor(0.7*nrow(q1CrashDF))
 set.seed(42)
 
-trainIndexes <- sample(seq_len(nrow(modelData)), size = trainSize)
-trainDF  <- modelData[trainIndexes, ]
-testDF   <- modelData[-trainIndexes, ]
+trainIndexes <- sample(seq_len(nrow(q1CrashDF)), size = trainSize)
+trainDF  <- q1CrashDF[trainIndexes, ]
+testDF   <- q1CrashDF[-trainIndexes, ]
 
-
-model1 <- glm(data=trainDF, Crash_Severity ~ Crash_Nature_Angle +  Crash_Nature_Collision_miscellaneous +
+# model 1
+# glm - gaussian
+# dependent varialbe - numeric version of Crash Severity
+# independent variables - all dummy variables of Crash_Nature
+model1 <- glm(data=trainDF, Crash_Severity_Num ~ Crash_Nature_Angle +  Crash_Nature_Collision_miscellaneous +
              Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
                   Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
                   Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
@@ -247,7 +255,7 @@ Used a multiple liear regression model, looking at the summary it doesn't look t
 #  https://stackoverflow.com/a/49862494
 predictions <- predict(model1, newdata=testDF, type="response")
 
- print(paste("Model 1 accuracy:", sum(round(predictions)==testDF$Crash_Severity)/nrow(testDF)))
+ print(paste("Model 1 accuracy:", sum(round(predictions)==testDF$Crash_Severity_Num)/nrow(testDF)))
 ```
 
 Model is not very poor on accuracy.
@@ -255,8 +263,11 @@ Model is not very poor on accuracy.
 Try agin but remove crash nature with low occurrence
 
 ```{r model 2}
-
-model2<- glm(data=trainDF, Crash_Severity ~ Crash_Nature_Angle +  
+# model 2
+# glm - gaussian
+# dependent varialbe - numeric version of Crash Severity
+# independent variables - selected (highest incidence) dummy variables of Crash_Nature
+model2<- glm(data=trainDF, Crash_Severity_Num ~ Crash_Nature_Angle +  
              Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
                   Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
                   Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
@@ -265,7 +276,7 @@ model2<- glm(data=trainDF, Crash_Severity ~ Crash_Nature_Angle +
 summary(model2)
 predictions <- predict(model2, newdata=testDF, type="response")
 
- print(paste("Model 2 accuracy:", sum(round(predictions)==testDF$Crash_Severity)/nrow(testDF)))
+ print(paste("Model 2 accuracy:", sum(round(predictions)==testDF$Crash_Severity_Num)/nrow(testDF)))
 ```
 
 Very slight improvement in AIC so model is a slightly better fit but prediciton accuracy reamins unchanged.
@@ -274,13 +285,16 @@ Very slight improvement in AIC so model is a slightly better fit but prediciton 
 Let's back up a bit. Rather than using dummy variables for the Crash_Nature, lets use the numeric re-encoded column in the next model
 
 ```{r model 3}
-
-model3 <- glm(data=trainDF, Crash_Severity ~ Crash_Nature, family="gaussian")
+# model 3
+# glm - gaussian
+# dependent varialbe - numeric version of Crash Severity
+# independent variables - numeric version  Crash_Nature - does this make sense as Crash_Nature is non-ordered
+model3 <- glm(data=trainDF, Crash_Severity_Num ~ Crash_Nature_Num, family="gaussian")
 
 summary(model3)
 predictions <- predict(model3, newdata=testDF, type="response")
 
- print(paste("Model 3 accuracy:", sum(round(predictions)==testDF$Crash_Severity)/nrow(testDF)))
+ print(paste("Model 3 accuracy:", sum(round(predictions)==testDF$Crash_Severity_Num)/nrow(testDF)))
  
 ```
 
