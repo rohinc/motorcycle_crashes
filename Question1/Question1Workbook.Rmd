@@ -24,6 +24,8 @@ setupPackage("fastDummies")
 setupPackage("PerformanceAnalytics")
 setupPackage("corrr")
 setupPackage("magrittr")
+#setupPackage("polr")  #  ordinal logistic regression - not available for R 4.0.2 :-(
+setupPackage("ordinal")
 
 ```
 
@@ -103,15 +105,20 @@ q1DfFileName <-"q1CrashDF.Rds"
 if( (!forceDfRebuild) & file.exists(q1DfFileName)) {
   q1CrashDF <- read_rds(q1DfFileName)
 } else {
+  
+  
   # creat extra dummy columns for the Crash_Nature - should we drop the first one? 
   #     remove_first_dummy = TRUE
   q1CrashDF <- fastDummies::dummy_cols(crashDF, select_columns= "Crash_Nature")
   names(q1CrashDF)<-str_replace_all(names(q1CrashDF), c(" " = "_" , "," = "", "-"="_" ))
   names(q1CrashDF)<-str_replace_all(names(q1CrashDF), c("___" = "_"  ))
   
+  # replace spaces with underscore in Crash_Severity
+  q1CrashDF$Crash_Severity <- str_replace_all(q1CrashDF$Crash_Severity, " ", "_")
+  
   # may not need this as we have Count_Fatal, Count_Hospitalisation etc 
-  q1CrashDF$Crash_Severity_Fac <- factor(q1CrashDF$Crash_Severity, c("Property damage only",
-        "Minor injury",  "Medical treatment", "Hospitalisation", "Fatal"), ordered=TRUE)
+  q1CrashDF$Crash_Severity_Fac <- factor(q1CrashDF$Crash_Severity, c("Property_damage_only",
+        "Minor_injury",  "Medical_treatment", "Hospitalisation", "Fatal"), ordered=TRUE)
   
   # numeric version of Crash_Severity_Fac
   q1CrashDF$Crash_Severity_Num <- as.numeric(q1CrashDF$Crash_Severity_Fac)
@@ -300,3 +307,30 @@ predictions <- predict(model3, newdata=testDF, type="response")
 
 Accuracy even worse.
 
+# Ordinal Logistic Regression
+
+Would have liked to have used the polr package but not available for this version of R, so will use the oridnal package and it's function for cumulative link models for ordinal regresion (clm).
+Reference: https://marissabarlaz.github.io/portfolio/ols/
+
+Not really expecting a different result to the attempted linear regression, just including for completeness.
+
+Preicitons are all hospitalisation!
+
+# TODO play with this a bit more.
+
+```{r Oridnal Logistic Regression model1}
+
+model4 <- clm(data=trainDF, Crash_Severity_Fac ~ Crash_Nature_Angle +  Crash_Nature_Collision_miscellaneous +
+             Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
+                  Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
+                  Crash_Nature_Non_collision_miscellaneous +Crash_Nature_Overturned +
+                  Crash_Nature_Rear_end + Crash_Nature_Sideswipe +
+                  Crash_Nature_Struck_by_external_load, link = "logit" )
+summary(model4)
+
+predictions <- predict(model4, newdata=testDF, type="class")
+
+# TODO: have to come back and look at how to do the following calc.
+#print(paste("Model 3 accuracy:", sum(as.numeric(predictions)==as.numeric(testDF$Crash_Severity_Fac))/nrow(testDF)))
+```
