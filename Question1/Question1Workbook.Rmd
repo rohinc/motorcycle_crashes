@@ -67,7 +67,7 @@ ggplot(crashDF) +
     theme(axis.text.x = element_text(angle = 90)) +
     xlab("Crash Nature")
 ```
-Looking at the obe plot, would it make sense to roll oup some of the Crash_Nature levels, say from "Hit Parked Vehicle" and all those to it's left?
+Looking at the above plot, would it make sense to roll oup some of the Crash_Nature levels, say from "Hit Parked Vehicle" and all those to it's left?
 
 ```{r total accidents by crash severity}
 
@@ -132,7 +132,8 @@ my_data <- select(q1CrashDF,  Count_Casualty_Fatality, Count_Casualty_Hospitalis
                   Crash_Nature_Rear_end, Crash_Nature_Sideswipe,
                   Crash_Nature_Struck_by_external_load
                   )
-chart.Correlation(my_data, histogram=TRUE, pch=19)
+
+#chart.Correlation(my_data, histogram=TRUE, pch=19)
 ```
 
 
@@ -146,7 +147,7 @@ my_data <- select(q1CrashDF,  Count_Casualty_Fatality,
                   Crash_Nature_Rear_end, Crash_Nature_Sideswipe,
                   Crash_Nature_Struck_by_external_load
                   )
-chart.Correlation(my_data, histogram=TRUE, pch=19)
+#chart.Correlation(my_data, histogram=TRUE, pch=19)
 ```
 Above correlation matrixes are too small, but the results don't look that good. Let's try a text based approach to get the correltions.
 
@@ -195,4 +196,93 @@ corrData <- select(q1CrashDF,  non_fatal_accident,
  result %>% focus(names(result)[2])
 ```
 
-Correlation still low. It would seem that the nature of an accident by itself has no correlation to the crash severity. However as can seen by the histograms at the start of the document a large number of accidents are the result of specific types of accidents, namly a collusion at an angle and riders falling off. It is not clear if riders fall off as a result of some other accident type.
+Correlation still low. It would seem that the nature of an accident by itself has no correlation to the crash severity. However as can seen by the histograms at the start of the document a large number of accidents are the result of specific types of accidents, namely a collision at an angle and riders falling off. It is not clear if riders fall off as a result of some other accident type.
+
+
+Just in case I'm doing things wrong with the above correlation let's look at a chi-squared test
+
+```{r chi-squared test}
+
+chisq.test(q1CrashDF$Crash_Severity, q1CrashDF$Crash_Nature, correct=FALSE)
+
+```
+
+Given the low p value the chi-squared test does imply that the Nature and Severity are dependent.
+
+```{r quick glm model}
+
+# re-encode Crash_Severity as numeric
+modelData <- q1CrashDF
+modelData$Crash_Severity <- as.numeric(q1CrashDF$Crash_Severity)
+modelData$Crash_Nature <- as.numeric(as.factor(q1CrashDF$Crash_Nature))
+
+#  split data into 70% train 30% test.
+trainSize <- floor(0.7*nrow(q1CrashDF))
+set.seed(42)
+
+trainIndexes <- sample(seq_len(nrow(modelData)), size = trainSize)
+trainDF  <- modelData[trainIndexes, ]
+testDF   <- modelData[-trainIndexes, ]
+
+
+model1 <- glm(data=trainDF, Crash_Severity ~ Crash_Nature_Angle +  Crash_Nature_Collision_miscellaneous +
+             Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
+                  Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
+                  Crash_Nature_Non_collision_miscellaneous +Crash_Nature_Overturned +
+                  Crash_Nature_Rear_end + Crash_Nature_Sideswipe +
+                  Crash_Nature_Struck_by_external_load, family="gaussian")
+
+summary(model1)
+```
+
+Used a multiple liear regression model, looking at the summary it doesn't look that promising because all p-values for independent are over .05.
+
+```{r get predictions}
+
+# prediciton throws up a "rank-deficient fit may be misleading" warning
+# this is a catch all type of warning, that could inlcude rank (in this case the data has the same rank),
+# sparse data or other concerns predict has about the data,  it should be thought of as 
+# "predicitons are brittle
+#  https://stackoverflow.com/a/49862494
+predictions <- predict(model1, newdata=testDF, type="response")
+
+ print(paste("Model 1 accuracy:", sum(round(predictions)==testDF$Crash_Severity)/nrow(testDF)))
+```
+
+Model is not very poor on accuracy.
+
+Try agin but remove crash nature with low occurrence
+
+```{r model 2}
+
+model2<- glm(data=trainDF, Crash_Severity ~ Crash_Nature_Angle +  
+             Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
+                  Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
+                  Crash_Nature_Rear_end + Crash_Nature_Sideswipe, family="gaussian")
+
+summary(model2)
+predictions <- predict(model2, newdata=testDF, type="response")
+
+ print(paste("Model 2 accuracy:", sum(round(predictions)==testDF$Crash_Severity)/nrow(testDF)))
+```
+
+Very slight improvement in AIC so model is a slightly better fit but prediciton accuracy reamins unchanged.
+
+
+Let's back up a bit. Rather than using dummy variables for the Crash_Nature, lets use the numeric re-encoded column in the next model
+
+```{r model 3}
+
+model3 <- glm(data=trainDF, Crash_Severity ~ Crash_Nature, family="gaussian")
+
+summary(model3)
+predictions <- predict(model3, newdata=testDF, type="response")
+
+ print(paste("Model 3 accuracy:", sum(round(predictions)==testDF$Crash_Severity)/nrow(testDF)))
+ 
+```
+
+Accuracy even worse.
+
