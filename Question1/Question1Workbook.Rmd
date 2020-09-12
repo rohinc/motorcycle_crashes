@@ -309,12 +309,12 @@ Accuracy even worse.
 
 # Ordinal Logistic Regression
 
-Would have liked to have used the polr package but not available for this version of R, so will use the oridnal package and it's function for cumulative link models for ordinal regresion (clm).
+Would have liked to have used the polr package but not available for this version of R, so will use the ordinal package and it's function for cumulative link models for ordinal regresion (clm).
 Reference: https://marissabarlaz.github.io/portfolio/ols/
 
 Not really expecting a different result to the attempted linear regression, just including for completeness.
 
-Preicitons are all hospitalisation!
+Predictions are all hospitalisation!
 
 # TODO play with this a bit more.
 
