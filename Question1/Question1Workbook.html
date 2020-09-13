@@ -421,8 +421,16 @@ setupPackage(&quot;tidyverse&quot;)</code></pre>
 <pre><code>## The following object is masked from &#39;package:tidyr&#39;:
 ## 
 ##     extract</code></pre>
-<div id="intro" class="section level1">
-<h1>Intro</h1>
+<pre class="r"><code>#setupPackage(&quot;polr&quot;)  #  ordinal logistic regression - not available for R 4.0.2 :-(, polr also in MASS package
+setupPackage(&quot;ordinal&quot;)  # ordinal logistic regression</code></pre>
+<pre><code>## Loading required package: ordinal</code></pre>
+<pre><code>## 
+## Attaching package: &#39;ordinal&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     slice</code></pre>
+<div id="introduciton" class="section level1">
+<h1>Introduciton</h1>
 <p>The question to be investigated is: Does a relationship exist between the nature of the crash and the crash severity in motorcycle accidents?</p>
 <p>Load the main crash data set and assign it to crashDF. EDA should reference crashDF</p>
 <pre class="r"><code>  crashDF &lt;- read_rds(&quot;../datasets/main.Rds&quot;)</code></pre>
@@ -489,9 +497,12 @@ unique(crashDF$Crash_Nature)</code></pre>
 <h1>Engineer Data</h1>
 <p>Steps taken:</p>
 <ul>
-<li>Turn Crash_Severity into an ordinal factor.</li>
-<li>create dummy attributes for Crash_Nature</li>
+<li>Created Crash_Severity_Fac which is an ordinal factor version of Crash_Severity</li>
+<li>Created Crash_Severity_Num which is a numeric version of Crash_Severity_Fac</li>
+<li>created dummy attributes for Crash_Nature</li>
 <li>all columnm names renamed to replace spaces with &quot;_&quot;.</li>
+<li>created non_fatal_accident column, equals 1 for a non-fatal accident, 0 for a fatal accident</li>
+<li>created Crash_Nature_Num as a numeric version of Crash_Nature</li>
 </ul>
 <p>NOTE: from this point on analysis should use the q1CrashDF dataframe</p>
 <pre class="r"><code># will check to see if we previously saved away the engineered data set and load it 
@@ -504,17 +515,27 @@ q1DfFileName &lt;-&quot;q1CrashDF.Rds&quot;
 if( (!forceDfRebuild) &amp; file.exists(q1DfFileName)) {
   q1CrashDF &lt;- read_rds(q1DfFileName)
 } else {
+  
+  
   # creat extra dummy columns for the Crash_Nature - should we drop the first one? 
   #     remove_first_dummy = TRUE
   q1CrashDF &lt;- fastDummies::dummy_cols(crashDF, select_columns= &quot;Crash_Nature&quot;)
   names(q1CrashDF)&lt;-str_replace_all(names(q1CrashDF), c(&quot; &quot; = &quot;_&quot; , &quot;,&quot; = &quot;&quot;, &quot;-&quot;=&quot;_&quot; ))
   names(q1CrashDF)&lt;-str_replace_all(names(q1CrashDF), c(&quot;___&quot; = &quot;_&quot;  ))
   
+  # replace spaces with underscore in Crash_Severity
+  q1CrashDF$Crash_Severity &lt;- str_replace_all(q1CrashDF$Crash_Severity, &quot; &quot;, &quot;_&quot;)
+  
   # may not need this as we have Count_Fatal, Count_Hospitalisation etc 
-  q1CrashDF$Crash_Severity &lt;- factor(q1CrashDF$Crash_Severity, c(&quot;Property damage only&quot;,
-        &quot;Minor injury&quot;,  &quot;Medical treatment&quot;, &quot;Hospitalisation&quot;, &quot;Fatal&quot;), ordered=TRUE)
+  q1CrashDF$Crash_Severity_Fac &lt;- factor(q1CrashDF$Crash_Severity, c(&quot;Property_damage_only&quot;,
+        &quot;Minor_injury&quot;,  &quot;Medical_treatment&quot;, &quot;Hospitalisation&quot;, &quot;Fatal&quot;), ordered=TRUE)
+  
+  # numeric version of Crash_Severity_Fac
+  q1CrashDF$Crash_Severity_Num &lt;- as.numeric(q1CrashDF$Crash_Severity_Fac)
   
   q1CrashDF %&lt;&gt;% mutate(non_fatal_accident = Count_Casualty_Fatality==0)
+  
+  q1CrashDF$Crash_Nature_Num &lt;- as.numeric(factor(q1CrashDF$Crash_Nature))
   print(names(q1CrashDF))
    
   write_rds(q1CrashDF, q1DfFileName)
@@ -581,7 +602,10 @@ if( (!forceDfRebuild) &amp; file.exists(q1DfFileName)) {
 ## [59] &quot;Crash_Nature_Rear_end&quot;                   
 ## [60] &quot;Crash_Nature_Sideswipe&quot;                  
 ## [61] &quot;Crash_Nature_Struck_by_external_load&quot;    
-## [62] &quot;non_fatal_accident&quot;</code></pre>
+## [62] &quot;Crash_Severity_Fac&quot;                      
+## [63] &quot;Crash_Severity_Num&quot;                      
+## [64] &quot;non_fatal_accident&quot;                      
+## [65] &quot;Crash_Nature_Num&quot;</code></pre>
 </div>
 <div id="additional-eda" class="section level1">
 <h1>Additional EDA</h1>
@@ -736,30 +760,28 @@ if( (!forceDfRebuild) &amp; file.exists(q1DfFileName)) {
 ## 13 Crash_Nature_Struck_by_external_load               0.000665</code></pre>
 <p>Correlation still low. It would seem that the nature of an accident by itself has no correlation to the crash severity. However as can seen by the histograms at the start of the document a large number of accidents are the result of specific types of accidents, namely a collision at an angle and riders falling off. It is not clear if riders fall off as a result of some other accident type.</p>
 <p>Just in case I’m doing things wrong with the above correlation let’s look at a chi-squared test</p>
-<pre class="r"><code>chisq.test(q1CrashDF$Crash_Severity, q1CrashDF$Crash_Nature, correct=FALSE)</code></pre>
-<pre><code>## Warning in chisq.test(q1CrashDF$Crash_Severity, q1CrashDF$Crash_Nature, : Chi-
-## squared approximation may be incorrect</code></pre>
+<pre class="r"><code>chisq.test(q1CrashDF$Crash_Severity_Fac, q1CrashDF$Crash_Nature, correct=FALSE)</code></pre>
+<pre><code>## Warning in chisq.test(q1CrashDF$Crash_Severity_Fac, q1CrashDF$Crash_Nature, :
+## Chi-squared approximation may be incorrect</code></pre>
 <pre><code>## 
 ##  Pearson&#39;s Chi-squared test
 ## 
-## data:  q1CrashDF$Crash_Severity and q1CrashDF$Crash_Nature
+## data:  q1CrashDF$Crash_Severity_Fac and q1CrashDF$Crash_Nature
 ## X-squared = 1549.7, df = 48, p-value &lt; 2.2e-16</code></pre>
 <p>Given the low p value the chi-squared test does imply that the Nature and Severity are dependent.</p>
-<pre class="r"><code># re-encode Crash_Severity as numeric
-modelData &lt;- q1CrashDF
-modelData$Crash_Severity &lt;- as.numeric(q1CrashDF$Crash_Severity)
-modelData$Crash_Nature &lt;- as.numeric(as.factor(q1CrashDF$Crash_Nature))
-
-#  split data into 70% train 30% test.
+<pre class="r"><code>#  split data into 70% train 30% test.
 trainSize &lt;- floor(0.7*nrow(q1CrashDF))
 set.seed(42)
 
-trainIndexes &lt;- sample(seq_len(nrow(modelData)), size = trainSize)
-trainDF  &lt;- modelData[trainIndexes, ]
-testDF   &lt;- modelData[-trainIndexes, ]
+trainIndexes &lt;- sample(seq_len(nrow(q1CrashDF)), size = trainSize)
+trainDF  &lt;- q1CrashDF[trainIndexes, ]
+testDF   &lt;- q1CrashDF[-trainIndexes, ]
 
-
-model1 &lt;- glm(data=trainDF, Crash_Severity ~ Crash_Nature_Angle +  Crash_Nature_Collision_miscellaneous +
+# model 1
+# glm - gaussian
+# dependent varialbe - numeric version of Crash Severity
+# independent variables - all dummy variables of Crash_Nature
+model1 &lt;- glm(data=trainDF, Crash_Severity_Num ~ Crash_Nature_Angle +  Crash_Nature_Collision_miscellaneous +
              Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
                   Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
                   Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
@@ -770,7 +792,7 @@ model1 &lt;- glm(data=trainDF, Crash_Severity ~ Crash_Nature_Angle +  Crash_Natu
 summary(model1)</code></pre>
 <pre><code>## 
 ## Call:
-## glm(formula = Crash_Severity ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + 
+## glm(formula = Crash_Severity_Num ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + 
 ##     Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + 
 ##     Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + 
 ##     Crash_Nature_Hit_pedestrian + Crash_Nature_Non_collision_miscellaneous + 
@@ -832,11 +854,15 @@ summary(model1)</code></pre>
 predictions &lt;- predict(model1, newdata=testDF, type=&quot;response&quot;)</code></pre>
 <pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
 ## prediction from a rank-deficient fit may be misleading</code></pre>
-<pre class="r"><code> print(paste(&quot;Model 1 accuracy:&quot;, sum(round(predictions)==testDF$Crash_Severity)/nrow(testDF)))</code></pre>
+<pre class="r"><code> print(paste(&quot;Model 1 accuracy:&quot;, sum(round(predictions)==testDF$Crash_Severity_Num)/nrow(testDF)))</code></pre>
 <pre><code>## [1] &quot;Model 1 accuracy: 0.446543643819567&quot;</code></pre>
 <p>Model is not very poor on accuracy.</p>
 <p>Try agin but remove crash nature with low occurrence</p>
-<pre class="r"><code>model2&lt;- glm(data=trainDF, Crash_Severity ~ Crash_Nature_Angle +  
+<pre class="r"><code># model 2
+# glm - gaussian
+# dependent varialbe - numeric version of Crash Severity
+# independent variables - selected (highest incidence) dummy variables of Crash_Nature
+model2&lt;- glm(data=trainDF, Crash_Severity_Num ~ Crash_Nature_Angle +  
              Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
                   Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
                   Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
@@ -845,7 +871,7 @@ predictions &lt;- predict(model1, newdata=testDF, type=&quot;response&quot;)</co
 summary(model2)</code></pre>
 <pre><code>## 
 ## Call:
-## glm(formula = Crash_Severity ~ Crash_Nature_Angle + Crash_Nature_Fall_from_vehicle + 
+## glm(formula = Crash_Severity_Num ~ Crash_Nature_Angle + Crash_Nature_Fall_from_vehicle + 
 ##     Crash_Nature_Head_on + Crash_Nature_Hit_animal + Crash_Nature_Hit_object + 
 ##     Crash_Nature_Hit_parked_vehicle + Crash_Nature_Hit_pedestrian + 
 ##     Crash_Nature_Rear_end + Crash_Nature_Sideswipe, family = &quot;gaussian&quot;, 
@@ -879,16 +905,20 @@ summary(model2)</code></pre>
 ## Number of Fisher Scoring iterations: 2</code></pre>
 <pre class="r"><code>predictions &lt;- predict(model2, newdata=testDF, type=&quot;response&quot;)
 
- print(paste(&quot;Model 2 accuracy:&quot;, sum(round(predictions)==testDF$Crash_Severity)/nrow(testDF)))</code></pre>
+ print(paste(&quot;Model 2 accuracy:&quot;, sum(round(predictions)==testDF$Crash_Severity_Num)/nrow(testDF)))</code></pre>
 <pre><code>## [1] &quot;Model 2 accuracy: 0.446104276508494&quot;</code></pre>
 <p>Very slight improvement in AIC so model is a slightly better fit but prediciton accuracy reamins unchanged.</p>
 <p>Let’s back up a bit. Rather than using dummy variables for the Crash_Nature, lets use the numeric re-encoded column in the next model</p>
-<pre class="r"><code>model3 &lt;- glm(data=trainDF, Crash_Severity ~ Crash_Nature, family=&quot;gaussian&quot;)
+<pre class="r"><code># model 3
+# glm - gaussian
+# dependent varialbe - numeric version of Crash Severity
+# independent variables - numeric version  Crash_Nature - does this make sense as Crash_Nature is non-ordered
+model3 &lt;- glm(data=trainDF, Crash_Severity_Num ~ Crash_Nature_Num, family=&quot;gaussian&quot;)
 
 summary(model3)</code></pre>
 <pre><code>## 
 ## Call:
-## glm(formula = Crash_Severity ~ Crash_Nature, family = &quot;gaussian&quot;, 
+## glm(formula = Crash_Severity_Num ~ Crash_Nature_Num, family = &quot;gaussian&quot;, 
 ##     data = trainDF)
 ## 
 ## Deviance Residuals: 
@@ -896,9 +926,9 @@ summary(model3)</code></pre>
 ## -2.5308  -0.5072   0.4692   0.5164   1.5989  
 ## 
 ## Coefficients:
-##               Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)   3.542625   0.009760 362.964  &lt; 2e-16 ***
-## Crash_Nature -0.011797   0.001594  -7.401 1.42e-13 ***
+##                   Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       3.542625   0.009760 362.964  &lt; 2e-16 ***
+## Crash_Nature_Num -0.011797   0.001594  -7.401 1.42e-13 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -911,9 +941,175 @@ summary(model3)</code></pre>
 ## Number of Fisher Scoring iterations: 2</code></pre>
 <pre class="r"><code>predictions &lt;- predict(model3, newdata=testDF, type=&quot;response&quot;)
 
- print(paste(&quot;Model 3 accuracy:&quot;, sum(round(predictions)==testDF$Crash_Severity)/nrow(testDF)))</code></pre>
+ print(paste(&quot;Model 3 accuracy:&quot;, sum(round(predictions)==testDF$Crash_Severity_Num)/nrow(testDF)))</code></pre>
 <pre><code>## [1] &quot;Model 3 accuracy: 0.433216168717047&quot;</code></pre>
 <p>Accuracy even worse.</p>
+</div>
+<div id="ordinal-logistic-regression" class="section level1">
+<h1>Ordinal Logistic Regression</h1>
+<p>Would have liked to have used the polr package but not available for this version of R, so will use the ordinal package and it’s function for cumulative link models for ordinal regresion (clm). Reference: <a href="https://marissabarlaz.github.io/portfolio/ols/" class="uri">https://marissabarlaz.github.io/portfolio/ols/</a></p>
+<p>Not really expecting a different result to the attempted linear regression, just including for completeness.</p>
+<p>Predictions are all hospitalisation!</p>
+<pre class="r"><code>model4 &lt;- clm(data=trainDF, Crash_Severity_Fac ~ Crash_Nature_Angle +  Crash_Nature_Collision_miscellaneous +
+             Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
+                  Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
+                  Crash_Nature_Non_collision_miscellaneous +Crash_Nature_Overturned +
+                  Crash_Nature_Rear_end + Crash_Nature_Sideswipe +
+                  Crash_Nature_Struck_by_external_load, link = &quot;logit&quot; )</code></pre>
+<pre><code>## Warning: Using formula(x) is deprecated when x is a character vector of length &gt; 1.
+##   Consider formula(paste(x, collapse = &quot; &quot;)) instead.</code></pre>
+<pre class="r"><code>summary(model4)</code></pre>
+<pre><code>## formula: 
+## Crash_Severity_Fac ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + Crash_Nature_Hit_pedestrian + Crash_Nature_Non_collision_miscellaneous + Crash_Nature_Overturned + Crash_Nature_Rear_end + Crash_Nature_Sideswipe + Crash_Nature_Struck_by_external_load
+## data:    trainDF
+## 
+##  link  threshold nobs  logLik    AIC      niter max.grad cond.H 
+##  logit flexible  15929 -17097.54 34227.08 7(0)  9.96e-09 1.6e+04
+## 
+## Coefficients: (1 not defined because of singularities)
+##                                          Estimate Std. Error z value Pr(&gt;|z|)
+## Crash_Nature_Angle                        0.10110    0.42521   0.238  0.81207
+## Crash_Nature_Collision_miscellaneous      0.86535    0.54324   1.593  0.11117
+## Crash_Nature_Fall_from_vehicle            0.26076    0.42543   0.613  0.53992
+## Crash_Nature_Head_on                      1.67585    0.44196   3.792  0.00015
+## Crash_Nature_Hit_animal                   0.56723    0.43518   1.303  0.19243
+## Crash_Nature_Hit_object                   0.87078    0.42659   2.041  0.04122
+## Crash_Nature_Hit_parked_vehicle          -0.03292    0.45358  -0.073  0.94214
+## Crash_Nature_Hit_pedestrian               0.34873    0.45138   0.773  0.43978
+## Crash_Nature_Non_collision_miscellaneous  0.46757    0.70821   0.660  0.50912
+## Crash_Nature_Overturned                   0.44376    0.52951   0.838  0.40200
+## Crash_Nature_Rear_end                    -0.26900    0.42634  -0.631  0.52806
+## Crash_Nature_Sideswipe                   -0.21840    0.42756  -0.511  0.60949
+## Crash_Nature_Struck_by_external_load           NA         NA      NA       NA
+##                                             
+## Crash_Nature_Angle                          
+## Crash_Nature_Collision_miscellaneous        
+## Crash_Nature_Fall_from_vehicle              
+## Crash_Nature_Head_on                     ***
+## Crash_Nature_Hit_animal                     
+## Crash_Nature_Hit_object                  *  
+## Crash_Nature_Hit_parked_vehicle             
+## Crash_Nature_Hit_pedestrian                 
+## Crash_Nature_Non_collision_miscellaneous    
+## Crash_Nature_Overturned                     
+## Crash_Nature_Rear_end                       
+## Crash_Nature_Sideswipe                      
+## Crash_Nature_Struck_by_external_load        
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Threshold coefficients:
+##                                   Estimate Std. Error z value
+## Property_damage_only|Minor_injury  -4.3038     0.4307  -9.993
+## Minor_injury|Medical_treatment     -1.7963     0.4247  -4.229
+## Medical_treatment|Hospitalisation  -0.1360     0.4244  -0.321
+## Hospitalisation|Fatal               3.7013     0.4266   8.675</code></pre>
+<pre class="r"><code>predictions &lt;- predict(model4, newdata=testDF, type=&quot;class&quot;)</code></pre>
+<pre><code>## Warning in predict.clm(model4, newdata = testDF, type = &quot;class&quot;): predictions
+## from column rank-deficient fit may be misleading</code></pre>
+<pre class="r"><code>print(paste(&quot;Model 4 accuracy:&quot;, sum(as.numeric(predictions$fit)==as.numeric(testDF$Crash_Severity_Fac))/nrow(testDF)))</code></pre>
+<pre><code>## [1] &quot;Model 4 accuracy: 0.552724077328647&quot;</code></pre>
+<p>The result looks better at .55 but not great. However, it seems all the predictions are “Hospitalisation” which suggests something is not working.</p>
+<p>Let’s try again with least occurring accident natures removed</p>
+<pre class="r"><code>model5&lt;- clm(data=trainDF, Crash_Severity_Fac ~ Crash_Nature_Angle +  
+             Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
+                  Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
+                  Crash_Nature_Rear_end + Crash_Nature_Sideswipe, link=&quot;logit&quot;)</code></pre>
+<pre><code>## Warning: Using formula(x) is deprecated when x is a character vector of length &gt; 1.
+##   Consider formula(paste(x, collapse = &quot; &quot;)) instead.</code></pre>
+<pre class="r"><code>summary(model5)</code></pre>
+<pre><code>## formula: 
+## Crash_Severity_Fac ~ Crash_Nature_Angle + Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + Crash_Nature_Hit_pedestrian + Crash_Nature_Rear_end + Crash_Nature_Sideswipe
+## data:    trainDF
+## 
+##  link  threshold nobs  logLik    AIC      niter max.grad cond.H 
+##  logit flexible  15929 -17098.83 34223.66 7(0)  9.93e-09 2.7e+03
+## 
+## Coefficients:
+##                                 Estimate Std. Error z value Pr(&gt;|z|)    
+## Crash_Nature_Angle              -0.40008    0.19313  -2.072 0.038312 *  
+## Crash_Nature_Fall_from_vehicle  -0.24043    0.19362  -1.242 0.214338    
+## Crash_Nature_Head_on             1.17442    0.22742   5.164 2.42e-07 ***
+## Crash_Nature_Hit_animal          0.06602    0.21417   0.308 0.757889    
+## Crash_Nature_Hit_object          0.36952    0.19607   1.885 0.059474 .  
+## Crash_Nature_Hit_parked_vehicle -0.53410    0.24947  -2.141 0.032277 *  
+## Crash_Nature_Hit_pedestrian     -0.15247    0.24544  -0.621 0.534459    
+## Crash_Nature_Rear_end           -0.77016    0.19565  -3.936 8.27e-05 ***
+## Crash_Nature_Sideswipe          -0.71956    0.19830  -3.629 0.000285 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Threshold coefficients:
+##                                   Estimate Std. Error z value
+## Property_damage_only|Minor_injury  -4.8048     0.2051 -23.432
+## Minor_injury|Medical_treatment     -2.2974     0.1923 -11.947
+## Medical_treatment|Hospitalisation  -0.6372     0.1913  -3.331
+## Hospitalisation|Fatal               3.1996     0.1957  16.349</code></pre>
+<pre class="r"><code>predictions &lt;- predict(model5, newdata=testDF, type=&quot;class&quot;)
+
+print(paste(&quot;Model 5 accuracy:&quot;, sum(as.numeric(predictions$fit)==as.numeric(testDF$Crash_Severity_Fac))/nrow(testDF)))</code></pre>
+<pre><code>## [1] &quot;Model 5 accuracy: 0.552724077328647&quot;</code></pre>
+</div>
+<div id="logistic-regression" class="section level1">
+<h1>Logistic regression</h1>
+<p>Investigate the prediction value of the the nature of accidents to just fatal vs non-fatal.</p>
+<pre class="r"><code>model6 &lt;- glm(data=trainDF, non_fatal_accident ~ Crash_Nature_Angle +  Crash_Nature_Collision_miscellaneous +
+             Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
+                  Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
+                  Crash_Nature_Non_collision_miscellaneous +Crash_Nature_Overturned +
+                  Crash_Nature_Rear_end + Crash_Nature_Sideswipe +
+                  Crash_Nature_Struck_by_external_load, family = &quot;binomial&quot; )
+
+summary(model6)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = non_fatal_accident ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + 
+##     Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + 
+##     Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + 
+##     Crash_Nature_Hit_pedestrian + Crash_Nature_Non_collision_miscellaneous + 
+##     Crash_Nature_Overturned + Crash_Nature_Rear_end + Crash_Nature_Sideswipe + 
+##     Crash_Nature_Struck_by_external_load, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.8985   0.1952   0.2092   0.2188   0.6241  
+## 
+## Coefficients: (1 not defined because of singularities)
+##                                            Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                               1.557e+01  3.430e+02   0.045    0.964
+## Crash_Nature_Angle                       -1.185e+01  3.430e+02  -0.035    0.972
+## Crash_Nature_Collision_miscellaneous     -1.305e+01  3.430e+02  -0.038    0.970
+## Crash_Nature_Fall_from_vehicle           -1.176e+01  3.430e+02  -0.034    0.973
+## Crash_Nature_Head_on                     -1.403e+01  3.430e+02  -0.041    0.967
+## Crash_Nature_Hit_animal                  -1.161e+01  3.430e+02  -0.034    0.973
+## Crash_Nature_Hit_object                  -1.307e+01  3.430e+02  -0.038    0.970
+## Crash_Nature_Hit_parked_vehicle          -1.186e+01  3.430e+02  -0.035    0.972
+## Crash_Nature_Hit_pedestrian              -1.192e+01  3.430e+02  -0.035    0.972
+## Crash_Nature_Non_collision_miscellaneous  4.079e-10  5.570e+02   0.000    1.000
+## Crash_Nature_Overturned                   4.076e-10  4.221e+02   0.000    1.000
+## Crash_Nature_Rear_end                    -1.147e+01  3.430e+02  -0.033    0.973
+## Crash_Nature_Sideswipe                   -1.138e+01  3.430e+02  -0.033    0.974
+## Crash_Nature_Struck_by_external_load             NA         NA      NA       NA
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 4615.6  on 15928  degrees of freedom
+## Residual deviance: 4309.6  on 15916  degrees of freedom
+## AIC: 4335.6
+## 
+## Number of Fisher Scoring iterations: 14</code></pre>
+<pre class="r"><code>predictions &lt;- predict(model6, newdata=testDF, type=&quot;response&quot;)</code></pre>
+<pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+## prediction from a rank-deficient fit may be misleading</code></pre>
+<pre class="r"><code>predicted_non_fatal &lt;- (predictions &gt;= 0.5)
+
+print(paste(&quot;Model 5 accuracy:&quot;, sum(predicted_non_fatal==testDF$non_fatal_accident)/nrow(testDF)))</code></pre>
+<pre><code>## [1] &quot;Model 5 accuracy: 0.965436438195665&quot;</code></pre>
+<p>This has a very high accuracy but really doesn’t tell us very much. The model seems to just assume that everything is non-fatal as the number of fatal accidents is actually very low; percentage of non-fatal accidents in the test set is 0.9654364 which is the same as the model accuracy.</p>
 </div>
 
 

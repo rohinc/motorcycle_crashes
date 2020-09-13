@@ -316,7 +316,6 @@ Not really expecting a different result to the attempted linear regression, just
 
 Predictions are all hospitalisation!
 
-# TODO play with this a bit more.
 
 ```{r Oridnal Logistic Regression model1}
 
@@ -331,6 +330,45 @@ summary(model4)
 
 predictions <- predict(model4, newdata=testDF, type="class")
 
-print(paste("Model 3 accuracy:", sum(as.numeric(predictions$fit)==as.numeric(testDF$Crash_Severity_Fac))/nrow(testDF)))
+print(paste("Model 4 accuracy:", sum(as.numeric(predictions$fit)==as.numeric(testDF$Crash_Severity_Fac))/nrow(testDF)))
 ```
 The result looks better at .55 but not great. However, it seems all the predictions are "Hospitalisation" which suggests something is not working.
+
+Let's try again with least occurring accident natures removed
+
+```{r model5 - ordinal linear regression}
+model5<- clm(data=trainDF, Crash_Severity_Fac ~ Crash_Nature_Angle +  
+             Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
+                  Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
+                  Crash_Nature_Rear_end + Crash_Nature_Sideswipe, link="logit")
+
+summary(model5)
+predictions <- predict(model5, newdata=testDF, type="class")
+
+print(paste("Model 5 accuracy:", sum(as.numeric(predictions$fit)==as.numeric(testDF$Crash_Severity_Fac))/nrow(testDF)))
+```
+
+# Logistic regression
+
+Investigate the prediction value of the the nature of accidents to just fatal vs non-fatal.
+
+```{r logistic regression}
+
+model6 <- glm(data=trainDF, non_fatal_accident ~ Crash_Nature_Angle +  Crash_Nature_Collision_miscellaneous +
+             Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on +
+                  Crash_Nature_Hit_animal + Crash_Nature_Hit_object +
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian +
+                  Crash_Nature_Non_collision_miscellaneous +Crash_Nature_Overturned +
+                  Crash_Nature_Rear_end + Crash_Nature_Sideswipe +
+                  Crash_Nature_Struck_by_external_load, family = "binomial" )
+
+summary(model6)
+predictions <- predict(model6, newdata=testDF, type="response")
+
+predicted_non_fatal <- (predictions >= 0.5)
+
+print(paste("Model 5 accuracy:", sum(predicted_non_fatal==testDF$non_fatal_accident)/nrow(testDF)))
+```
+
+This has a very high accuracy but really doesn't tell us very much. The model seems to just assume that everything is non-fatal as the number of fatal accidents is actually very low;  percentage of non-fatal accidents in the test set is `r sum(testDF$non_fatal_accident)/nrow(testDF)` which is the same as the model accuracy.
