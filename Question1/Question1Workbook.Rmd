@@ -24,12 +24,12 @@ setupPackage("fastDummies")
 setupPackage("PerformanceAnalytics")
 setupPackage("corrr")
 setupPackage("magrittr")
-#setupPackage("polr")  #  ordinal logistic regression - not available for R 4.0.2 :-(
-setupPackage("ordinal")
+#setupPackage("polr")  #  ordinal logistic regression - not available for R 4.0.2 :-(, polr also in MASS package
+setupPackage("ordinal")  # ordinal logistic regression
 
 ```
 
-# Intro
+# Introduciton
 
 The question to be investigated is: Does a relationship exist between the nature of the crash and the crash severity in motorcycle accidents?
 
@@ -331,6 +331,6 @@ summary(model4)
 
 predictions <- predict(model4, newdata=testDF, type="class")
 
-# TODO: have to come back and look at how to do the following calc.
-#print(paste("Model 3 accuracy:", sum(as.numeric(predictions)==as.numeric(testDF$Crash_Severity_Fac))/nrow(testDF)))
+print(paste("Model 3 accuracy:", sum(as.numeric(predictions$fit)==as.numeric(testDF$Crash_Severity_Fac))/nrow(testDF)))
 ```
+The result looks better at .55 but not great. However, it seems all the predictions are "Hospitalisation" which suggests something is not working.
