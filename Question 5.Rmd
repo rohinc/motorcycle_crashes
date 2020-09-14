@@ -1,0 +1,312 @@
+---
+title: "Question 4&5"
+author: "William Feng 13786355"
+date: "14/09/2020"
+output: html_document
+---
+
+For us, this will be a combination of Q4 & 5, through exploratory ggplots. We'll do the EDA stats and create graphs to show what causes, when it happens and where are the most common crashes. 
+I.e. histograms, pie charts, density plots 
+As well as start drafting the structure of the ppt, while waiting for everyone to finish their parts.
+
+Q4: What are the road features that played the most significant role in motorcycle crashes?
+Q5: Where are the most dangerous locations that motorcyclists have been hospitalised? And can we suggest strategies to reduce them?  
+
+# TLDR - Identifying the crash hotspots in QLD 
+
+# Getting th data directly from the GitHub Repo 
+```{r, message=FALSE, warning=FALSE}
+setwd("~/motorcycle_crashes")
+library(readr)
+locations_station <- read_csv("weather/locations_station.csv")
+station_list <- read_csv("weather/station_list.csv")
+monthly_avg <- read_csv("weather/monthly_avg.csv")
+```
+
+```{r, message=FALSE}
+library(dplyr)
+
+station_list <- filter(station_list, station_list$STA=='QLD') 
+station_list <- station_list[, -c(2:5, 8)]
+
+monthly_avg <- monthly_avg[, -c(3)]
+
+locations_station <- locations_station[, -c(13,14,18:21,23:25,27,28,47,49:53)]
+
+# merging station_list with monthly avg first
+# colnames(monthly_avg)
+monthly_avg <- monthly_avg %>% rename('Site' = 'bom_id') 
+
+station_rain <- full_join(station_list, monthly_avg, by = "Site")
+station_rain <- na.omit(station_rain)
+
+main <- full_join(locations_station, station_rain, by = c("Crash_Year" = "Year", "Crash_Month" = "Month_name", "site_id_1" = "Site"))
+# joins the data set by year, month and site name. 
+
+main <- na.omit(main) # filters all NAs produced by the join 
+```
+
+# Exploratory Data Analysis - Basic Level EDA 
+
+Atmospheric Condition
+```{r}
+atmos = as.data.frame(table(main$Crash_Atmospheric_Condition))
+atmos_percentage = as.data.frame(table(main$Crash_Atmospheric_Condition)/22757)
+
+atmos_percentage
+
+# Load ggplot2
+library(ggplot2)
+
+# Basic piechart
+ggplot(atmos, aes(x="", y=Freq, fill=Var1)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+
+Overwhelmingly clear fine weather 
+Clear weather 93%
+Fog 0.3%
+Raining 6%
+Smoke/dust 0.1%
+Unknown 0.06%
+
+Lighting condition
+```{r}
+lighting <- as.data.frame(table(main$Crash_Lighting_Condition))
+
+light_percentage <- as.data.frame(table(main$Crash_Lighting_Condition)/22757)
+
+light_percentage
+
+# Load ggplot2
+library(ggplot2)
+
+# Basic piechart
+ggplot(lighting, aes(x="", y=Freq, fill=Var1)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+Overwhelmingly daylight crashes
+Daylight - 74%
+Darkness Lighted - 14%
+Darkness Not lighted - 4.8%
+Dawn/Dusk - 6.6%
+Unknown - 0.07%
+
+Road surface condition
+```{r}
+surface <- as.data.frame(table(main$Crash_Road_Surface_Condition))
+
+surface_percentage <- as.data.frame(table(main$Crash_Road_Surface_Condition)/22757)
+
+surface_percentage
+
+# Load ggplot2
+library(ggplot2)
+
+# Basic piechart
+ggplot(surface, aes(x="", y=Freq, fill=Var1)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+Overwhelmingly sealed dry condition
+Sealed Dry - 88.5%
+Sealed Wet - 8.8%
+Unsealed Dry - 2.2%
+Unsealed Wet - 0.3%
+Unknown - 0.08%
+
+Crash hour time 
+```{r}
+hour <- as.data.frame(table(main$Crash_Hour))
+hour
+
+plot(hour$Var1, hour$Freq, xlab = "Hour", ylab = "Number of crashes", main = "Time of crashes")
+
+# Load ggplot2
+library(ggplot2)
+
+# Basic piechart
+ggplot(hour, aes(x="", y=Freq, fill=Var1)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+Most common time of crash is 1500, 1600, 1700 hours - Peak hour traffic 
+
+Month of crash
+```{r}
+month <- as.data.frame(table(main$Crash_Month))
+```
+
+Week of crash
+```{r}
+week <- as.data.frame(table(main$Crash_Day_Of_Week))
+```
+
+# Extracting road types
+```{r}
+library(stringr)
+
+substring_last <- str_extract_all(main$Crash_Street,"\\w+$") 
+
+#substring_last
+
+v <- as.character(substring_last)
+```
+
+
+Most common crash sites 
+1. Road - 11288 
+2. St - 5343
+3. Hwy - 2422
+4. Dr - 1183
+5. Ave - 623
+6. Tce - 208
+7. Pde - 178
+8. Ramp - 148 
+9. Ct - 131
+10. Blvd - 127
+etc
+```{r}
+sort(table(v), decreasing = TRUE)
+```
+
+Percentage 
+1. Road - 11288 = 49.60%
+2. St - 5343 = 23.47$
+3. Hwy - 2422 = 10.64%
+4. Dr - 1183 = 5.19%
+5. Ave - 623 = 2.73%
+6. Tce - 208 = 0.91%
+7. Pde - 178 = 0.78%
+8. Ramp - 148 = 0.65%
+9. Ct - 131 = 0.57%
+10. Blvd - 127 = 0.55%
+
+```{r}
+sort(table(v)*100/22757, decreasing = TRUE)
+```
+
+# What are the road features that played the most significant role in motorcycle crashes? 
+
+```{r}
+type <- as.data.frame(table(v))
+```
+
+```{r}
+plot(type$v, type$Freq, xlab = "Road type", ylab = "Number of crashes", main = "Most common crashes by road type")
+with(type[1:155,], text(Freq~v, labels = row.names(type[1:155,]), pos = 4))
+
+# 117 = Rd
+# 124 = St
+# 65 = Hwy
+# 46 = Dr
+# 9 = Ave
+```
+
+Road feature type
+```{r}
+features <- as.data.frame(table(main$Crash_Roadway_Feature))
+
+plot(features$Var1, features$Freq, xlab = "Road feature", ylab = "Number of crashes", main = "Most common crashes by road feature")
+
+# Load ggplot2
+library(ggplot2)
+
+# Basic piechart
+ggplot(features, aes(x="", y=Freq, fill=Var1)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+
+Crash nature 
+```{r}
+nature <- as.data.frame(table(main$Crash_Nature))
+
+plot(nature$Var1, nature$Freq, xlab = "Nature of crash", ylab = "Number of crashes", main = "Most common crashes by nature")
+
+# Load ggplot2
+library(ggplot2)
+
+# Basic piechart
+ggplot(nature, aes(x="", y=Freq, fill=Var1)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+
+Crash Type
+```{r}
+single_multi <- as.data.frame(table(main$Crash_Type))
+
+plot(single_multi$Var1, single_multi$Freq, xlab = "Type", ylab = "Number of crashes", main = "Most common crashes by Type")
+
+# Load ggplot2
+library(ggplot2)
+
+# Basic piechart
+ggplot(single_multi, aes(x="", y=Freq, fill=Var1)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+
+
+# Plotly mapping with Mapbox API 
+```{r}
+library(plotly)
+
+
+```
+
+
+
+
+# Leaflet map - heat map 
+```{r}
+#library(tidyverse)
+#library(shiny)
+#library(leaflet)
+# library(leaflet.extras)
+# library(magrittr)
+# library(htmltools)
+# library(htmlwidgets)
+# library(showtext)
+# library(data.table)
+
+# m <- leaflet(main) %>%
+#   addProviderTiles(providers$Stamen.Toner, group = "Black and white") %>%
+#   addMiniMap() %>%
+#   addTiles(options = providerTileOptions(noWrap = TRUE), group="Colour") %>%
+#   addMarkers(
+#     lng = ~Crash_Longitude_GDA94,
+#     lat = ~Crash_Latitude_GDA94,
+#     #clusterOptions = markerClusterOptions(),
+#     label = ~htmlEscape(Crash_Year)
+#   ) %>%
+#   addCircleMarkers(
+#     lng = ~Crash_Longitude_GDA94[main$Crash_Severity],
+#     lat = ~Crash_Latitude_GDA94[main$Crash_Severity],
+#     color = "#8B0000",
+#     stroke = FALSE,
+#     fillOpacity = 0.8,
+#     group = "Fatalities"
+# #  ) %>%
+  #addHeatmap(
+    #lng = ~Crash_Longitude_GDA94, 
+    #lat = ~Crash_Latitude_GDA94,
+    #radius = 17,
+    #blur = 25,
+    #cellSize = 25
+  #) %>% 
+#  addLayersControl(
+#    overlayGroups = c("Fatalities"),
+#    baseGroups = c("Black and white","Colour"), 
+#    options = layersControlOptions(collapsed = FALSE)
+#  ) 
+
+#m
+```
+
+
+
+
