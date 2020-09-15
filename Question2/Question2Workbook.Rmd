@@ -1,0 +1,152 @@
+---
+title: "Workbook to investigate Question 2"
+author: "Luciana Mazili"
+date: "10/09/2020"
+output: 
+  html_document:
+     number_sections: no
+     fig_caption: yes
+     toc: true
+     toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(sqldf)
+library(ggplot2)
+
+```
+
+```{r loading the data frame (df)}
+#loading the data frame (df)
+crashDF <- read_rds("../datasets/main.Rds")
+
+```
+
+
+
+# Question 2 - Is higher average monthly rainfall related to an increase in fatalities?
+
+
+```{r fatality sum by year}
+# fatality sum by year
+Year_Fatality = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year FROM crashDF GROUP BY Crash_Year")
+```
+
+```{r plot fatality sum by year, message=FALSE}
+# plot fatality sum by year
+ggplot(Year_Fatality, aes(x=Crash_Year, y=Fatality)) +
+  geom_point() +
+  geom_smooth() +
+  scale_x_continuous(breaks=c(2001:2018), labels=c(2001:2018)) +
+  labs(x = "Year", y= "Fatality", title = "Number of Motorcycle Fatality by Year")
+
+```
+
+
+```{r fatality sum by month, eval=FALSE, include=FALSE}
+# Month_Fatality = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Month FROM main GROUP BY Crash_Month")
+```
+
+
+```{r fatality sum by month & rainfall}
+#fatality sum by month & rainfall AVG
+#Month_fatality_Rainfall = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Month, rainfall FROM crashDF GROUP BY Crash_Month") 
+```
+
+
+#  we need to sum the fatalaties by month. (The follwing plot "Number of Motorcycle Fatality by Month from 2001 to 2018") is wroking but is not correct as I need to figure out a better way to sum the "Count_Casualty_Fatality" variable. I don't know why is showing the 0 observations on the plot). (William suggestions - boxplot year month/summer/winter - rainfall on a line & fatalities by coloumn graphs) 
+# Another option we can sum the fatalities by a range of the rainfall using https://www.r-bloggers.com/from-continuous-to-categorical/
+
+```{r plot fatality sum by month & rainfall}
+#plot fatality sum by month & rainfall
+ggplot(crashDF, aes(x=Crash_Month, y=Count_Casualty_Fatality, colour=rainfall)) +
+  geom_point() +
+  stat_summary(fun = sum) +
+  scale_x_discrete(limits = month.name) +
+  labs(x = "Month", y= "Fatality", title = "Number of Motorcycle Fatality by Month from 2001 to 2018")
+  
+```
+
+```{r plot fatality sum by month & rainfall AVG}
+#plot fatality sum by month & rainfall AVG
+#ggplot(Month_fatality_Rainfall, aes(x=Crash_Month, y=Fatality, colour=rainfall)) +
+#  geom_point() +
+#  scale_x_discrete(limits = month.name) +
+#  labs(x = "Month", y= "Fatality", title = "Number of Motorcycle Fatality by Month from 2001 to 2018")
+  
+```
+
+
+```{r}
+#YearMonth_fatality_Rainfall = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, AVG(rainfall) as Rainfall FROM crashDF GROUP BY Crash_Month")
+
+```
+
+```{r plot fatality sum by year & month & rainfall AVG}
+#ggplot(YearMonth_fatality_Rainfall, aes(x=Crash_Month, y=Fatality, colour=Rainfall)) + facet_wrap(~Crash_Year) +
+#  geom_point() +
+#  scale_x_discrete(limits = month.name)
+```
+
+
+#  we need to sum the fatalaties by month for each year. (Wiiliam suggestion - histogram or heat map)
+
+```{r plot by year & month & rainfall}
+library(ggplot2)
+ggplot(crashDF, aes(x=Crash_Month, y=Count_Casualty_Fatality, colour=rainfall)) +
+  facet_wrap(~Crash_Year) +
+  geom_point() +
+    scale_x_discrete(limits = month.name)
+```
+
+#  we need to transform the "Count_Casualtyf_Fatality" variable into a factor. (William Suggestion - 3 levels of factor become categorical - boxplot)
+
+```{r plot rainfall & Count_Casualty_Fatality}
+ggplot(crashDF, aes(x=rainfall, y=Count_Casualty_Fatality))  +
+  geom_point()
+```
+```{R}
+cor(crashDF$rainfall,crashDF$Count_Casualty_Fatality)
+```
+#  slm 
+
+```{R}
+slm <- lm(Count_Casualty_Fatality~rainfall,data=crashDF)
+```
+
+```{r}
+coef(slm)
+```
+
+
+```{r}
+ggplot(data=crashDF, aes(x=rainfall,y=Count_Casualty_Fatality)) + geom_point()+ 
+  geom_smooth(method='lm')
+```
+
+
+
+```{r}
+summary(slm)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
