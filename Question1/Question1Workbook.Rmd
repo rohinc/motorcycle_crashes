@@ -47,11 +47,10 @@ print(col_names)
 ```
 ```{r get attribute values}
 unique(crashDF$Crash_Severity)
-#TODO:: turn Crash_Severity into an ordinal - property damage only, Minor Injury, Medical treatment, Hospitalisation, Fatal
 
 unique(crashDF$Crash_Nature)
 
-#NOTE: Crash_Sevrity ~ Crash_Nature is predicting an ordinal factor based on a nominal one
+#NOTE: Crash_Severity ~ Crash_Nature is predicting an ordinal factor based on a nominal one
 ```
 ```{r historgram crash severity by carsh nature}
 
@@ -116,6 +115,7 @@ if( (!forceDfRebuild) & file.exists(q1DfFileName)) {
   # replace spaces with underscore in Crash_Severity
   q1CrashDF$Crash_Severity <- str_replace_all(q1CrashDF$Crash_Severity, " ", "_")
   
+  
   # may not need this as we have Count_Fatal, Count_Hospitalisation etc 
   q1CrashDF$Crash_Severity_Fac <- factor(q1CrashDF$Crash_Severity, c("Property_damage_only",
         "Minor_injury",  "Medical_treatment", "Hospitalisation", "Fatal"), ordered=TRUE)
@@ -123,9 +123,27 @@ if( (!forceDfRebuild) & file.exists(q1DfFileName)) {
   # numeric version of Crash_Severity_Fac
   q1CrashDF$Crash_Severity_Num <- as.numeric(q1CrashDF$Crash_Severity_Fac)
   
+  # creat a logical - 0 if fatal, 1 if non-fatal (probably smarter to reverse that)
   q1CrashDF %<>% mutate(non_fatal_accident = Count_Casualty_Fatality==0)
   
-  q1CrashDF$Crash_Nature_Num <- as.numeric(factor(q1CrashDF$Crash_Nature))
+  q1CrashDF$Crash_Nature_Fac <- factor(q1CrashDF$Crash_Nature)
+  
+  q1CrashDF$Crash_Nature_Num <- as.numeric(q1CrashDF$Crash_Nature_Fac)
+  
+  # remove spaces from Crash_Speed_Limit
+  q1CrashDF$Crash_Speed_Limit <- str_replace_all(q1CrashDF$Crash_Speed_Limit, c(" "= "", "-"="to", "/"=""))
+  
+  # create an ordinal version of speed limit
+  q1CrashDF$Crash_Speed_Limit_Fac <- factor(q1CrashDF$Crash_Speed_Limit,
+                                            c("0to50kmh", "60kmh", "70kmh", "80to90kmh", "100to110kmh"),
+                                            ordered=TRUE)
+  # create a numeric version of speed limit
+  q1CrashDF$Crash_Speed_Limit_Num <- as.numeric(q1CrashDF$Crash_Speed_Limit_Fac)
+  
+   # create dummy variables for Speed limit
+  q1CrashDF <- fastDummies::dummy_cols(q1CrashDF, select_columns= "Crash_Speed_Limit")
+ 
+  
   print(names(q1CrashDF))
    
   write_rds(q1CrashDF, q1DfFileName)
@@ -372,3 +390,26 @@ print(paste("Model 5 accuracy:", sum(predicted_non_fatal==testDF$non_fatal_accid
 ```
 
 This has a very high accuracy but really doesn't tell us very much. The model seems to just assume that everything is non-fatal as the number of fatal accidents is actually very low;  percentage of non-fatal accidents in the test set is `r sum(testDF$non_fatal_accident)/nrow(testDF)` which is the same as the model accuracy.
+
+
+#  Include Speed Zone data
+
+Try some models with crash seveirty and crash speed limit.
+
+Must be doing something wrong prediciton is alway sHospitalisation.
+
+```{r ordinal linear regression with some speed}
+model7<- clm(data=trainDF, Crash_Severity_Fac ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + 
+    Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + 
+    Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + 
+    Crash_Nature_Hit_pedestrian +
+    Crash_Nature_Overturned + 
+    Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_100to110kmh +
+    Crash_Speed_Limit_60kmh+  Crash_Speed_Limit_70kmh,             
+    link="logit")
+
+summary(model7)
+predictions <- predict(model7, newdata=testDF, type="class")
+
+print(paste("Model 7 accuracy:", sum(as.numeric(predictions$fit)==as.numeric(testDF$Crash_Severity_Fac))/nrow(testDF)))
+```

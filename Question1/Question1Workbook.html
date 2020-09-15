@@ -466,9 +466,7 @@ print(col_names)</code></pre>
 <pre class="r"><code>unique(crashDF$Crash_Severity)</code></pre>
 <pre><code>## [1] &quot;Hospitalisation&quot;      &quot;Fatal&quot;                &quot;Medical treatment&quot;   
 ## [4] &quot;Minor injury&quot;         &quot;Property damage only&quot;</code></pre>
-<pre class="r"><code>#TODO:: turn Crash_Severity into an ordinal - property damage only, Minor Injury, Medical treatment, Hospitalisation, Fatal
-
-unique(crashDF$Crash_Nature)</code></pre>
+<pre class="r"><code>unique(crashDF$Crash_Nature)</code></pre>
 <pre><code>##  [1] &quot;Angle&quot;                         &quot;Fall from vehicle&quot;            
 ##  [3] &quot;Sideswipe&quot;                     &quot;Hit object&quot;                   
 ##  [5] &quot;Hit pedestrian&quot;                &quot;Rear-end&quot;                     
@@ -476,7 +474,7 @@ unique(crashDF$Crash_Nature)</code></pre>
 ##  [9] &quot;Non-collision - miscellaneous&quot; &quot;Hit parked vehicle&quot;           
 ## [11] &quot;Struck by external load&quot;       &quot;Collision - miscellaneous&quot;    
 ## [13] &quot;Overturned&quot;</code></pre>
-<pre class="r"><code>#NOTE: Crash_Sevrity ~ Crash_Nature is predicting an ordinal factor based on a nominal one</code></pre>
+<pre class="r"><code>#NOTE: Crash_Severity ~ Crash_Nature is predicting an ordinal factor based on a nominal one</code></pre>
 <pre class="r"><code>ggplot(crashDF, aes(x=Crash_Severity)) +
   geom_bar(stat=&quot;count&quot;) +
   facet_wrap(~Crash_Nature) +
@@ -526,6 +524,7 @@ if( (!forceDfRebuild) &amp; file.exists(q1DfFileName)) {
   # replace spaces with underscore in Crash_Severity
   q1CrashDF$Crash_Severity &lt;- str_replace_all(q1CrashDF$Crash_Severity, &quot; &quot;, &quot;_&quot;)
   
+  
   # may not need this as we have Count_Fatal, Count_Hospitalisation etc 
   q1CrashDF$Crash_Severity_Fac &lt;- factor(q1CrashDF$Crash_Severity, c(&quot;Property_damage_only&quot;,
         &quot;Minor_injury&quot;,  &quot;Medical_treatment&quot;, &quot;Hospitalisation&quot;, &quot;Fatal&quot;), ordered=TRUE)
@@ -533,9 +532,27 @@ if( (!forceDfRebuild) &amp; file.exists(q1DfFileName)) {
   # numeric version of Crash_Severity_Fac
   q1CrashDF$Crash_Severity_Num &lt;- as.numeric(q1CrashDF$Crash_Severity_Fac)
   
+  # creat a logical - 0 if fatal, 1 if non-fatal (probably smarter to reverse that)
   q1CrashDF %&lt;&gt;% mutate(non_fatal_accident = Count_Casualty_Fatality==0)
   
-  q1CrashDF$Crash_Nature_Num &lt;- as.numeric(factor(q1CrashDF$Crash_Nature))
+  q1CrashDF$Crash_Nature_Fac &lt;- factor(q1CrashDF$Crash_Nature)
+  
+  q1CrashDF$Crash_Nature_Num &lt;- as.numeric(q1CrashDF$Crash_Nature_Fac)
+  
+  # remove spaces from Crash_Speed_Limit
+  q1CrashDF$Crash_Speed_Limit &lt;- str_replace_all(q1CrashDF$Crash_Speed_Limit, c(&quot; &quot;= &quot;&quot;, &quot;-&quot;=&quot;to&quot;, &quot;/&quot;=&quot;&quot;))
+  
+  # create an ordinal version of speed limit
+  q1CrashDF$Crash_Speed_Limit_Fac &lt;- factor(q1CrashDF$Crash_Speed_Limit,
+                                            c(&quot;0to50kmh&quot;, &quot;60kmh&quot;, &quot;70kmh&quot;, &quot;80to90kmh&quot;, &quot;100to110kmh&quot;),
+                                            ordered=TRUE)
+  # create a numeric version of speed limit
+  q1CrashDF$Crash_Speed_Limit_Num &lt;- as.numeric(q1CrashDF$Crash_Speed_Limit_Fac)
+  
+   # create dummy variables for Speed limit
+  q1CrashDF &lt;- fastDummies::dummy_cols(q1CrashDF, select_columns= &quot;Crash_Speed_Limit&quot;)
+ 
+  
   print(names(q1CrashDF))
    
   write_rds(q1CrashDF, q1DfFileName)
@@ -605,7 +622,15 @@ if( (!forceDfRebuild) &amp; file.exists(q1DfFileName)) {
 ## [62] &quot;Crash_Severity_Fac&quot;                      
 ## [63] &quot;Crash_Severity_Num&quot;                      
 ## [64] &quot;non_fatal_accident&quot;                      
-## [65] &quot;Crash_Nature_Num&quot;</code></pre>
+## [65] &quot;Crash_Nature_Fac&quot;                        
+## [66] &quot;Crash_Nature_Num&quot;                        
+## [67] &quot;Crash_Speed_Limit_Fac&quot;                   
+## [68] &quot;Crash_Speed_Limit_Num&quot;                   
+## [69] &quot;Crash_Speed_Limit_0to50kmh&quot;              
+## [70] &quot;Crash_Speed_Limit_100to110kmh&quot;           
+## [71] &quot;Crash_Speed_Limit_60kmh&quot;                 
+## [72] &quot;Crash_Speed_Limit_70kmh&quot;                 
+## [73] &quot;Crash_Speed_Limit_80to90kmh&quot;</code></pre>
 </div>
 <div id="additional-eda" class="section level1">
 <h1>Additional EDA</h1>
@@ -1110,6 +1135,57 @@ summary(model6)</code></pre>
 print(paste(&quot;Model 5 accuracy:&quot;, sum(predicted_non_fatal==testDF$non_fatal_accident)/nrow(testDF)))</code></pre>
 <pre><code>## [1] &quot;Model 5 accuracy: 0.965436438195665&quot;</code></pre>
 <p>This has a very high accuracy but really doesn’t tell us very much. The model seems to just assume that everything is non-fatal as the number of fatal accidents is actually very low; percentage of non-fatal accidents in the test set is 0.9654364 which is the same as the model accuracy.</p>
+</div>
+<div id="include-speed-zone-data" class="section level1">
+<h1>Include Speed Zone data</h1>
+<p>Try some models with crash seveirty and crash speed limit.</p>
+<p>Must be doing something wrong prediciton is alway sHospitalisation.</p>
+<pre class="r"><code>model7&lt;- clm(data=trainDF, Crash_Severity_Fac ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + 
+    Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + 
+    Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + 
+    Crash_Nature_Hit_pedestrian +
+    Crash_Nature_Overturned + 
+    Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_100to110kmh +
+    Crash_Speed_Limit_60kmh+  Crash_Speed_Limit_70kmh,             
+    link=&quot;logit&quot;)</code></pre>
+<pre><code>## Warning: Using formula(x) is deprecated when x is a character vector of length &gt; 1.
+##   Consider formula(paste(x, collapse = &quot; &quot;)) instead.</code></pre>
+<pre class="r"><code>summary(model7)</code></pre>
+<pre><code>## formula: 
+## Crash_Severity_Fac ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + Crash_Nature_Hit_pedestrian + Crash_Nature_Overturned + Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_100to110kmh + Crash_Speed_Limit_60kmh + Crash_Speed_Limit_70kmh
+## data:    trainDF
+## 
+##  link  threshold nobs  logLik    AIC      niter max.grad cond.H 
+##  logit flexible  15929 -16956.60 33947.21 7(0)  1.34e-08 7.4e+02
+## 
+## Coefficients:
+##                                      Estimate Std. Error z value Pr(&gt;|z|)    
+## Crash_Nature_Angle                    0.45070    0.04286  10.515  &lt; 2e-16 ***
+## Crash_Nature_Collision_miscellaneous  0.97102    0.34183   2.841  0.00450 ** 
+## Crash_Nature_Fall_from_vehicle        0.46296    0.04493  10.303  &lt; 2e-16 ***
+## Crash_Nature_Head_on                  1.87220    0.12662  14.786  &lt; 2e-16 ***
+## Crash_Nature_Hit_animal               0.55348    0.10405   5.319 1.04e-07 ***
+## Crash_Nature_Hit_object               1.05978    0.05488  19.312  &lt; 2e-16 ***
+## Crash_Nature_Hit_parked_vehicle       0.30677    0.16471   1.863  0.06253 .  
+## Crash_Nature_Hit_pedestrian           0.72897    0.15807   4.612 4.00e-06 ***
+## Crash_Nature_Overturned               0.58165    0.31953   1.820  0.06871 .  
+## Crash_Speed_Limit_0to50kmh           -0.56537    0.06340  -8.918  &lt; 2e-16 ***
+## Crash_Speed_Limit_100to110kmh         0.23156    0.06824   3.393  0.00069 ***
+## Crash_Speed_Limit_60kmh              -0.49454    0.05619  -8.802  &lt; 2e-16 ***
+## Crash_Speed_Limit_70kmh              -0.21032    0.08479  -2.481  0.01312 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Threshold coefficients:
+##                                   Estimate Std. Error z value
+## Property_damage_only|Minor_injury -4.42334    0.09412 -46.996
+## Minor_injury|Medical_treatment    -1.91086    0.06193 -30.856
+## Medical_treatment|Hospitalisation -0.23404    0.05950  -3.934
+## Hospitalisation|Fatal              3.65317    0.07325  49.874</code></pre>
+<pre class="r"><code>predictions &lt;- predict(model7, newdata=testDF, type=&quot;class&quot;)
+
+print(paste(&quot;Model 7 accuracy:&quot;, sum(as.numeric(predictions$fit)==as.numeric(testDF$Crash_Severity_Fac))/nrow(testDF)))</code></pre>
+<pre><code>## [1] &quot;Model 7 accuracy: 0.552724077328647&quot;</code></pre>
 </div>
 
 
