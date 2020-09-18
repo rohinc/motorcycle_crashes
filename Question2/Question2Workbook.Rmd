@@ -41,7 +41,10 @@ Year_Fatality = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Ye
 
 ```{r fatality sum by year, month}
 # fatality sum by year, month
-month_Fatality = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, rainfall FROM crashDF GROUP BY Crash_Year, Crash_Month")
+month_Fatality = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, SUM(rainfall) as total_rainfall FROM crashDF GROUP BY Crash_Year, Crash_Month")
+
+month_Fatality['avg_rainfall'] <- NA
+month_Fatality$avg_rainfall <- month_Fatality$total_rainfall/30.42
 
 month_Fatality$Crash_Month = factor(month_Fatality$Crash_Month, levels = month.name)
 ```
@@ -101,15 +104,15 @@ box1 <- ggplot(month_Fatality, aes(x=Crash_Month, y=Fatality, fill=rainfall)) +
 
 box1
 ```
-
+mean(month_Fatality$avg_rainfall)
 
 ```{r plot fatality sum by month & rainfall}
 #plot fatality sum by month & rainfall
 
-month_Fatality$rainfall <- factor(ifelse(month_Fatality$rainfall > mean(month_Fatality$rainfall), 1, 0),
-                                    labels = c("Low Rainfall", "High Rainfall"))
+month_Fatality$avg_rainfall <- factor(ifelse(month_Fatality$avg_rainfall > mean(month_Fatality$avg_rainfall), 1, 0),
+                                    labels = c("Low Rainfall (<11.21mm)", "High Rainfall (>11.21mm)"))
 
-box <- ggplot(month_Fatality, aes(x=Crash_Month, y=Fatality, fill=rainfall)) +
+box <- ggplot(month_Fatality, aes(x=Crash_Month, y=Fatality, fill=avg_rainfall)) +
   geom_boxplot(alpha=0.7)+
   scale_x_discrete(name = 'Month')+
   scale_y_continuous(name = "Number of Fatalities", breaks = seq(0, 12, 2))+
@@ -126,6 +129,12 @@ box <- ggplot(month_Fatality, aes(x=Crash_Month, y=Fatality, fill=rainfall)) +
 
 box
 ```
+
+
+
+
+
+
 ```{r fatality sum by year, month}
 # fatality sum by year, month
 month_Fatality_2 = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, rainfall FROM crashDF GROUP BY Crash_Year, Crash_Month")
