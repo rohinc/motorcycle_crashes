@@ -64,7 +64,8 @@ ggplot(crashDF, aes(x=Crash_Severity)) +
 ```{r total accidents by crash nature}
 
 ggplot(crashDF) +
-    geom_bar(aes(x = forcats::fct_infreq(Crash_Nature), fill = Crash_Severity)) +
+    geom_bar(aes(x = forcats::fct_rev(forcats::fct_infreq(Crash_Nature)), fill = Crash_Severity)) +
+    coord_flip() +
     theme(axis.text.x = element_text(angle = 90)) +
     xlab("Crash Nature")
 ```
@@ -73,7 +74,8 @@ Looking at the above plot, would it make sense to roll oup some of the Crash_Nat
 ```{r total accidents by crash severity}
 
 ggplot(crashDF) +
-    geom_bar(aes(x = forcats::fct_infreq(Crash_Severity), fill = Crash_Nature)) +
+    geom_bar(aes(x = forcats::fct_rev(forcats::fct_infreq(Crash_Severity)), fill = Crash_Nature)) +
+    coord_flip() +
     theme(axis.text.x = element_text(angle = 90)) +
     xlab("Crash Severity")
 ```
@@ -81,7 +83,8 @@ ggplot(crashDF) +
  crashDF %>%
   filter(Crash_Roadway_Feature == "No Roadway Feature") %>%
     ggplot() +
-    geom_bar(aes(x = forcats::fct_infreq(Crash_Nature), fill = Crash_Severity)) +
+    geom_bar(aes(x = forcats::fct_rev(forcats::fct_infreq(Crash_Nature)), fill = Crash_Severity)) +
+    coord_flip() +
     theme(axis.text.x = element_text(angle = 90)) +
     xlab("Crash Nature") +
     ggtitle("Nature of Crashes with no road feature")
@@ -95,7 +98,8 @@ for( speed in speeds){
   tmpData <- crashDF %>% filter(Crash_Speed_Limit == speed)
  print(
    ggplot(tmpData) +
-    geom_bar(aes(x = forcats::fct_infreq(Crash_Nature), fill = Crash_Severity)) +
+    geom_bar(aes(x = forcats::fct_rev(forcats::fct_infreq(Crash_Nature)), fill = Crash_Severity)) +
+    coord_flip() +
     theme(axis.text.x = element_text(angle = 90)) +
     xlab("Crash Nature") +
     ggtitle(paste ("Nature of Crashes for Speed Limit: ", speed))
