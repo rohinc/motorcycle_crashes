@@ -380,12 +380,12 @@ setupPackage &lt;- function( packageName, loud=FALSE ) {
 
 setupPackage(&quot;tidyverse&quot;)</code></pre>
 <pre><code>## Loading required package: tidyverse</code></pre>
-<pre><code>## ── Attaching packages ────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ── Attaching packages ───────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
 <pre><code>## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
 ## ✓ tibble  3.0.3     ✓ dplyr   1.0.2
 ## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
 ## ✓ readr   1.3.1     ✓ forcats 0.5.0</code></pre>
-<pre><code>## ── Conflicts ───────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+<pre><code>## ── Conflicts ──────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>setupPackage(&quot;fastDummies&quot;)</code></pre>
@@ -501,6 +501,15 @@ print(col_names)</code></pre>
     xlab(&quot;Crash Nature&quot;) +
     ggtitle(&quot;Nature of Crashes with no road feature&quot;)</code></pre>
 <p>&lt;img src=“Question1Workbook_files/figure-html/for”no feature&quot; plot breakd down by nature-1.png&quot; width=“672” /&gt;</p>
+<pre class="r"><code> crashDF %&gt;%
+  filter(Crash_Roadway_Feature == &quot;No Roadway Feature&quot;) %&gt;%
+    ggplot() +
+    geom_bar(aes(x = forcats::fct_rev(forcats::fct_infreq(Crash_DCA_Group_Description)), fill = Crash_Severity)) +
+    coord_flip() +
+    theme(axis.text.x = element_text(angle = 90)) +
+    xlab(&quot;Crash Nature&quot;) +
+    ggtitle(&quot;DCA Description of Crashes with no road feature&quot;)</code></pre>
+<p>&lt;img src=“Question1Workbook_files/figure-html/for”no feature&quot; plot breakdown by Crash_DCA_Group_Description-1.png&quot; width=“672” /&gt;</p>
 <pre class="r"><code>speeds &lt;- unique(crashDF$Crash_Speed_Limit)
 
 for( speed in speeds){
