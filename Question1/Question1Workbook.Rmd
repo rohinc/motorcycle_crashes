@@ -151,6 +151,17 @@ ggplot(yearly_counts, aes(x=Crash_Year, y=count, group=Crash_Nature, color=Crash
   geom_line() +
   ggtitle("Crash Nature count by year")
 ```
+
+``` {r play}
+feat_counts <- crashDF %>%
+                 group_by(Crash_Atmospheric_Condition) %>%
+                 summarise(count=sum(Count_Casualty_Fatality))
+
+ggplot(feat_counts, aes(x=Crash_Atmospheric_Condition ,y=count))+
+  geom_bar(stat="identity") 
+
+```
+
 # Engineer Data
 
 Steps taken:
