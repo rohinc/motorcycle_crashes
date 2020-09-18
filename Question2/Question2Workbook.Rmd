@@ -1,6 +1,6 @@
 ---
 title: "Workbook to investigate Question 2"
-author: "Luciana Mazili"
+author: "Luciana Mazili & Rohin Chhabra"
 date: "10/09/2020"
 output: 
   html_document:
@@ -19,6 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(sqldf)
 library(ggplot2)
+library(RColorBrewer)
 
 ```
 
@@ -37,6 +38,14 @@ crashDF <- read_rds("../datasets/main.Rds")
 # fatality sum by year
 Year_Fatality = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year FROM crashDF GROUP BY Crash_Year")
 ```
+
+```{r fatality sum by year, month}
+# fatality sum by year, month
+month_Fatality = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, rainfall FROM crashDF GROUP BY Crash_Year, Crash_Month")
+
+month_Fatality$Crash_Month = factor(month_Fatality$Crash_Month, levels = month.name)
+```
+
 
 ```{r plot fatality sum by year, message=FALSE}
 # plot fatality sum by year
@@ -65,13 +74,69 @@ ggplot(Year_Fatality, aes(x=Crash_Year, y=Fatality)) +
 
 ```{r plot fatality sum by month & rainfall}
 #plot fatality sum by month & rainfall
-ggplot(crashDF, aes(x=Crash_Month, y=Count_Casualty_Fatality, colour=rainfall)) +
-  geom_point() +
-  stat_summary(fun = sum) +
-  scale_x_discrete(limits = month.name) +
-  labs(x = "Month", y= "Fatality", title = "Number of Motorcycle Fatality by Month from 2001 to 2018")
+#ggplot(crashDF, aes(x=Crash_Month, y=Count_Casualty_Fatality, colour=rainfall)) +
+#  geom_point() +
+#  stat_summary(fun = sum) +
+#  scale_x_discrete(limits = month.name) +
+#  labs(x = "Month", y= "Fatality", title = "Number of Motorcycle Fatality by Month from 2001 #to 2018")
   
 ```
+
+```
+#no rainfall
+box1 <- ggplot(month_Fatality, aes(x=Crash_Month, y=Fatality, fill=rainfall)) +
+  geom_boxplot(fill = fill, colour = line)+
+  scale_x_discrete(name = 'Month')+
+  scale_y_continuous(name = "Number of Fatalities", breaks = seq(0, 12, 2))+
+  ggtitle("Boxplot of total fatalities by month")+
+  theme_bw() +
+        theme(plot.title = element_text(size = 14, family = "Tahoma", face = "bold"),
+              text = element_text(size = 12, family = "Tahoma"),
+              axis.title = element_text(face="bold"),
+              axis.text.x=element_text(size = 11, angle = 90, vjust = 0.5, hjust=1),
+              legend.position = "bottom")+
+   scale_fill_brewer(palette = "Accent") +
+        labs(fill = "Rainfall")
+  #+facet_grid(. ~ rainfall)
+
+box1
+```
+
+
+```{r plot fatality sum by month & rainfall}
+#plot fatality sum by month & rainfall
+
+month_Fatality$rainfall <- factor(ifelse(month_Fatality$rainfall > mean(month_Fatality$rainfall), 1, 0),
+                                    labels = c("Low Rainfall", "High Rainfall"))
+
+box <- ggplot(month_Fatality, aes(x=Crash_Month, y=Fatality, fill=rainfall)) +
+  geom_boxplot(alpha=0.7)+
+  scale_x_discrete(name = 'Month')+
+  scale_y_continuous(name = "Number of Fatalities", breaks = seq(0, 12, 2))+
+  ggtitle("Boxplot of total fatalities by month")+
+  theme_bw() +
+        theme(plot.title = element_text(size = 14, family = "Tahoma", face = "bold"),
+              text = element_text(size = 12, family = "Tahoma"),
+              axis.title = element_text(face="bold"),
+              axis.text.x=element_text(size = 11, angle = 90, vjust = 0.5, hjust=1),
+              legend.position = "bottom")+
+   scale_fill_brewer(palette = "Accent") +
+        labs(fill = "Rainfall")
+  #+facet_grid(. ~ rainfall)
+
+box
+```
+```{r fatality sum by year, month}
+# fatality sum by year, month
+month_Fatality_2 = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, rainfall FROM crashDF GROUP BY Crash_Year, Crash_Month")
+cut <- cut(month_Fatality_2$rainfall, 8)
+cut
+#Negative rain(fall) occurs when a particular area experiences more atmospheric evaporation than water downpour over a period of time. The phenomenon usually occurs when temperatures are unusually high, and precipitation is unusually low for the season
+#month_Fatality$Crash_Month = factor(month_Fatality$Crash_Month, levels = month.name)
+```
+
+
+
 
 ```{r plot fatality sum by month & rainfall AVG}
 #plot fatality sum by month & rainfall AVG
@@ -93,7 +158,7 @@ ggplot(crashDF, aes(x=Crash_Month, y=Count_Casualty_Fatality, colour=rainfall)) 
 #  geom_point() +
 #  scale_x_discrete(limits = month.name)
 ```
-
+cut
 
 #  we need to sum the fatalaties by month for each year. (Wiiliam suggestion - histogram or heat map)
 
