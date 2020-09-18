@@ -136,12 +136,37 @@ box
 
 
 ```{r fatality sum by year, month}
+
 # fatality sum by year, month
-month_Fatality_2 = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, rainfall FROM crashDF GROUP BY Crash_Year, Crash_Month")
-cut <- cut(month_Fatality_2$rainfall, 8)
-cut
-#Negative rain(fall) occurs when a particular area experiences more atmospheric evaporation than water downpour over a period of time. The phenomenon usually occurs when temperatures are unusually high, and precipitation is unusually low for the season
-#month_Fatality$Crash_Month = factor(month_Fatality$Crash_Month, levels = month.name)
+month_Fatality_cut = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, SUM(rainfall) as total_rainfall FROM crashDF GROUP BY Crash_Year, Crash_Month")
+
+month_Fatality_cut['avg_rainfall'] <- NA
+month_Fatality_cut$avg_rainfall <- month_Fatality_cut$total_rainfall/30.42
+
+month_Fatality_cut$Crash_Month = factor(month_Fatality_cut$Crash_Month, levels = month.name)
+
+month_Fatality_cut[['rainfall_range']] <- cut(month_Fatality_cut$avg_rainfall, c(0, 4, 16, 32, 64), right=FALSE)
+
+summedFatalities <- aggregate(Fatality ~ rainfall_range, month_Fatality_cut, FUN = sum)
+
+barSum <- ggplot(data=summedFatalities, aes(x=rainfall_range, y=Fatality, fill=rainfall_range)) +
+  ggtitle("Total fatalities vs average monthly rainfall")+
+  geom_bar(stat="identity", width=0.5)+
+  geom_text(aes(label = Fatality), hjust = 0.5, vjust=1.0) +
+
+  #scale from: https://www.sciencedirect.com/science/article/pii/S1877705816333124  
+  scale_x_discrete(name = element_blank(), labels = element_blank())+
+  scale_y_continuous(name = "Number of Fatalities", breaks = seq(0, 500, 50))+
+theme_bw()+
+  theme(plot.title = element_text(size = 12, family = "Tahoma", face = "bold", hjust = 0.5),
+              text = element_text(size = 9, family = "Tahoma"),
+              axis.title = element_text(face="bold"),
+              axis.text.x=element_text(size = 11, angle = 90, vjust = 0.5, hjust=1),
+              legend.position = "left")+
+  scale_fill_discrete(name = "Average Rainfall Range", labels = c("Light: 0-4mm/day", "Light-Moderate: 4-16mm/day", "Moderate-Heavy: 16-32mm/day", "Heavy: 32-64mm/day"))
+
+barSum
+
 ```
 
 
