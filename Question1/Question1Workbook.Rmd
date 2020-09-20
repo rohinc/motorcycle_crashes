@@ -185,12 +185,13 @@ feat_counts$rainfall <- round(feat_counts$rainfall/numYears)
 #function(b) {b*max(feat_counts$rainfall)/max(feat_counts$fatalities)}
 ggplot() +
   geom_bar(aes(x=feat_counts$Crash_Month,
-               y=feat_counts$fatalities*max(feat_counts$rainfall)/max(feat_counts$fatalities)),  
-           stat="identity") +
-  geom_line(aes(x=feat_counts$Crash_Month, y=feat_counts$rainfall, group=1), colour="blue") +
+               y=feat_counts$fatalities),  
+           stat="identity", fill="grey") +
+  geom_line(aes(x=feat_counts$Crash_Month, 
+                y=feat_counts$rainfall*max(feat_counts$fatalities)/max(feat_counts$rainfall), group=1), colour="blue") +
   xlab("Month") +
   scale_y_continuous("Avg. Fatalities",
-                     sec.axis = sec_axis(~., name="Avg. Rainfall") ) +
+                     sec.axis = sec_axis(~.*max(feat_counts$rainfall)/max(feat_counts$fatalities), name="Avg. Rainfall") ) +
   ggtitle(paste("Avg Fatalities and rainfall ", min(crashDF$Crash_Year), " to ",  max(crashDF$Crash_Year))) +
    theme(axis.title.y.right = element_text(color = "blue"))
 ```
