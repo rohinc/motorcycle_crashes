@@ -152,7 +152,7 @@ ggplot(yearly_counts, aes(x=Crash_Year, y=count, group=Crash_Nature, color=Crash
   ggtitle("Crash Nature count by year")
 ```
 
-``` {r play}
+``` {r example code for Aida}
 feat_counts <- crashDF %>%
                  group_by(Crash_Atmospheric_Condition) %>%
                  summarise(count=sum(Count_Casualty_Fatality))
@@ -161,7 +161,39 @@ ggplot(feat_counts, aes(x=Crash_Atmospheric_Condition ,y=count))+
   geom_bar(stat="identity") 
 
 ```
+```{r example code for Luci}
 
+feat_counts <- crashDF %>%
+                 group_by(Crash_Month) %>%
+                 summarise(fatalities=sum(Count_Casualty_Fatality), rainfall=sum(rainfall), .groups='drop')
+
+
+numYears <- max(crashDF$Crash_Year) -min(crashDF$Crash_Year)
+
+feat_counts$fatalities <- round( feat_counts$fatalities/numYears)
+
+feat_counts$Crash_Month <- factor(feat_counts$Crash_Month, c("January", "February", "March","April",
+                                                              "May", "June", "July", 
+                                                              "August", "September", "October",
+                                                              "November", "December"), ordered=TRUE)
+
+# following isn't quite right, as it somes up the rainfall for each accident - so if two accidents roughly same
+# time in same area the rainfall will be doubled up - also doesn't include rainfall for days with no 
+#  accidents ..
+feat_counts$rainfall <- round(feat_counts$rainfall/numYears)
+
+#function(b) {b*max(feat_counts$rainfall)/max(feat_counts$fatalities)}
+ggplot() +
+  geom_bar(aes(x=feat_counts$Crash_Month,
+               y=feat_counts$fatalities*max(feat_counts$rainfall)/max(feat_counts$fatalities)),  
+           stat="identity") +
+  geom_line(aes(x=feat_counts$Crash_Month, y=feat_counts$rainfall, group=1), colour="blue") +
+  xlab("Month") +
+  scale_y_continuous("Avg. Fatalities",
+                     sec.axis = sec_axis(~., name="Avg. Rainfall") ) +
+  ggtitle(paste("Avg Fatalities and rainfall ", min(feat_counts$Crash_Year), " to ",  max(feat_counts$Crash_Year))) +
+   theme(axis.title.y.right = element_text(color = "blue"))
+```
 # Engineer Data
 
 Steps taken:
