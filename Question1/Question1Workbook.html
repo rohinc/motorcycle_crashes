@@ -568,9 +568,11 @@ feat_counts$Crash_Month &lt;- factor(feat_counts$Crash_Month, c(&quot;January&qu
                                                               &quot;August&quot;, &quot;September&quot;, &quot;October&quot;,
                                                               &quot;November&quot;, &quot;December&quot;), ordered=TRUE)
 
-# following isn&#39;t quite right, as it somes up the rainfall for each accident - so if two accidents roughly same
-# time in same area the rainfall will be doubled up - also doesn&#39;t include rainfall for days with no 
+# following isn&#39;t quite right, as it sums up the rainfall for each accident - so if two accidents happen at roughly 
+# the same time in same area the rainfall will be doubled up - also doesn&#39;t include rainfall for days with no 
 #  accidents ..
+# actually the concept of avg rainfall is preblematic are we considering avg rainfall for the state, avg rainfall at times of
+# accidents, or something else?
 feat_counts$rainfall &lt;- round(feat_counts$rainfall/numYears)
 
 #function(b) {b*max(feat_counts$rainfall)/max(feat_counts$fatalities)}

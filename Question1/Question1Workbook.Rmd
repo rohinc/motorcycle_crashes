@@ -177,9 +177,11 @@ feat_counts$Crash_Month <- factor(feat_counts$Crash_Month, c("January", "Februar
                                                               "August", "September", "October",
                                                               "November", "December"), ordered=TRUE)
 
-# following isn't quite right, as it somes up the rainfall for each accident - so if two accidents roughly same
-# time in same area the rainfall will be doubled up - also doesn't include rainfall for days with no 
+# following isn't quite right, as it sums up the rainfall for each accident - so if two accidents happen at roughly 
+# the same time in same area the rainfall will be doubled up - also doesn't include rainfall for days with no 
 #  accidents ..
+# actually the concept of avg rainfall is preblematic are we considering avg rainfall for the state, avg rainfall at times of
+# accidents, or something else?
 feat_counts$rainfall <- round(feat_counts$rainfall/numYears)
 
 #function(b) {b*max(feat_counts$rainfall)/max(feat_counts$fatalities)}
