@@ -39,6 +39,10 @@ crashDF <- read_rds("../datasets/main.Rds")
 Year_Fatality = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year FROM crashDF GROUP BY Crash_Year")
 ```
 
+```{r accidents sum excluding by year & rainfall}
+Year_Accidents_Rainfall = sqldf(("SELECT COUNT(crash_id) as Accident, Crash_Year FROM crashDF GROUP BY Crash_Year"))
+```
+
 ```{r fatality sum by year, month}
 # fatality sum by year, month
 month_Fatality = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, SUM(rainfall) as total_rainfall FROM crashDF GROUP BY Crash_Year, Crash_Month")
@@ -50,15 +54,76 @@ month_Fatality$Crash_Month = factor(month_Fatality$Crash_Month, levels = month.n
 ```
 
 
+```{r}
+ggplot(Year_Accidents_Rainfall, aes(x=Crash_Year, y=Accident)) +
+  geom_point() +
+  geom_smooth() +
+  scale_x_continuous(breaks=c(2001:2018), labels=c(2001:2018)) +
+  labs(x = "Year", y= "Accident", title = "Number of Motorcycle Accidents by Year") +
+  theme_bw()
+
+```
+
+
+
 ```{r plot fatality sum by year, message=FALSE}
 # plot fatality sum by year
 ggplot(Year_Fatality, aes(x=Crash_Year, y=Fatality)) +
   geom_point() +
   geom_smooth() +
   scale_x_continuous(breaks=c(2001:2018), labels=c(2001:2018)) +
-  labs(x = "Year", y= "Fatality", title = "Number of Motorcycle Fatality by Year")
+  labs(x = "Year", y= "Fatality", title = "Number of Motorcycle Fatalities by Year") +
+  theme_bw()
 
 ```
+
+
+```{r fatality sum by month & AVG rainfall}
+#fatality sum by month & rainfall AVG
+Month_fatality_Rainfall = sqldf("SELECT SUM(Fatality) as Fatality, Crash_Month, avg_rainfall FROM month_Fatality GROUP BY Crash_Month") 
+```
+
+
+```{r  Accident sum by month & rainfall}
+#ggplot() + 
+#  geom_bar(Month_fatality_Rainfall,aes(x = Crash_Month,Y = value,fill = variable), stat = "identity", #position = "identity") + geom_line(Month_fatality_Rainfall,aes(Crash_Month, avg_rainfall))
+
+ggplot(data=Month_fatality_Rainfall, aes(x=Crash_Month, y=Fatality, fill=avg_rainfall)) +
+    geom_bar(colour="black", stat="identity") +
+      scale_x_discrete(limits = month.name) +
+      labs(x = "Month", y = "Fatality", fill =  "Rainfall", title = "Number of Motorcycle Fatality by Month from 2001 to 2018") +
+    theme_bw() +
+       theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+              text = element_text(size = 9),
+              axis.title = element_text(face="bold"),
+              axis.text.x=element_text(size = 11, angle = 90, vjust = 0.5, hjust=1),
+              legend.position = "right") +
+              scale_fill_continuous(trans = 'reverse')
+              #scale_fill_continuous(high = "#132B43", low = "#56B1F7")
+              # scale_color_hue(direction = -1)
+                
+
+```
+
+```{r}
+ggplot(Month_fatality_Rainfall, aes(x=Crash_Month, y=Fatality, colour=avg_rainfall)) +
+ geom_point() +
+ scale_x_discrete(limits = month.name) +
+  labs(x = "Month", y= "Fatality", title = "Number of Motorcycle Fatality by Month from 2001 to 2018")
+```
+
+
+```{r plot by year & month & rainfall}
+library(ggplot2)
+ggplot(month_Fatality, aes(x=Crash_Month, y=Fatality, colour=avg_rainfall)) +
+  facet_wrap(~Crash_Year) +
+  geom_point() +
+    scale_x_discrete(limits = month.name) +
+    labs(x = "Month", y= "Fatality", title = "Number of Motorcycle fatality & rainfall per month by Year") +
+    theme_bw()
+
+```
+
 
 
 ```{r fatality sum by month, eval=FALSE, include=FALSE}
@@ -71,19 +136,6 @@ ggplot(Year_Fatality, aes(x=Crash_Year, y=Fatality)) +
 #Month_fatality_Rainfall = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Month, rainfall FROM crashDF GROUP BY Crash_Month") 
 ```
 
-
-#  we need to sum the fatalaties by month. (The follwing plot "Number of Motorcycle Fatality by Month from 2001 to 2018") is wroking but is not correct as I need to figure out a better way to sum the "Count_Casualty_Fatality" variable. I don't know why is showing the 0 observations on the plot). (William suggestions - boxplot year month/summer/winter - rainfall on a line & fatalities by coloumn graphs) 
-# Another option we can sum the fatalities by a range of the rainfall using https://www.r-bloggers.com/from-continuous-to-categorical/
-
-```{r plot fatality sum by month & rainfall}
-#plot fatality sum by month & rainfall
-#ggplot(crashDF, aes(x=Crash_Month, y=Count_Casualty_Fatality, colour=rainfall)) +
-#  geom_point() +
-#  stat_summary(fun = sum) +
-#  scale_x_discrete(limits = month.name) +
-#  labs(x = "Month", y= "Fatality", title = "Number of Motorcycle Fatality by Month from 2001 #to 2018")
-  
-```
 
 ```
 #no rainfall
@@ -130,11 +182,7 @@ box
 ```
 
 
-
-
-
-
-```{r fatality sum by year, month}
+```{r fatality sum by year, month, Total & AvG Rainfall}
 
 # fatality sum by year, month
 month_Fatality_cut = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, SUM(rainfall) as total_rainfall FROM crashDF GROUP BY Crash_Year, Crash_Month")
@@ -168,41 +216,6 @@ barSum
 ```
 
 
-
-
-```{r plot fatality sum by month & rainfall AVG}
-#plot fatality sum by month & rainfall AVG
-#ggplot(Month_fatality_Rainfall, aes(x=Crash_Month, y=Fatality, colour=rainfall)) +
-#  geom_point() +
-#  scale_x_discrete(limits = month.name) +
-#  labs(x = "Month", y= "Fatality", title = "Number of Motorcycle Fatality by Month from 2001 to 2018")
-  
-```
-
-
-```{r}
-#YearMonth_fatality_Rainfall = sqldf("SELECT SUM(Count_Casualty_Fatality) as Fatality, Crash_Year, Crash_Month, AVG(rainfall) as Rainfall FROM crashDF GROUP BY Crash_Month")
-
-```
-
-```{r plot fatality sum by year & month & rainfall AVG}
-#ggplot(YearMonth_fatality_Rainfall, aes(x=Crash_Month, y=Fatality, colour=Rainfall)) + facet_wrap(~Crash_Year) +
-#  geom_point() +
-#  scale_x_discrete(limits = month.name)
-```
-cut
-
-#  we need to sum the fatalaties by month for each year. (Wiiliam suggestion - histogram or heat map)
-
-```{r plot by year & month & rainfall}
-library(ggplot2)
-ggplot(crashDF, aes(x=Crash_Month, y=Count_Casualty_Fatality, colour=rainfall)) +
-  facet_wrap(~Crash_Year) +
-  geom_point() +
-    scale_x_discrete(limits = month.name)
-```
-
-#  we need to transform the "Count_Casualtyf_Fatality" variable into a factor. (William Suggestion - 3 levels of factor become categorical - boxplot)
 
 ```{r plot rainfall & Count_Casualty_Fatality}
 ggplot(crashDF, aes(x=rainfall, y=Count_Casualty_Fatality))  +

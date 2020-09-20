@@ -79,6 +79,8 @@ ggplot(crashDF) +
     theme(axis.text.x = element_text(angle = 90)) +
     xlab("Crash Severity")
 ```
+
+
 ```{r for "no feature" plot breakd down by nature}
  crashDF %>%
   filter(Crash_Roadway_Feature == "No Roadway Feature") %>%
@@ -89,6 +91,28 @@ ggplot(crashDF) +
     xlab("Crash Nature") +
     ggtitle("Nature of Crashes with no road feature")
 
+```
+
+
+```{r Crash_DCA_Group_Description}
+ crashDF %>%
+    ggplot() +
+    geom_bar(aes(x = forcats::fct_rev(forcats::fct_infreq(Crash_DCA_Group_Description)), fill = Crash_Severity)) +
+    coord_flip() +
+    theme(axis.text.x = element_text(angle = 90)) +
+    xlab("DCA Description") +
+    ggtitle("DCA Description of Crashes with no road feature")
+```
+
+```{r for "no feature" plot breakdown by Crash_DCA_Group_Description}
+ crashDF %>%
+  filter(Crash_Roadway_Feature == "No Roadway Feature") %>%
+    ggplot() +
+    geom_bar(aes(x = forcats::fct_rev(forcats::fct_infreq(Crash_DCA_Group_Description)), fill = Crash_Severity)) +
+    coord_flip() +
+    theme(axis.text.x = element_text(angle = 90)) +
+    xlab("DCA Description") +
+    ggtitle("DCA Description of Crashes with no road feature")
 ```
 ``` {r crash nature by individual speed zone}
 
@@ -127,6 +151,17 @@ ggplot(yearly_counts, aes(x=Crash_Year, y=count, group=Crash_Nature, color=Crash
   geom_line() +
   ggtitle("Crash Nature count by year")
 ```
+
+``` {r play}
+feat_counts <- crashDF %>%
+                 group_by(Crash_Atmospheric_Condition) %>%
+                 summarise(count=sum(Count_Casualty_Fatality))
+
+ggplot(feat_counts, aes(x=Crash_Atmospheric_Condition ,y=count))+
+  geom_bar(stat="identity") 
+
+```
+
 # Engineer Data
 
 Steps taken:
