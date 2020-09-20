@@ -167,12 +167,11 @@ month_Fatality$avg_rainfall <- factor(ifelse(month_Fatality$avg_rainfall > mean(
 box <- ggplot(month_Fatality, aes(x=Crash_Month, y=Fatality, fill=avg_rainfall)) +
   geom_boxplot(alpha=5)+
   scale_x_discrete(name = 'Month')+
-  scale_y_continuous(name = "Average no. of fatalities", breaks = seq(0, 12, 2))+
-  ggtitle( "Fatalities vs Rainfall\n (monthly averages)")+
+  scale_y_continuous(name = "no. of fatalities", breaks = seq(0, 12, 2))+
+  ggtitle( "Fatalities vs Rainfall (monthly averages)", subtitle = "(2001-2008)" )+
   theme_bw() +
-        theme(plot.title = element_text(size = 14, hjust = 0.5),
-              text = element_text(size = 12),
-              axis.text.x=element_text(size = 11, angle = 90, vjust = 0.5, hjust=1),
+        theme(
+              axis.text.x=element_text(angle = 45, hjust=1),
               legend.position = "right")+
               scale_fill_manual(values = c("#FFDDDD","#CCEEFF")) +
         labs(fill = "Rainfall")
