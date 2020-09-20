@@ -191,7 +191,7 @@ ggplot() +
   xlab("Month") +
   scale_y_continuous("Avg. Fatalities",
                      sec.axis = sec_axis(~., name="Avg. Rainfall") ) +
-  ggtitle(paste("Avg Fatalities and rainfall ", min(feat_counts$Crash_Year), " to ",  max(feat_counts$Crash_Year))) +
+  ggtitle(paste("Avg Fatalities and rainfall ", min(crashDF$Crash_Year), " to ",  max(crashDF$Crash_Year))) +
    theme(axis.title.y.right = element_text(color = "blue"))
 ```
 # Engineer Data
