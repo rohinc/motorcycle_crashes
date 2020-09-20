@@ -110,20 +110,19 @@ mean(month_Fatality$avg_rainfall)
 #plot fatality sum by month & rainfall
 
 month_Fatality$avg_rainfall <- factor(ifelse(month_Fatality$avg_rainfall > mean(month_Fatality$avg_rainfall), 1, 0),
-                                    labels = c("Low Rainfall (<11.21mm)", "High Rainfall (>11.21mm)"))
+                                    labels = c("Below average", "Above average"))
 
 box <- ggplot(month_Fatality, aes(x=Crash_Month, y=Fatality, fill=avg_rainfall)) +
-  geom_boxplot(alpha=0.7)+
+  geom_boxplot(alpha=5)+
   scale_x_discrete(name = 'Month')+
-  scale_y_continuous(name = "Number of Fatalities", breaks = seq(0, 12, 2))+
-  ggtitle("Total fatalities per month vs average rainfall")+
+  scale_y_continuous(name = "Average no. of fatalities", breaks = seq(0, 12, 2))+
+  ggtitle( "Fatalities vs Rainfall\n (monthly averages)")+
   theme_bw() +
-        theme(plot.title = element_text(size = 14, family = "Tahoma", face = "bold", hjust = 0.5),
-              text = element_text(size = 12, family = "Tahoma"),
-              axis.title = element_text(face="bold"),
+        theme(plot.title = element_text(size = 14, hjust = 0.5),
+              text = element_text(size = 12),
               axis.text.x=element_text(size = 11, angle = 90, vjust = 0.5, hjust=1),
-              legend.position = "bottom")+
-   scale_fill_brewer(palette = "Accent") +
+              legend.position = "right")+
+              scale_fill_manual(values = c("#FFDDDD","#CCEEFF")) +
         labs(fill = "Rainfall")
   #+facet_grid(. ~ rainfall)
 
@@ -152,15 +151,14 @@ summedFatalities <- aggregate(Fatality ~ rainfall_range, month_Fatality_cut, FUN
 barSum <- ggplot(data=summedFatalities, aes(x=rainfall_range, y=Fatality, fill=rainfall_range)) +
   ggtitle("Total fatalities vs average monthly rainfall")+
   geom_bar(stat="identity", width=0.5)+
-  geom_text(aes(label = Fatality), hjust = 0.5, vjust=1.0) +
+  geom_text(aes(label = Fatality), hjust = 0.5, position=position_dodge(1), size=3.5) +
 
   #scale from: https://www.sciencedirect.com/science/article/pii/S1877705816333124  
   scale_x_discrete(name = element_blank(), labels = element_blank())+
   scale_y_continuous(name = "Number of Fatalities", breaks = seq(0, 500, 50))+
 theme_bw()+
-  theme(plot.title = element_text(size = 12, family = "Tahoma", face = "bold", hjust = 0.5),
-              text = element_text(size = 9, family = "Tahoma"),
-              axis.title = element_text(face="bold"),
+  theme(plot.title = element_text(size = 12, hjust = 0.5),
+              text = element_text(size = 9),
               axis.text.x=element_text(size = 11, angle = 90, vjust = 0.5, hjust=1),
               legend.position = "left")+
   scale_fill_discrete(name = "Average Rainfall Range", labels = c("Light: 0-4mm/day", "Light-Moderate: 4-16mm/day", "Moderate-Heavy: 16-32mm/day", "Heavy: 32-64mm/day"))
