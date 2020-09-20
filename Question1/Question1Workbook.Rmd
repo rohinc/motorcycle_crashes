@@ -195,7 +195,7 @@ ggplot() +
   scale_y_continuous("Avg. Fatalities",
                      sec.axis = sec_axis(~.*max(feat_counts$rainfall)/max(feat_counts$fatalities), name="Avg. Rainfall") ) +
   ggtitle(paste("Avg Fatalities and rainfall ", min(crashDF$Crash_Year), " to ",  max(crashDF$Crash_Year))) +
-   theme(axis.title.y.right = element_text(color = "blue"))
+   theme(axis.text.x = element_text(angle = 90), axis.title.y.right = element_text(color = "blue"))
 ```
 # Engineer Data
 
