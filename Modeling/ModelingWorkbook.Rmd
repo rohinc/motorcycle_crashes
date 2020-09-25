@@ -246,7 +246,7 @@ cm
 
 Try the same thing but with ordinal linear regression. Similar result as above
 
-```{r ordinal linear regression}
+```{r model 2 - ordinal linear regression }
 
 model2<- clm(data=trainDF, fatal_accident_fac ~ Crash_Speed_Limit_Fac,            
     link="logit")
@@ -256,4 +256,25 @@ model2.predictions <- predict(model2, newdata=testDF, type="class")
 
 cm = confusionMatrix(model2.predictions$fit, testDF$fatal_accident_fac, positive="TRUE")
 cm
+```
+
+
+Back to logistic regression but with dummy variables for speed.
+Model still producing all FALSE values. 
+
+```{r model3 - logistic regression with speed dumy variables}
+
+model3 <- glm( fatal_accident ~ 
+               Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_100to110kmh +            
+               Crash_Speed_Limit_60kmh + Crash_Speed_Limit_70kmh +
+               Crash_Speed_Limit_80to90kmh, 
+               data=trainDF, family="binomial")
+summary(model3)
+
+model3.predictions <- predict(model3, newdata = testDF, type="response") >= 0.5
+
+
+cm = confusionMatrix(factor(model3.predictions, levels=c("FALSE","TRUE")), factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+cm
+
 ```

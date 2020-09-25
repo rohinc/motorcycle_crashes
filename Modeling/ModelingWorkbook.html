@@ -826,6 +826,73 @@ cm</code></pre>
 ##                                           
 ##        &#39;Positive&#39; Class : TRUE            
 ## </code></pre>
+<p>Back to logistic regression but with dummy variables for speed. Model still producing all FALSE values.</p>
+<pre class="r"><code>model3 &lt;- glm( fatal_accident ~ 
+               Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_100to110kmh +            
+               Crash_Speed_Limit_60kmh + Crash_Speed_Limit_70kmh +
+               Crash_Speed_Limit_80to90kmh, 
+               data=trainDF, family=&quot;binomial&quot;)
+summary(model3)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_100to110kmh + 
+##     Crash_Speed_Limit_60kmh + Crash_Speed_Limit_70kmh + Crash_Speed_Limit_80to90kmh, 
+##     family = &quot;binomial&quot;, data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.3898  -0.2673  -0.2078  -0.2078   2.8342  
+## 
+## Coefficients: (1 not defined because of singularities)
+##                               Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                    -2.7154     0.1038 -26.166  &lt; 2e-16 ***
+## Crash_Speed_Limit_0to50kmh     -1.2826     0.1753  -7.316 2.55e-13 ***
+## Crash_Speed_Limit_100to110kmh   0.1763     0.1314   1.342  0.17974    
+## Crash_Speed_Limit_60kmh        -1.1092     0.1284  -8.641  &lt; 2e-16 ***
+## Crash_Speed_Limit_70kmh        -0.5988     0.2129  -2.813  0.00491 ** 
+## Crash_Speed_Limit_80to90kmh         NA         NA      NA       NA    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 4615.6  on 15928  degrees of freedom
+## Residual deviance: 4431.6  on 15924  degrees of freedom
+## AIC: 4441.6
+## 
+## Number of Fisher Scoring iterations: 6</code></pre>
+<pre class="r"><code>model3.predictions &lt;- predict(model3, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5</code></pre>
+<pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+## prediction from a rank-deficient fit may be misleading</code></pre>
+<pre class="r"><code>cm = confusionMatrix(factor(model3.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)), factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
+cm</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE  6592  236
+##      TRUE      0    0
+##                                           
+##                Accuracy : 0.9654          
+##                  95% CI : (0.9608, 0.9696)
+##     No Information Rate : 0.9654          
+##     P-Value [Acc &gt; NIR] : 0.5173          
+##                                           
+##                   Kappa : 0               
+##                                           
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 0.00000         
+##             Specificity : 1.00000         
+##          Pos Pred Value :     NaN         
+##          Neg Pred Value : 0.96544         
+##              Prevalence : 0.03456         
+##          Detection Rate : 0.00000         
+##    Detection Prevalence : 0.00000         
+##       Balanced Accuracy : 0.50000         
+##                                           
+##        &#39;Positive&#39; Class : TRUE            
+## </code></pre>
 </div>
 
 
