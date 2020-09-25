@@ -1,0 +1,259 @@
+---
+title: "Workbook to investigate Modeling"
+author: "Team 3"
+date: "25/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r packages and libraries, echo=FALSE, message=FALSE, include=FALSE}
+
+# function to load library, will first attempt to load package if not present
+setupPackage <- function( packageName, loud=FALSE ) {
+  if (!require(packageName, character.only=TRUE)) {
+    install.packages(packageName, verbose = loud, dependencies = TRUE)
+  } 
+  library(packageName, character.only=TRUE, verbose = loud)
+}
+
+setupPackage("tidyverse")
+setupPackage("fastDummies")
+setupPackage("PerformanceAnalytics")
+setupPackage("corrr")
+setupPackage("magrittr")
+#setupPackage("polr")  #  ordinal logistic regression - not available for R 4.0.2 :-(, polr also in MASS package
+setupPackage("ordinal")  # ordinal logistic regression
+setupPackage("caret") # for confusion matrix
+
+```
+# Introduciton
+
+Workbook to investigate modeling of crash data usig logistic regression as the target.
+
+
+# Engineer Data
+
+Steps taken:
+
+* Created Crash_Severity_Fac  which is an ordinal factor version of Crash_Severity
+* Created Crash_Severity_Num which is a numeric version of Crash_Severity_Fac
+* created dummy attributes for Crash_Nature
+* all columnm names renamed to replace spaces with "_".
+* created logical fatal_accident column, equals 1 for a fatal accident, 0 for a non-fatal accident
+* create factor fatal_accident_fac based on fatal_accident
+* created Crash_Nature_Num as a numeric version of Crash_Nature
+
+
+NOTE: from this point on analysis should use the CrashDF  dataframe
+
+```{r engineer variables}
+# will check to see if we previously saved away the engineered data set and load it 
+# rather than re-engineering the main crash data again.
+# NOTE: this means that if additional engineering code is added the saved copy of q1CrashDF.Rds
+# should be deleted OR the forceDfRebuild variable should be set to TRUE.
+forceDfRebuild <- TRUE
+dfFileName <-"CrashDF.Rds"
+
+if( (!forceDfRebuild) & file.exists(dfFileName)) {
+  # if already engineered use the saved copy
+  crashDF <- read_rds(dfFileName)
+} else {
+  # grab the original data set created by William, Rhoin and Luci
+  origData <- read_rds("../datasets/main.Rds")
+  
+  # create extra dummy columns for the Crash_Nature - should we drop the first one? 
+  #     remove_first_dummy = TRUE
+  crashDF <- fastDummies::dummy_cols(origData, select_columns= "Crash_Nature")
+  names(crashDF)<-str_replace_all(names(crashDF), c(" " = "_" , "," = "", "-"="_" ))
+  names(crashDF)<-str_replace_all(names(crashDF), c("___" = "_"  ))
+  
+  # replace spaces with underscore in Crash_Severity
+  crashDF$Crash_Severity <- str_replace_all(crashDF$Crash_Severity, " ", "_")
+  
+  
+  # may not need this as we have Count_Fatal, Count_Hospitalisation etc 
+  crashDF$Crash_Severity_Fac <- factor(crashDF$Crash_Severity, c("Property_damage_only",
+        "Minor_injury",  "Medical_treatment", "Hospitalisation", "Fatal"), ordered=TRUE)
+  
+  # numeric version of Crash_Severity_Fac
+  crashDF$Crash_Severity_Num <- as.numeric(crashDF$Crash_Severity_Fac)
+  
+  # create a logical - 1 if fatal, 0 if non-fatal
+  crashDF %<>% mutate(fatal_accident = Count_Casualty_Fatality > 0)
+  crashDF$fatal_accident_fac  <- factor(crashDF$fatal_accident, levels=c("FALSE", "TRUE"))
+  
+  crashDF$Crash_Nature_Fac <- factor(crashDF$Crash_Nature)
+  
+  crashDF$Crash_Nature_Num <- as.numeric(crashDF$Crash_Nature_Fac)
+  
+  # remove spaces from Crash_Speed_Limit
+  crashDF$Crash_Speed_Limit <- str_replace_all(crashDF$Crash_Speed_Limit, c(" "= "", "-"="to", "/"=""))
+  
+  # create an ordinal version of speed limit
+  crashDF$Crash_Speed_Limit_Fac <- factor(crashDF$Crash_Speed_Limit,
+                                            c("0to50kmh", "60kmh", "70kmh", "80to90kmh", "100to110kmh"),
+                                            ordered=TRUE)
+  # create a numeric version of speed limit
+  crashDF$Crash_Speed_Limit_Num <- as.numeric(crashDF$Crash_Speed_Limit_Fac)
+  
+   # create dummy variables for Speed limit
+  crashDF <- fastDummies::dummy_cols(crashDF, select_columns= "Crash_Speed_Limit")
+ 
+  
+  print(names(crashDF))
+   
+  write_rds(crashDF, dfFileName)
+  
+}
+  
+
+```
+
+# Pre-modeling EDA
+
+Probably need to show we looked into some statistical measures before we jump right into the modeling.  This needs to be padded out a bit 
+
+```{r alterative to correlation graphs}
+corrData <- select(crashDF,  Count_Casualty_Fatality, Count_Casualty_Hospitalised,
+                  Count_Casualty_MedicallyTreated, Count_Casualty_MinorInjury,
+                  Crash_Nature_Angle, Crash_Nature_Collision_miscellaneous,
+                  Crash_Nature_Fall_from_vehicle, Crash_Nature_Head_on,
+                  Crash_Nature_Hit_animal, Crash_Nature_Hit_object,
+                  Crash_Nature_Hit_parked_vehicle, Crash_Nature_Hit_pedestrian,
+                  Crash_Nature_Non_collision_miscellaneous, Crash_Nature_Overturned,
+                  Crash_Nature_Rear_end, Crash_Nature_Sideswipe,
+                  Crash_Nature_Struck_by_external_load
+                  )
+ result <- corrData %>% correlate()
+ 
+  
+ result %>% focus(names(result)[2])  # Can't seem to be able to use the name Count_Casulaty_Fatality directly?
+ 
+result %>% focus(names(result)[3])
+ 
+result %>% focus(names(result)[4])
+
+result %>% focus(names(result)[5])
+  
+
+```
+
+Correlation analysis doesn't reveal any correlation of any strength between severity of accident and the nature of the accident. The Highest positive correlation is 0.12 between Head On accidents and Fatalities, however this i not a significant correlation. All remaining correlations are above -0.01 and below 0.01  which are no correlation at all.
+
+
+```{r correlation for fatal accidents}
+corrData <- select(crashDF,  fatal_accident,
+                  Crash_Nature_Angle, Crash_Nature_Collision_miscellaneous,
+                  Crash_Nature_Fall_from_vehicle, Crash_Nature_Head_on,
+                  Crash_Nature_Hit_animal, Crash_Nature_Hit_object,
+                  Crash_Nature_Hit_parked_vehicle, Crash_Nature_Hit_pedestrian,
+                  Crash_Nature_Non_collision_miscellaneous, Crash_Nature_Overturned,
+                  Crash_Nature_Rear_end, Crash_Nature_Sideswipe,
+                  Crash_Nature_Struck_by_external_load
+                  )
+ result <- corrData %>% correlate()
+ 
+ result %>% focus(names(result)[2])
+```
+
+## Correlation of fatal accidents and speed
+
+Not sure if this is jutifiable to encode speed zone as numeric.  There is a low correlation between it and fatal accident.
+
+```{r correlation for fatal accidents and speed as numeirc}
+corrData <- select(crashDF,  fatal_accident,
+                   Crash_Speed_Limit_Num
+                  )
+ result <- corrData %>% correlate()
+ 
+ result %>% focus(names(result)[2])
+```
+Looking at speed zone slightly differently encoded as dummy variables (do we need to leave one out). Doesn't seem to be a correlation between the dummy variables and fatal accidents
+
+```{r correlation for fatal accidents and speed as dummy variables}
+corrData <- select(crashDF,  fatal_accident,
+                   Crash_Speed_Limit_0to50kmh,
+                   Crash_Speed_Limit_100to110kmh,
+                   Crash_Speed_Limit_60kmh,
+                   Crash_Speed_Limit_70kmh,
+                   Crash_Speed_Limit_80to90kmh
+                  )
+ result <- corrData %>% correlate()
+ 
+ result %>% focus(names(result)[2])
+```
+
+Correlation still low. It would seem that the nature of an accident by itself has no correlation to the crash severity. However as can seen by the histograms at the start of the document a large number of accidents are the result of specific types of accidents, namely a collision at an angle and riders falling off. It is not clear if riders fall off as a result of some other accident type.
+
+
+Just in case I'm doing things wrong with the above correlation let's look at a chi-squared test
+
+```{r chi-squared test}
+
+chisq.test(crashDF$Crash_Severity_Fac, crashDF$Crash_Nature, correct=FALSE)
+
+```
+
+Given the low p value the chi-squared test does imply that the Nature and Severity are dependent.
+
+```{r split into train and test sests }
+
+#  split data into 70% train 30% test.
+trainSize <- floor(0.7*nrow(crashDF))
+set.seed(42)
+
+trainIndexes <- sample(seq_len(nrow(crashDF)), size = trainSize)
+trainDF  <- crashDF[trainIndexes, ]
+testDF   <- crashDF[-trainIndexes, ]
+```
+
+
+## Modeling all years
+
+This is using the entire data set. Following sections will look at data from specific time periods.  upto 2008 ?    2008 to 2017,  2017 to now.
+
+Basic logistic model - Fatal_accident as the target, start with speed zone as the predictor. Try with speed limit as a factor and then coded as a dummy variable to see if there are differences.
+
+Will probably have to add additional predictors to get anything meaningful.
+
+NOTE: need to check this article out in detail, can make our analysis sound fancy ;-), 
+https://stats.idre.ucla.edu/r/dae/logit-regression/
+
+# Model 1   fatal_accident ~ Speed limit encoded as a numeric
+
+Again not sure if this makes sense to encode speed zone as numeirc. Should repeat with ordinal regression.
+
+Both intercept and speed seem to be signficiant based on p-values.
+
+Prediction is way off. seems to just predict FALSE. - which gives us an accuracy of ~95% because of low numbers of fatalities
+
+```{r model1 - logistic regression}
+
+model1 <- glm( fatal_accident ~ Crash_Speed_Limit_Num, data=trainDF, family="binomial")
+summary(model1)
+
+model1.predictions <- predict(model1, newdata = testDF, type="response") >= 0.5
+
+
+cm = confusionMatrix(factor(model1.predictions, levels=c("FALSE","TRUE")), factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+cm
+
+```
+
+Try the same thing but with ordinal linear regression. Similar result as above
+
+```{r ordinal linear regression}
+
+model2<- clm(data=trainDF, fatal_accident_fac ~ Crash_Speed_Limit_Fac,            
+    link="logit")
+
+summary(model2)
+model2.predictions <- predict(model2, newdata=testDF, type="class")
+
+cm = confusionMatrix(model2.predictions$fit, testDF$fatal_accident_fac, positive="TRUE")
+cm
+```
