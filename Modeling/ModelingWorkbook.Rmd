@@ -483,9 +483,43 @@ With `r sum(crash2017DF$fatal_accident ==1 )` fatalities
 ```{r Summary for 2017 to present}
 summary( crash2017DF)
 ```
+## 2008 to 2016 Inclusive
+```{r select records for 2008 to 20016 on}
+
+crash2008DF <- filter(crashDF, Crash_Year >= 2008 & Crash_Year < 2017)
+
+```
+
+There are `r nrow(crash2008DF)` observations.
+With `r sum(crash2008DF$fatal_accident ==1 )` fatalities
+
+```{r Summary for 2008 to present}
+summary( crash2008DF)
+```
 
 
 
-```{r run models for 2017}
-modelYearlyData(crash2017DF, "2017toPresent")
+```{r run models for 2008}
+modelYearlyData(crash2008DF, "2008to2016")
+```
+
+
+## Before 2008
+```{r select records prior to 2008 }
+
+crash2001DF <- filter(crashDF, Crash_Year < 2008)
+
+```
+
+There are `r nrow(crash2001DF)` observations.
+With `r sum(crash2001DF$fatal_accident ==1 )` fatalities
+
+```{r Summary prior to 2008}
+summary( crash2001DF)
+```
+
+
+
+```{r run models for years prior 2008}
+modelYearlyData(crash2008DF, "Prior2008")
 ```
