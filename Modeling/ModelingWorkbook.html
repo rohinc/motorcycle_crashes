@@ -1493,8 +1493,214 @@ cm</code></pre>
 ##  3rd Qu.:1.0000          3rd Qu.:0.00000         3rd Qu.:0.00000            
 ##  Max.   :1.0000          Max.   :1.00000         Max.   :1.00000            
 ## </code></pre>
-<pre class="r"><code>modelYearlyData(crash2017DF, &quot;2017toPresent&quot;)</code></pre>
-<pre><code>## [1] &quot;********   YearModel1 for  2017toPresent&quot;
+</div>
+<div id="to-2016-inclusive" class="section level2">
+<h2>2008 to 2016 Inclusive</h2>
+<pre class="r"><code>crash2008DF &lt;- filter(crashDF, Crash_Year &gt;= 2008 &amp; Crash_Year &lt; 2017)</code></pre>
+<p>There are 11754 observations. With 404 fatalities</p>
+<pre class="r"><code>summary( crash2008DF)</code></pre>
+<pre><code>##        X1           crash_id      Crash_Severity       Crash_Year  
+##  Min.   : 1122   Min.   : 16909   Length:11754       Min.   :2008  
+##  1st Qu.: 6832   1st Qu.: 80104   Class :character   1st Qu.:2009  
+##  Median :15298   Median :181045   Mode  :character   Median :2012  
+##  Mean   :14410   Mean   :170013                      Mean   :2012  
+##  3rd Qu.:21321   3rd Qu.:247118                      3rd Qu.:2014  
+##  Max.   :28322   Max.   :328148                      Max.   :2016  
+##                                                                    
+##  Crash_Month        Crash_Day_Of_Week    Crash_Hour    Crash_Nature      
+##  Length:11754       Length:11754       Min.   : 0.00   Length:11754      
+##  Class :character   Class :character   1st Qu.: 9.00   Class :character  
+##  Mode  :character   Mode  :character   Median :13.00   Mode  :character  
+##                                        Mean   :12.84                     
+##                                        3rd Qu.:16.00                     
+##                                        Max.   :23.00                     
+##                                                                          
+##   Crash_Type        Crash_Longitude_GDA94 Crash_Latitude_GDA94
+##  Length:11754       Min.   :138.0         Min.   :-29.00      
+##  Class :character   1st Qu.:152.0         1st Qu.:-27.59      
+##  Mode  :character   Median :153.0         Median :-27.41      
+##                     Mean   :151.8         Mean   :-25.90      
+##                     3rd Qu.:153.1         3rd Qu.:-26.30      
+##                     Max.   :153.5         Max.   :-10.79      
+##                                                               
+##  Crash_Street        Loc_Suburb        Loc_Local_Government_Area
+##  Length:11754       Length:11754       Length:11754             
+##  Class :character   Class :character   Class :character         
+##  Mode  :character   Mode  :character   Mode  :character         
+##                                                                 
+##                                                                 
+##                                                                 
+##                                                                 
+##  Loc_Post_Code      Loc_Main_Roads_Region Loc_ABS_Remoteness
+##  Length:11754       Length:11754          Length:11754      
+##  Class :character   Class :character      Class :character  
+##  Mode  :character   Mode  :character      Mode  :character  
+##                                                             
+##                                                             
+##                                                             
+##                                                             
+##  Crash_Controlling_Authority Crash_Roadway_Feature Crash_Traffic_Control
+##  Length:11754                Length:11754          Length:11754         
+##  Class :character            Class :character      Class :character     
+##  Mode  :character            Mode  :character      Mode  :character     
+##                                                                         
+##                                                                         
+##                                                                         
+##                                                                         
+##  Crash_Speed_Limit  Crash_Road_Surface_Condition Crash_Atmospheric_Condition
+##  Length:11754       Length:11754                 Length:11754               
+##  Class :character   Class :character             Class :character           
+##  Mode  :character   Mode  :character             Mode  :character           
+##                                                                             
+##                                                                             
+##                                                                             
+##                                                                             
+##  Crash_Lighting_Condition Crash_Road_Horiz_Align Crash_Road_Vert_Align
+##  Length:11754             Length:11754           Length:11754         
+##  Class :character         Class :character       Class :character     
+##  Mode  :character         Mode  :character       Mode  :character     
+##                                                                       
+##                                                                       
+##                                                                       
+##                                                                       
+##  Crash_DCA_Code  Crash_DCA_Description Crash_DCA_Group_Description
+##  Min.   :  0.0   Length:11754          Length:11754               
+##  1st Qu.:202.0   Class :character      Class :character           
+##  Median :400.0   Mode  :character      Mode  :character           
+##  Mean   :455.1                                                    
+##  3rd Qu.:705.0                                                    
+##  Max.   :907.0                                                    
+##                                                                   
+##  DCA_Key_Approach_Dir Count_Casualty_Fatality Count_Casualty_Hospitalised
+##  Length:11754         Min.   :0.00000         Min.   :0.000              
+##  Class :character     1st Qu.:0.00000         1st Qu.:0.000              
+##  Mode  :character     Median :0.00000         Median :1.000              
+##                       Mean   :0.03531         Mean   :0.614              
+##                       3rd Qu.:0.00000         3rd Qu.:1.000              
+##                       Max.   :2.00000         Max.   :4.000              
+##                                                                          
+##  Count_Casualty_MedicallyTreated Count_Casualty_MinorInjury
+##  Min.   :0.0000                  Min.   :0.0000            
+##  1st Qu.:0.0000                  1st Qu.:0.0000            
+##  Median :0.0000                  Median :0.0000            
+##  Mean   :0.3295                  Mean   :0.1228            
+##  3rd Qu.:1.0000                  3rd Qu.:0.0000            
+##  Max.   :7.0000                  Max.   :3.0000            
+##                                                            
+##  Count_Casualty_Total Count_Unit_Motorcycle_Moped   site_id_1     
+##  Min.   :0.000        Min.   :1.000               Min.   : 27005  
+##  1st Qu.:1.000        1st Qu.:1.000               1st Qu.: 40145  
+##  Median :1.000        Median :1.000               Median : 40460  
+##  Mean   :1.102        Mean   :1.021               Mean   : 39214  
+##  3rd Qu.:1.000        3rd Qu.:1.000               3rd Qu.: 40908  
+##  Max.   :8.000        Max.   :4.000               Max.   :140007  
+##                                                                   
+##  site_name_1          distance_1        site_id_list_2   site_name_2       
+##  Length:11754       Min.   :    33.14   Min.   : 27006   Length:11754      
+##  Class :character   1st Qu.:  1952.22   1st Qu.: 40157   Class :character  
+##  Mode  :character   Median :  3267.34   Median : 40412   Mode  :character  
+##                     Mean   :  4098.91   Mean   : 40266                     
+##                     3rd Qu.:  5461.06   3rd Qu.: 40875                     
+##                     Max.   :135185.90   Max.   :140010                     
+##                                                                            
+##    distance_2       site_id_list_3   site_name_3          distance_3      
+##  Min.   :   174.3   Min.   : 27006   Length:11754       Min.   :   509.5  
+##  1st Qu.:  3807.4   1st Qu.: 40151   Class :character   1st Qu.:  5354.3  
+##  Median :  5423.0   Median : 40476   Mode  :character   Median :  7556.4  
+##  Mean   :  6607.1   Mean   : 39962                      Mean   :  9122.2  
+##  3rd Qu.:  8039.7   3rd Qu.: 40874                      3rd Qu.: 11279.8  
+##  Max.   :135299.1   Max.   :140010                      Max.   :160293.0  
+##                                                                           
+##       Lat              Lon           rainfall       Crash_Nature_Angle
+##  Min.   :-29.00   Min.   :138.7   Min.   : 0.0000   Min.   :0.0000    
+##  1st Qu.:-27.58   1st Qu.:152.0   1st Qu.: 0.7735   1st Qu.:0.0000    
+##  Median :-27.42   Median :153.0   Median : 2.0917   Median :0.0000    
+##  Mean   :-25.90   Mean   :151.8   Mean   : 3.6295   Mean   :0.2967    
+##  3rd Qu.:-26.32   3rd Qu.:153.1   3rd Qu.: 4.7186   3rd Qu.:1.0000    
+##  Max.   :-10.72   Max.   :153.5   Max.   :68.5400   Max.   :1.0000    
+##                                                                       
+##  Crash_Nature_Collision_miscellaneous Crash_Nature_Fall_from_vehicle
+##  Min.   :0.000000                     Min.   :0.0000                
+##  1st Qu.:0.000000                     1st Qu.:0.0000                
+##  Median :0.000000                     Median :0.0000                
+##  Mean   :0.002042                     Mean   :0.2665                
+##  3rd Qu.:0.000000                     3rd Qu.:1.0000                
+##  Max.   :1.000000                     Max.   :1.0000                
+##                                                                     
+##  Crash_Nature_Head_on Crash_Nature_Hit_animal Crash_Nature_Hit_object
+##  Min.   :0.00000      Min.   :0.00000         Min.   :0.0000         
+##  1st Qu.:0.00000      1st Qu.:0.00000         1st Qu.:0.0000         
+##  Median :0.00000      Median :0.00000         Median :0.0000         
+##  Mean   :0.02535      Mean   :0.02739         Mean   :0.1588         
+##  3rd Qu.:0.00000      3rd Qu.:0.00000         3rd Qu.:0.0000         
+##  Max.   :1.00000      Max.   :1.00000         Max.   :1.0000         
+##                                                                      
+##  Crash_Nature_Hit_parked_vehicle Crash_Nature_Hit_pedestrian
+##  Min.   :0.00000                 Min.   :0.000000           
+##  1st Qu.:0.00000                 1st Qu.:0.000000           
+##  Median :0.00000                 Median :0.000000           
+##  Mean   :0.01021                 Mean   :0.009018           
+##  3rd Qu.:0.00000                 3rd Qu.:0.000000           
+##  Max.   :1.00000                 Max.   :1.000000           
+##                                                             
+##  Crash_Nature_Non_collision_miscellaneous Crash_Nature_Overturned
+##  Min.   :0.0000000                        Min.   :0.000000       
+##  1st Qu.:0.0000000                        1st Qu.:0.000000       
+##  Median :0.0000000                        Median :0.000000       
+##  Mean   :0.0003403                        Mean   :0.002893       
+##  3rd Qu.:0.0000000                        3rd Qu.:0.000000       
+##  Max.   :1.0000000                        Max.   :1.000000       
+##                                                                  
+##  Crash_Nature_Rear_end Crash_Nature_Sideswipe
+##  Min.   :0.0000        Min.   :0.00000       
+##  1st Qu.:0.0000        1st Qu.:0.00000       
+##  Median :0.0000        Median :0.00000       
+##  Mean   :0.1262        Mean   :0.07342       
+##  3rd Qu.:0.0000        3rd Qu.:0.00000       
+##  Max.   :1.0000        Max.   :1.00000       
+##                                              
+##  Crash_Nature_Struck_by_external_load            Crash_Severity_Fac
+##  Min.   :0.000000                     Property_damage_only:  99    
+##  1st Qu.:0.000000                     Minor_injury        :1048    
+##  Median :0.000000                     Medical_treatment   :3399    
+##  Mean   :0.001191                     Hospitalisation     :6804    
+##  3rd Qu.:0.000000                     Fatal               : 404    
+##  Max.   :1.000000                                                  
+##                                                                    
+##  Crash_Severity_Num fatal_accident  fatal_accident_fac
+##  Min.   :1.000      Mode :logical   FALSE:11350       
+##  1st Qu.:3.000      FALSE:11350     TRUE :  404       
+##  Median :4.000      TRUE :404                         
+##  Mean   :3.542                                        
+##  3rd Qu.:4.000                                        
+##  Max.   :5.000                                        
+##                                                       
+##           Crash_Nature_Fac Crash_Nature_Num Crash_Speed_Limit_Fac
+##  Angle            :3487    Min.   : 1.000   0to50kmh   :2244     
+##  Fall from vehicle:3132    1st Qu.: 1.000   60kmh      :6064     
+##  Hit object       :1867    Median : 3.000   70kmh      : 616     
+##  Rear-end         :1483    Mean   : 4.752   80to90kmh  :1195     
+##  Sideswipe        : 863    3rd Qu.: 6.000   100to110kmh:1635     
+##  Hit animal       : 322    Max.   :13.000                        
+##  (Other)          : 600                                          
+##  Crash_Speed_Limit_Num Crash_Speed_Limit_0to50kmh Crash_Speed_Limit_100to110kmh
+##  Min.   :1.000         Min.   :0.0000             Min.   :0.0000               
+##  1st Qu.:2.000         1st Qu.:0.0000             1st Qu.:0.0000               
+##  Median :2.000         Median :0.0000             Median :0.0000               
+##  Mean   :2.482         Mean   :0.1909             Mean   :0.1391               
+##  3rd Qu.:3.000         3rd Qu.:0.0000             3rd Qu.:0.0000               
+##  Max.   :5.000         Max.   :1.0000             Max.   :1.0000               
+##                                                                                
+##  Crash_Speed_Limit_60kmh Crash_Speed_Limit_70kmh Crash_Speed_Limit_80to90kmh
+##  Min.   :0.0000          Min.   :0.00000         Min.   :0.0000             
+##  1st Qu.:0.0000          1st Qu.:0.00000         1st Qu.:0.0000             
+##  Median :1.0000          Median :0.00000         Median :0.0000             
+##  Mean   :0.5159          Mean   :0.05241         Mean   :0.1017             
+##  3rd Qu.:1.0000          3rd Qu.:0.00000         3rd Qu.:0.0000             
+##  Max.   :1.0000          Max.   :1.00000         Max.   :1.0000             
+## </code></pre>
+<pre class="r"><code>modelYearlyData(crash2008DF, &quot;2008to2016&quot;)</code></pre>
+<pre><code>## [1] &quot;********   YearModel1 for  2008to2016&quot;
 ## 
 ## Call:
 ## glm(formula = fatal_accident ~ Crash_Speed_Limit_Num, family = &quot;binomial&quot;, 
@@ -1502,20 +1708,20 @@ cm</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.3450  -0.2445  -0.2055  -0.2055   2.9029  
+## -0.4067  -0.2693  -0.2185  -0.2185   2.8853  
 ## 
 ## Coefficients:
 ##                       Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)            -4.5502     0.3645 -12.484  &lt; 2e-16 ***
-## Crash_Speed_Limit_Num   0.3517     0.1088   3.232  0.00123 ** 
+## (Intercept)           -4.57089    0.15043  -30.39   &lt;2e-16 ***
+## Crash_Speed_Limit_Num  0.42400    0.04221   10.05   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 387.53  on 1578  degrees of freedom
-## Residual deviance: 377.64  on 1577  degrees of freedom
-## AIC: 381.64
+##     Null deviance: 2416.6  on 8226  degrees of freedom
+## Residual deviance: 2318.7  on 8225  degrees of freedom
+## AIC: 2322.7
 ## 
 ## Number of Fisher Scoring iterations: 6
 ## 
@@ -1523,76 +1729,76 @@ cm</code></pre>
 ## 
 ##           Reference
 ## Prediction FALSE TRUE
-##      FALSE   652   25
+##      FALSE  3399  128
 ##      TRUE      0    0
-##                                         
-##                Accuracy : 0.9631        
-##                  95% CI : (0.946, 0.976)
-##     No Information Rate : 0.9631        
-##     P-Value [Acc &gt; NIR] : 0.5529        
-##                                         
-##                   Kappa : 0             
-##                                         
-##  Mcnemar&#39;s Test P-Value : 1.587e-06     
-##                                         
-##             Sensitivity : 0.00000       
-##             Specificity : 1.00000       
-##          Pos Pred Value :     NaN       
-##          Neg Pred Value : 0.96307       
-##              Prevalence : 0.03693       
-##          Detection Rate : 0.00000       
-##    Detection Prevalence : 0.00000       
-##       Balanced Accuracy : 0.50000       
-##                                         
-##        &#39;Positive&#39; Class : TRUE          
-##                                         
-## [1] &quot;******  YearModel2 for  2017toPresent&quot;
+##                                          
+##                Accuracy : 0.9637         
+##                  95% CI : (0.957, 0.9696)
+##     No Information Rate : 0.9637         
+##     P-Value [Acc &gt; NIR] : 0.5235         
+##                                          
+##                   Kappa : 0              
+##                                          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 0.00000        
+##             Specificity : 1.00000        
+##          Pos Pred Value :     NaN        
+##          Neg Pred Value : 0.96371        
+##              Prevalence : 0.03629        
+##          Detection Rate : 0.00000        
+##    Detection Prevalence : 0.00000        
+##       Balanced Accuracy : 0.50000        
+##                                          
+##        &#39;Positive&#39; Class : TRUE           
+##                                          
+## [1] &quot;******  YearModel2 for  2008to2016&quot;
 ## formula: fatal_accident_fac ~ Crash_Speed_Limit_Fac
 ## data:    trainDF
 ## 
-##  link  threshold nobs logLik  AIC    niter max.grad cond.H 
-##  logit flexible  1579 -187.91 385.82 7(0)  8.80e-10 1.0e+01
+##  link  threshold nobs logLik   AIC     niter max.grad cond.H 
+##  logit flexible  8227 -1158.63 2327.27 7(0)  5.91e-11 1.7e+01
 ## 
 ## Coefficients:
-##                         Estimate Std. Error z value Pr(&gt;|z|)   
-## Crash_Speed_Limit_Fac.L  1.13351    0.38258   2.963  0.00305 **
-## Crash_Speed_Limit_Fac.Q -0.37924    0.42303  -0.896  0.36999   
-## Crash_Speed_Limit_Fac.C -0.32597    0.32601  -1.000  0.31737   
-## Crash_Speed_Limit_Fac^4  0.07127    0.42541   0.168  0.86695   
+##                         Estimate Std. Error z value Pr(&gt;|z|)    
+## Crash_Speed_Limit_Fac.L  1.27997    0.14874   8.605   &lt;2e-16 ***
+## Crash_Speed_Limit_Fac.Q  0.07526    0.18858   0.399    0.690    
+## Crash_Speed_Limit_Fac.C -0.14420    0.13460  -1.071    0.284    
+## Crash_Speed_Limit_Fac^4  0.02543    0.20954   0.121    0.903    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Threshold coefficients:
 ##            Estimate Std. Error z value
-## FALSE|TRUE    3.432      0.175   19.61
+## FALSE|TRUE  3.26641    0.07737   42.22
 ## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction FALSE TRUE
-##      FALSE   652   25
+##      FALSE  3399  128
 ##      TRUE      0    0
-##                                         
-##                Accuracy : 0.9631        
-##                  95% CI : (0.946, 0.976)
-##     No Information Rate : 0.9631        
-##     P-Value [Acc &gt; NIR] : 0.5529        
-##                                         
-##                   Kappa : 0             
-##                                         
-##  Mcnemar&#39;s Test P-Value : 1.587e-06     
-##                                         
-##             Sensitivity : 0.00000       
-##             Specificity : 1.00000       
-##          Pos Pred Value :     NaN       
-##          Neg Pred Value : 0.96307       
-##              Prevalence : 0.03693       
-##          Detection Rate : 0.00000       
-##    Detection Prevalence : 0.00000       
-##       Balanced Accuracy : 0.50000       
-##                                         
-##        &#39;Positive&#39; Class : TRUE          
-##                                         
-## [1] &quot;******* YearModel3 for  2017toPresent&quot;
+##                                          
+##                Accuracy : 0.9637         
+##                  95% CI : (0.957, 0.9696)
+##     No Information Rate : 0.9637         
+##     P-Value [Acc &gt; NIR] : 0.5235         
+##                                          
+##                   Kappa : 0              
+##                                          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 0.00000        
+##             Specificity : 1.00000        
+##          Pos Pred Value :     NaN        
+##          Neg Pred Value : 0.96371        
+##              Prevalence : 0.03629        
+##          Detection Rate : 0.00000        
+##    Detection Prevalence : 0.00000        
+##       Balanced Accuracy : 0.50000        
+##                                          
+##        &#39;Positive&#39; Class : TRUE           
+##                                          
+## [1] &quot;******* YearModel3 for  2008to2016&quot;
 ## 
 ## Call:
 ## glm(formula = fatal_accident ~ Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_100to110kmh + 
@@ -1601,56 +1807,56 @@ cm</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.3436  -0.2857  -0.1973  -0.1973   2.9169  
+## -0.4051  -0.2707  -0.2109  -0.2109   2.8304  
 ## 
 ## Coefficients: (1 not defined because of singularities)
 ##                               Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                    -2.8000     0.3433  -8.156 3.47e-16 ***
-## Crash_Speed_Limit_0to50kmh     -1.4399     0.5663  -2.542  0.01101 *  
-## Crash_Speed_Limit_100to110kmh  -0.2123     0.4842  -0.438  0.66109    
-## Crash_Speed_Limit_60kmh        -1.1292     0.4311  -2.619  0.00881 ** 
-## Crash_Speed_Limit_70kmh        -0.3781     0.6150  -0.615  0.53876    
+## (Intercept)                    -2.8027     0.1502 -18.657  &lt; 2e-16 ***
+## Crash_Speed_Limit_0to50kmh     -1.1844     0.2402  -4.931 8.17e-07 ***
+## Crash_Speed_Limit_100to110kmh   0.3435     0.1854   1.853   0.0639 .  
+## Crash_Speed_Limit_60kmh        -0.9919     0.1832  -5.415 6.14e-08 ***
+## Crash_Speed_Limit_70kmh        -0.4857     0.3029  -1.604   0.1088    
 ## Crash_Speed_Limit_80to90kmh         NA         NA      NA       NA    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 387.53  on 1578  degrees of freedom
-## Residual deviance: 375.82  on 1574  degrees of freedom
-## AIC: 385.82
+##     Null deviance: 2416.6  on 8226  degrees of freedom
+## Residual deviance: 2317.3  on 8222  degrees of freedom
+## AIC: 2327.3
 ## 
-## Number of Fisher Scoring iterations: 7</code></pre>
+## Number of Fisher Scoring iterations: 6</code></pre>
 <pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
 ## prediction from a rank-deficient fit may be misleading</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction FALSE TRUE
-##      FALSE   652   25
+##      FALSE  3399  128
 ##      TRUE      0    0
-##                                         
-##                Accuracy : 0.9631        
-##                  95% CI : (0.946, 0.976)
-##     No Information Rate : 0.9631        
-##     P-Value [Acc &gt; NIR] : 0.5529        
-##                                         
-##                   Kappa : 0             
-##                                         
-##  Mcnemar&#39;s Test P-Value : 1.587e-06     
-##                                         
-##             Sensitivity : 0.00000       
-##             Specificity : 1.00000       
-##          Pos Pred Value :     NaN       
-##          Neg Pred Value : 0.96307       
-##              Prevalence : 0.03693       
-##          Detection Rate : 0.00000       
-##    Detection Prevalence : 0.00000       
-##       Balanced Accuracy : 0.50000       
-##                                         
-##        &#39;Positive&#39; Class : TRUE          
-##                                         
-## [1] &quot;*********** YearModel4 for  2017toPresent&quot;
+##                                          
+##                Accuracy : 0.9637         
+##                  95% CI : (0.957, 0.9696)
+##     No Information Rate : 0.9637         
+##     P-Value [Acc &gt; NIR] : 0.5235         
+##                                          
+##                   Kappa : 0              
+##                                          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 0.00000        
+##             Specificity : 1.00000        
+##          Pos Pred Value :     NaN        
+##          Neg Pred Value : 0.96371        
+##              Prevalence : 0.03629        
+##          Detection Rate : 0.00000        
+##    Detection Prevalence : 0.00000        
+##       Balanced Accuracy : 0.50000        
+##                                          
+##        &#39;Positive&#39; Class : TRUE           
+##                                          
+## [1] &quot;*********** YearModel4 for  2008to2016&quot;
 ## 
 ## Call:
 ## glm(formula = fatal_accident ~ Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_60kmh + 
@@ -1659,52 +1865,471 @@ cm</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.3436  -0.2857  -0.1973  -0.1973   2.9169  
+## -0.4051  -0.2707  -0.2109  -0.2109   2.8304  
 ## 
 ## Coefficients:
 ##                             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                  -3.0123     0.3414  -8.822   &lt;2e-16 ***
-## Crash_Speed_Limit_0to50kmh   -1.2276     0.5652  -2.172   0.0299 *  
-## Crash_Speed_Limit_60kmh      -0.9169     0.4296  -2.134   0.0328 *  
-## Crash_Speed_Limit_70kmh      -0.1658     0.6140  -0.270   0.7871    
-## Crash_Speed_Limit_80to90kmh   0.2123     0.4842   0.438   0.6611    
+## (Intercept)                  -2.4592     0.1086 -22.640  &lt; 2e-16 ***
+## Crash_Speed_Limit_0to50kmh   -1.5278     0.2166  -7.054 1.74e-12 ***
+## Crash_Speed_Limit_60kmh      -1.3354     0.1510  -8.845  &lt; 2e-16 ***
+## Crash_Speed_Limit_70kmh      -0.8292     0.2845  -2.914  0.00356 ** 
+## Crash_Speed_Limit_80to90kmh  -0.3435     0.1854  -1.853  0.06389 .  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 387.53  on 1578  degrees of freedom
-## Residual deviance: 375.82  on 1574  degrees of freedom
-## AIC: 385.82
+##     Null deviance: 2416.6  on 8226  degrees of freedom
+## Residual deviance: 2317.3  on 8222  degrees of freedom
+## AIC: 2327.3
 ## 
-## Number of Fisher Scoring iterations: 7
+## Number of Fisher Scoring iterations: 6
 ## 
 ## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction FALSE TRUE
-##      FALSE   652   25
+##      FALSE  3399  128
 ##      TRUE      0    0
-##                                         
-##                Accuracy : 0.9631        
-##                  95% CI : (0.946, 0.976)
-##     No Information Rate : 0.9631        
-##     P-Value [Acc &gt; NIR] : 0.5529        
-##                                         
-##                   Kappa : 0             
-##                                         
-##  Mcnemar&#39;s Test P-Value : 1.587e-06     
-##                                         
-##             Sensitivity : 0.00000       
-##             Specificity : 1.00000       
-##          Pos Pred Value :     NaN       
-##          Neg Pred Value : 0.96307       
-##              Prevalence : 0.03693       
-##          Detection Rate : 0.00000       
-##    Detection Prevalence : 0.00000       
-##       Balanced Accuracy : 0.50000       
-##                                         
-##        &#39;Positive&#39; Class : TRUE          
+##                                          
+##                Accuracy : 0.9637         
+##                  95% CI : (0.957, 0.9696)
+##     No Information Rate : 0.9637         
+##     P-Value [Acc &gt; NIR] : 0.5235         
+##                                          
+##                   Kappa : 0              
+##                                          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 0.00000        
+##             Specificity : 1.00000        
+##          Pos Pred Value :     NaN        
+##          Neg Pred Value : 0.96371        
+##              Prevalence : 0.03629        
+##          Detection Rate : 0.00000        
+##    Detection Prevalence : 0.00000        
+##       Balanced Accuracy : 0.50000        
+##                                          
+##        &#39;Positive&#39; Class : TRUE           
+## </code></pre>
+</div>
+<div id="before-2008" class="section level2">
+<h2>Before 2008</h2>
+<pre class="r"><code>crash2001DF &lt;- filter(crashDF, Crash_Year &lt; 2008)</code></pre>
+<p>There are 8747 observations. With 290 fatalities</p>
+<pre class="r"><code>summary( crash2001DF)</code></pre>
+<pre><code>##        X1           crash_id      Crash_Severity       Crash_Year  
+##  Min.   :    0   Min.   :    26   Length:8747        Min.   :2001  
+##  1st Qu.: 7086   1st Qu.: 82248   Class :character   1st Qu.:2003  
+##  Median :13616   Median :159311   Mode  :character   Median :2005  
+##  Mean   :13429   Mean   :158014                      Mean   :2004  
+##  3rd Qu.:21198   3rd Qu.:246003                      3rd Qu.:2006  
+##  Max.   :27110   Max.   :318341                      Max.   :2007  
+##                                                                    
+##  Crash_Month        Crash_Day_Of_Week    Crash_Hour    Crash_Nature      
+##  Length:8747        Length:8747        Min.   : 0.00   Length:8747       
+##  Class :character   Class :character   1st Qu.:10.00   Class :character  
+##  Mode  :character   Mode  :character   Median :14.00   Mode  :character  
+##                                        Mean   :13.24                     
+##                                        3rd Qu.:17.00                     
+##                                        Max.   :23.00                     
+##                                                                          
+##   Crash_Type        Crash_Longitude_GDA94 Crash_Latitude_GDA94
+##  Length:8747        Min.   :  0.0         Min.   :-28.90      
+##  Class :character   1st Qu.:151.9         1st Qu.:-27.58      
+##  Mode  :character   Median :153.0         Median :-27.44      
+##                     Mean   :151.6         Mean   :-25.70      
+##                     3rd Qu.:153.1         3rd Qu.:-25.55      
+##                     Max.   :153.5         Max.   :  0.00      
+##                                                               
+##  Crash_Street        Loc_Suburb        Loc_Local_Government_Area
+##  Length:8747        Length:8747        Length:8747              
+##  Class :character   Class :character   Class :character         
+##  Mode  :character   Mode  :character   Mode  :character         
+##                                                                 
+##                                                                 
+##                                                                 
+##                                                                 
+##  Loc_Post_Code      Loc_Main_Roads_Region Loc_ABS_Remoteness
+##  Length:8747        Length:8747           Length:8747       
+##  Class :character   Class :character      Class :character  
+##  Mode  :character   Mode  :character      Mode  :character  
+##                                                             
+##                                                             
+##                                                             
+##                                                             
+##  Crash_Controlling_Authority Crash_Roadway_Feature Crash_Traffic_Control
+##  Length:8747                 Length:8747           Length:8747          
+##  Class :character            Class :character      Class :character     
+##  Mode  :character            Mode  :character      Mode  :character     
+##                                                                         
+##                                                                         
+##                                                                         
+##                                                                         
+##  Crash_Speed_Limit  Crash_Road_Surface_Condition Crash_Atmospheric_Condition
+##  Length:8747        Length:8747                  Length:8747                
+##  Class :character   Class :character             Class :character           
+##  Mode  :character   Mode  :character             Mode  :character           
+##                                                                             
+##                                                                             
+##                                                                             
+##                                                                             
+##  Crash_Lighting_Condition Crash_Road_Horiz_Align Crash_Road_Vert_Align
+##  Length:8747              Length:8747            Length:8747          
+##  Class :character         Class :character       Class :character     
+##  Mode  :character         Mode  :character       Mode  :character     
+##                                                                       
+##                                                                       
+##                                                                       
+##                                                                       
+##  Crash_DCA_Code Crash_DCA_Description Crash_DCA_Group_Description
+##  Min.   :  0    Length:8747           Length:8747                
+##  1st Qu.:202    Class :character      Class :character           
+##  Median :308    Mode  :character      Mode  :character           
+##  Mean   :428                                                     
+##  3rd Qu.:705                                                     
+##  Max.   :904                                                     
+##                                                                  
+##  DCA_Key_Approach_Dir Count_Casualty_Fatality Count_Casualty_Hospitalised
+##  Length:8747          Min.   :0.00000         Min.   :0.0000             
+##  Class :character     1st Qu.:0.00000         1st Qu.:0.0000             
+##  Mode  :character     Median :0.00000         Median :0.0000             
+##                       Mean   :0.03395         Mean   :0.5275             
+##                       3rd Qu.:0.00000         3rd Qu.:1.0000             
+##                       Max.   :2.00000         Max.   :5.0000             
+##                                                                          
+##  Count_Casualty_MedicallyTreated Count_Casualty_MinorInjury
+##  Min.   :0.0000                  Min.   :0.0000            
+##  1st Qu.:0.0000                  1st Qu.:0.0000            
+##  Median :0.0000                  Median :0.0000            
+##  Mean   :0.3395                  Mean   :0.1932            
+##  3rd Qu.:1.0000                  3rd Qu.:0.0000            
+##  Max.   :5.0000                  Max.   :4.0000            
+##                                                            
+##  Count_Casualty_Total Count_Unit_Motorcycle_Moped   site_id_1    
+##  Min.   :0.000        Min.   :1.000               Min.   :27005  
+##  1st Qu.:1.000        1st Qu.:1.000               1st Qu.:40115  
+##  Median :1.000        Median :1.000               Median :40416  
+##  Mean   :1.094        Mean   :1.018               Mean   :38912  
+##  3rd Qu.:1.000        3rd Qu.:1.000               3rd Qu.:40861  
+##  Max.   :7.000        Max.   :5.000               Max.   :45063  
+##                                                                  
+##  site_name_1          distance_1       site_id_list_2   site_name_2       
+##  Length:8747        Min.   :      22   Min.   : 27006   Length:8747       
+##  Class :character   1st Qu.:    1854   1st Qu.: 40141   Class :character  
+##  Mode  :character   Median :    3108   Median : 40383   Mode  :character  
+##                     Mean   :    7262   Mean   : 40065                     
+##                     3rd Qu.:    5188   3rd Qu.: 40848                     
+##                     Max.   :14769184   Max.   :140009                     
+##                                                                           
+##    distance_2       site_id_list_3   site_name_3          distance_3      
+##  Min.   :     308   Min.   : 27034   Length:8747        Min.   :     521  
+##  1st Qu.:    3671   1st Qu.: 40115   Class :character   1st Qu.:    5213  
+##  Median :    5147   Median : 40417   Mode  :character   Median :    7218  
+##  Mean   :    9615   Mean   : 39754                      Mean   :   12010  
+##  3rd Qu.:    7427   3rd Qu.: 40849                      3rd Qu.:   10894  
+##  Max.   :14793133   Max.   :140010                      Max.   :14793149  
+##                                                                           
+##       Lat              Lon           rainfall       Crash_Nature_Angle
+##  Min.   :-29.00   Min.   :138.1   Min.   :  0.000   Min.   :0.0000    
+##  1st Qu.:-27.58   1st Qu.:151.9   1st Qu.:  0.669   1st Qu.:0.0000    
+##  Median :-27.43   Median :153.0   Median :  1.735   Median :0.0000    
+##  Mean   :-25.70   Mean   :151.7   Mean   :  2.777   Mean   :0.3442    
+##  3rd Qu.:-25.51   3rd Qu.:153.1   3rd Qu.:  3.540   3rd Qu.:1.0000    
+##  Max.   :-10.90   Max.   :153.5   Max.   :232.000   Max.   :1.0000    
+##                                                                       
+##  Crash_Nature_Collision_miscellaneous Crash_Nature_Fall_from_vehicle
+##  Min.   :0.000000                     Min.   :0.0000                
+##  1st Qu.:0.000000                     1st Qu.:0.0000                
+##  Median :0.000000                     Median :0.0000                
+##  Mean   :0.003887                     Mean   :0.2275                
+##  3rd Qu.:0.000000                     3rd Qu.:0.0000                
+##  Max.   :1.000000                     Max.   :1.0000                
+##                                                                     
+##  Crash_Nature_Head_on Crash_Nature_Hit_animal Crash_Nature_Hit_object
+##  Min.   :0.00000      Min.   :0.00000         Min.   :0.0000         
+##  1st Qu.:0.00000      1st Qu.:0.00000         1st Qu.:0.0000         
+##  Median :0.00000      Median :0.00000         Median :0.0000         
+##  Mean   :0.02389      Mean   :0.02515         Mean   :0.1483         
+##  3rd Qu.:0.00000      3rd Qu.:0.00000         3rd Qu.:0.0000         
+##  Max.   :1.00000      Max.   :1.00000         Max.   :1.0000         
+##                                                                      
+##  Crash_Nature_Hit_parked_vehicle Crash_Nature_Hit_pedestrian
+##  Min.   :0.00000                 Min.   :0.0000             
+##  1st Qu.:0.00000                 1st Qu.:0.0000             
+##  Median :0.00000                 Median :0.0000             
+##  Mean   :0.01017                 Mean   :0.0104             
+##  3rd Qu.:0.00000                 3rd Qu.:0.0000             
+##  Max.   :1.00000                 Max.   :1.0000             
+##                                                             
+##  Crash_Nature_Non_collision_miscellaneous Crash_Nature_Overturned
+##  Min.   :0.000000                         Min.   :0.000000       
+##  1st Qu.:0.000000                         1st Qu.:0.000000       
+##  Median :0.000000                         Median :0.000000       
+##  Mean   :0.001372                         Mean   :0.000343       
+##  3rd Qu.:0.000000                         3rd Qu.:0.000000       
+##  Max.   :1.000000                         Max.   :1.000000       
+##                                                                  
+##  Crash_Nature_Rear_end Crash_Nature_Sideswipe
+##  Min.   :0.0000        Min.   :0.00000       
+##  1st Qu.:0.0000        1st Qu.:0.00000       
+##  Median :0.0000        Median :0.00000       
+##  Mean   :0.1206        Mean   :0.08231       
+##  3rd Qu.:0.0000        3rd Qu.:0.00000       
+##  Max.   :1.0000        Max.   :1.00000       
+##                                              
+##  Crash_Nature_Struck_by_external_load            Crash_Severity_Fac
+##  Min.   :0.000000                     Property_damage_only: 155    
+##  1st Qu.:0.000000                     Minor_injury        :1362    
+##  Median :0.000000                     Medical_treatment   :2617    
+##  Mean   :0.001829                     Hospitalisation     :4323    
+##  3rd Qu.:0.000000                     Fatal               : 290    
+##  Max.   :1.000000                                                  
+##                                                                    
+##  Crash_Severity_Num fatal_accident  fatal_accident_fac
+##  Min.   :1.000      Mode :logical   FALSE:8457        
+##  1st Qu.:3.000      FALSE:8457      TRUE : 290        
+##  Median :4.000      TRUE :290                         
+##  Mean   :3.369                                        
+##  3rd Qu.:4.000                                        
+##  Max.   :5.000                                        
+##                                                       
+##           Crash_Nature_Fac Crash_Nature_Num Crash_Speed_Limit_Fac
+##  Angle            :3011    Min.   : 1.000   0to50kmh   :1296     
+##  Fall from vehicle:1990    1st Qu.: 1.000   60kmh      :4835     
+##  Hit object       :1297    Median : 3.000   70kmh      : 467     
+##  Rear-end         :1055    Mean   : 4.654   80to90kmh  : 872     
+##  Sideswipe        : 720    3rd Qu.: 6.000   100to110kmh:1277     
+##  Hit animal       : 220    Max.   :13.000                        
+##  (Other)          : 454                                          
+##  Crash_Speed_Limit_Num Crash_Speed_Limit_0to50kmh Crash_Speed_Limit_100to110kmh
+##  Min.   :1.000         Min.   :0.0000             Min.   :0.000                
+##  1st Qu.:2.000         1st Qu.:0.0000             1st Qu.:0.000                
+##  Median :2.000         Median :0.0000             Median :0.000                
+##  Mean   :2.543         Mean   :0.1482             Mean   :0.146                
+##  3rd Qu.:3.000         3rd Qu.:0.0000             3rd Qu.:0.000                
+##  Max.   :5.000         Max.   :1.0000             Max.   :1.000                
+##                                                                                
+##  Crash_Speed_Limit_60kmh Crash_Speed_Limit_70kmh Crash_Speed_Limit_80to90kmh
+##  Min.   :0.0000          Min.   :0.00000         Min.   :0.00000            
+##  1st Qu.:0.0000          1st Qu.:0.00000         1st Qu.:0.00000            
+##  Median :1.0000          Median :0.00000         Median :0.00000            
+##  Mean   :0.5528          Mean   :0.05339         Mean   :0.09969            
+##  3rd Qu.:1.0000          3rd Qu.:0.00000         3rd Qu.:0.00000            
+##  Max.   :1.0000          Max.   :1.00000         Max.   :1.00000            
+## </code></pre>
+<pre class="r"><code>modelYearlyData(crash2008DF, &quot;Prior2008&quot;)</code></pre>
+<pre><code>## [1] &quot;********   YearModel1 for  Prior2008&quot;
+## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Speed_Limit_Num, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.4067  -0.2693  -0.2185  -0.2185   2.8853  
+## 
+## Coefficients:
+##                       Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)           -4.57089    0.15043  -30.39   &lt;2e-16 ***
+## Crash_Speed_Limit_Num  0.42400    0.04221   10.05   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 2416.6  on 8226  degrees of freedom
+## Residual deviance: 2318.7  on 8225  degrees of freedom
+## AIC: 2322.7
+## 
+## Number of Fisher Scoring iterations: 6
+## 
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE  3399  128
+##      TRUE      0    0
+##                                          
+##                Accuracy : 0.9637         
+##                  95% CI : (0.957, 0.9696)
+##     No Information Rate : 0.9637         
+##     P-Value [Acc &gt; NIR] : 0.5235         
+##                                          
+##                   Kappa : 0              
+##                                          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 0.00000        
+##             Specificity : 1.00000        
+##          Pos Pred Value :     NaN        
+##          Neg Pred Value : 0.96371        
+##              Prevalence : 0.03629        
+##          Detection Rate : 0.00000        
+##    Detection Prevalence : 0.00000        
+##       Balanced Accuracy : 0.50000        
+##                                          
+##        &#39;Positive&#39; Class : TRUE           
+##                                          
+## [1] &quot;******  YearModel2 for  Prior2008&quot;
+## formula: fatal_accident_fac ~ Crash_Speed_Limit_Fac
+## data:    trainDF
+## 
+##  link  threshold nobs logLik   AIC     niter max.grad cond.H 
+##  logit flexible  8227 -1158.63 2327.27 7(0)  5.91e-11 1.7e+01
+## 
+## Coefficients:
+##                         Estimate Std. Error z value Pr(&gt;|z|)    
+## Crash_Speed_Limit_Fac.L  1.27997    0.14874   8.605   &lt;2e-16 ***
+## Crash_Speed_Limit_Fac.Q  0.07526    0.18858   0.399    0.690    
+## Crash_Speed_Limit_Fac.C -0.14420    0.13460  -1.071    0.284    
+## Crash_Speed_Limit_Fac^4  0.02543    0.20954   0.121    0.903    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Threshold coefficients:
+##            Estimate Std. Error z value
+## FALSE|TRUE  3.26641    0.07737   42.22
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE  3399  128
+##      TRUE      0    0
+##                                          
+##                Accuracy : 0.9637         
+##                  95% CI : (0.957, 0.9696)
+##     No Information Rate : 0.9637         
+##     P-Value [Acc &gt; NIR] : 0.5235         
+##                                          
+##                   Kappa : 0              
+##                                          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 0.00000        
+##             Specificity : 1.00000        
+##          Pos Pred Value :     NaN        
+##          Neg Pred Value : 0.96371        
+##              Prevalence : 0.03629        
+##          Detection Rate : 0.00000        
+##    Detection Prevalence : 0.00000        
+##       Balanced Accuracy : 0.50000        
+##                                          
+##        &#39;Positive&#39; Class : TRUE           
+##                                          
+## [1] &quot;******* YearModel3 for  Prior2008&quot;
+## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_100to110kmh + 
+##     Crash_Speed_Limit_60kmh + Crash_Speed_Limit_70kmh + Crash_Speed_Limit_80to90kmh, 
+##     family = &quot;binomial&quot;, data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.4051  -0.2707  -0.2109  -0.2109   2.8304  
+## 
+## Coefficients: (1 not defined because of singularities)
+##                               Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                    -2.8027     0.1502 -18.657  &lt; 2e-16 ***
+## Crash_Speed_Limit_0to50kmh     -1.1844     0.2402  -4.931 8.17e-07 ***
+## Crash_Speed_Limit_100to110kmh   0.3435     0.1854   1.853   0.0639 .  
+## Crash_Speed_Limit_60kmh        -0.9919     0.1832  -5.415 6.14e-08 ***
+## Crash_Speed_Limit_70kmh        -0.4857     0.3029  -1.604   0.1088    
+## Crash_Speed_Limit_80to90kmh         NA         NA      NA       NA    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 2416.6  on 8226  degrees of freedom
+## Residual deviance: 2317.3  on 8222  degrees of freedom
+## AIC: 2327.3
+## 
+## Number of Fisher Scoring iterations: 6</code></pre>
+<pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+## prediction from a rank-deficient fit may be misleading</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE  3399  128
+##      TRUE      0    0
+##                                          
+##                Accuracy : 0.9637         
+##                  95% CI : (0.957, 0.9696)
+##     No Information Rate : 0.9637         
+##     P-Value [Acc &gt; NIR] : 0.5235         
+##                                          
+##                   Kappa : 0              
+##                                          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 0.00000        
+##             Specificity : 1.00000        
+##          Pos Pred Value :     NaN        
+##          Neg Pred Value : 0.96371        
+##              Prevalence : 0.03629        
+##          Detection Rate : 0.00000        
+##    Detection Prevalence : 0.00000        
+##       Balanced Accuracy : 0.50000        
+##                                          
+##        &#39;Positive&#39; Class : TRUE           
+##                                          
+## [1] &quot;*********** YearModel4 for  Prior2008&quot;
+## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_60kmh + 
+##     Crash_Speed_Limit_70kmh + Crash_Speed_Limit_80to90kmh, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.4051  -0.2707  -0.2109  -0.2109   2.8304  
+## 
+## Coefficients:
+##                             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                  -2.4592     0.1086 -22.640  &lt; 2e-16 ***
+## Crash_Speed_Limit_0to50kmh   -1.5278     0.2166  -7.054 1.74e-12 ***
+## Crash_Speed_Limit_60kmh      -1.3354     0.1510  -8.845  &lt; 2e-16 ***
+## Crash_Speed_Limit_70kmh      -0.8292     0.2845  -2.914  0.00356 ** 
+## Crash_Speed_Limit_80to90kmh  -0.3435     0.1854  -1.853  0.06389 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 2416.6  on 8226  degrees of freedom
+## Residual deviance: 2317.3  on 8222  degrees of freedom
+## AIC: 2327.3
+## 
+## Number of Fisher Scoring iterations: 6
+## 
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE  3399  128
+##      TRUE      0    0
+##                                          
+##                Accuracy : 0.9637         
+##                  95% CI : (0.957, 0.9696)
+##     No Information Rate : 0.9637         
+##     P-Value [Acc &gt; NIR] : 0.5235         
+##                                          
+##                   Kappa : 0              
+##                                          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 0.00000        
+##             Specificity : 1.00000        
+##          Pos Pred Value :     NaN        
+##          Neg Pred Value : 0.96371        
+##              Prevalence : 0.03629        
+##          Detection Rate : 0.00000        
+##    Detection Prevalence : 0.00000        
+##       Balanced Accuracy : 0.50000        
+##                                          
+##        &#39;Positive&#39; Class : TRUE           
 ## </code></pre>
 </div>
 </div>
