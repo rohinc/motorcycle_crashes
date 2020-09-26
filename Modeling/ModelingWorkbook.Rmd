@@ -158,7 +158,11 @@ accidentTableToDF <-function(accidentTable) {
   tmpDF <- cbind(crash_nature = row.names(accidentTable),
                  as.data.frame.matrix(accidentTable))
 
-  tmpDF %<>% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %>% arrange(-percent_fatal)
+  total_accidents = sum(tmpDF$fatal + tmpDF$non_fatal)
+  tmpDF %<>% mutate( percent_accidents = ((fatal+non_fatal)/(total_accidents))*100 ) 
+  tmpDF %<>% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %>%
+    arrange(-percent_fatal)
+
 
   return(tmpDF)
   
