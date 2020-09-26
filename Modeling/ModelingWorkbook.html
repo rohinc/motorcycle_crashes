@@ -533,148 +533,235 @@ if( (!forceDfRebuild) &amp; file.exists(dfFileName)) {
 ## 4 80to90kmh                        2291
 ## 5 70kmh                            1230</code></pre>
 <p>Do some breakdown of fatalities</p>
-<pre class="r"><code>accidentTable =  table(crashDF$Crash_Speed_Limit_Fac, crashDF$fatal_accident)
-colnames(accidentTable) &lt;- c(&quot;non_fatal&quot;, &quot;fatal&quot;)
-
-tmpDF &lt;- cbind(speed_zone = row.names(accidentTable), as.data.frame.matrix(accidentTable))
-
-tmpDF %&lt;&gt;% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %&gt;% arrange(-percent_fatal)
-
-tmpDF</code></pre>
-<pre><code>##    speed_zone non_fatal fatal percent_fatal
-## 1 100to110kmh      2958   238      7.446809
-## 2   80to90kmh      2146   145      6.329114
-## 3       70kmh      1186    44      3.577236
-## 4       60kmh     11737   257      2.142738
-## 5    0to50kmh      3969    77      1.903114</code></pre>
-<pre class="r"><code>accidentTable =  table(crashDF$Crash_Nature, crashDF$fatal_accident)
-colnames(accidentTable) &lt;- c(&quot;non_fatal&quot;, &quot;fatal&quot;)
-
-tmpDF &lt;- cbind(speed_zone = row.names(accidentTable), as.data.frame.matrix(accidentTable))
-
-tmpDF %&lt;&gt;% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %&gt;% arrange(-percent_fatal)
-
-tmpDF</code></pre>
-<pre><code>##                       speed_zone non_fatal fatal percent_fatal
-## 1                        Head-on       455    93     16.970803
-## 2                     Hit object      3198   252      7.304348
-## 3  Non-collision - miscellaneous        15     1      6.250000
-## 4      Collision - miscellaneous        55     3      5.172414
-## 5        Struck by external load        32     1      3.030303
-## 6                 Hit pedestrian       207     6      2.816901
-## 7                          Angle      6986   184      2.566248
-## 8             Hit parked vehicle       229     6      2.553191
-## 9                     Hit animal       580    14      2.356902
-## 10             Fall from vehicle      5617   125      2.176942
-## 11                     Sideswipe      1778    30      1.659292
-## 12                      Rear-end      2796    46      1.618578
-## 13                    Overturned        48     0      0.000000</code></pre>
-<pre class="r"><code>accidentTableToDF &lt;-function(accidentTable) {
+<pre class="r"><code>accidentTableToDF &lt;-function(colName, accidentTable) {
   colnames(accidentTable) &lt;- c(&quot;non_fatal&quot;, &quot;fatal&quot;)
 
-  tmpDF &lt;- cbind(crash_nature = row.names(accidentTable),
-                 as.data.frame.matrix(accidentTable))
+ # tmpDF &lt;- cbind(crash_nature = row.names(accidentTable),
+#                 as.data.frame.matrix(accidentTable))
+  tmpDF &lt;- mutate(as.data.frame.matrix(accidentTable), !!colName := row.names(accidentTable))
 
-  tmpDF %&lt;&gt;% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %&gt;% arrange(-percent_fatal)
+  total_accidents = sum(tmpDF$fatal + tmpDF$non_fatal)
+  tmpDF %&lt;&gt;% mutate( percent_accidents = ((fatal+non_fatal)/(total_accidents))*100 ) 
+  tmpDF %&lt;&gt;% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %&gt;%
+    arrange(-percent_fatal, -percent_accidents)
+
 
   return(tmpDF)
   
-}
-crashDF %&gt;% filter(Crash_Speed_Limit_0to50kmh == 1) -&gt; tmpDF
+}</code></pre>
+<p>Total accidents by speed zone</p>
+<pre class="r"><code>accidentTable =  table(crashDF$Crash_Speed_Limit_Fac, crashDF$fatal_accident)
+
+tmpDF &lt;- accidentTableToDF(&quot;Crash_Speed_limit&quot;, accidentTable)
+
+tmpDF</code></pre>
+<pre><code>##   non_fatal fatal Crash_Speed_limit percent_accidents percent_fatal
+## 1      2958   238       100to110kmh          14.04403      7.446809
+## 2      2146   145         80to90kmh          10.06723      6.329114
+## 3      1186    44             70kmh           5.40493      3.577236
+## 4     11737   257             60kmh          52.70466      2.142738
+## 5      3969    77          0to50kmh          17.77914      1.903114</code></pre>
+<p>Total accidents by crash nature</p>
+<pre class="r"><code>accidentTable =  table(crashDF$Crash_Nature, crashDF$fatal_accident)
+colnames(accidentTable) &lt;- c(&quot;non_fatal&quot;, &quot;fatal&quot;)
+
+tmpDF &lt;- accidentTableToDF(&quot;Crash_Nature&quot;, accidentTable)
+
+tmpDF</code></pre>
+<pre><code>##    non_fatal fatal                  Crash_Nature percent_accidents
+## 1        455    93                       Head-on        2.40805027
+## 2       3198   252                    Hit object       15.16017050
+## 3         15     1 Non-collision - miscellaneous        0.07030804
+## 4         55     3     Collision - miscellaneous        0.25486663
+## 5         32     1       Struck by external load        0.14501033
+## 6        207     6                Hit pedestrian        0.93597574
+## 7       6986   184                         Angle       31.50678912
+## 8        229     6            Hit parked vehicle        1.03264929
+## 9        580    14                    Hit animal        2.61018588
+## 10      5617   125             Fall from vehicle       25.23179681
+## 11      1778    30                     Sideswipe        7.94480819
+## 12      2796    46                      Rear-end       12.48846509
+## 13        48     0                    Overturned        0.21092411
+##    percent_fatal
+## 1      16.970803
+## 2       7.304348
+## 3       6.250000
+## 4       5.172414
+## 5       3.030303
+## 6       2.816901
+## 7       2.566248
+## 8       2.553191
+## 9       2.356902
+## 10      2.176942
+## 11      1.659292
+## 12      1.618578
+## 13      0.000000</code></pre>
+<p>Accidents by nature for each speed zone.</p>
+<pre class="r"><code>crashDF %&gt;% filter(Crash_Speed_Limit_0to50kmh == 1) -&gt; tmpDF
 accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
 print(&quot;Speed Zone 0-50kmh&quot;)</code></pre>
 <pre><code>## [1] &quot;Speed Zone 0-50kmh&quot;</code></pre>
-<pre class="r"><code>print(accidentTableToDF(accidentTable))</code></pre>
-<pre><code>##                     crash_nature non_fatal fatal percent_fatal
-## 1                     Hit object       520    33     5.9674503
-## 2                        Head-on        92     5     5.1546392
-## 3             Hit parked vehicle       117     5     4.0983607
-## 4                          Angle      1524    20     1.2953368
-## 5              Fall from vehicle       965    11     1.1270492
-## 6                       Rear-end       326     2     0.6097561
-## 7                      Sideswipe       260     1     0.3831418
-## 8      Collision - miscellaneous         6     0     0.0000000
-## 9                     Hit animal        72     0     0.0000000
-## 10                Hit pedestrian        77     0     0.0000000
-## 11 Non-collision - miscellaneous         4     0     0.0000000
-## 12                    Overturned         5     0     0.0000000
-## 13       Struck by external load         1     0     0.0000000</code></pre>
+<pre class="r"><code>print(accidentTableToDF(&quot;Crash_Nature&quot;, accidentTable))</code></pre>
+<pre><code>##    non_fatal fatal                  Crash_Nature percent_accidents
+## 1        520    33                    Hit object       13.66782007
+## 2         92     5                       Head-on        2.39742956
+## 3        117     5            Hit parked vehicle        3.01532378
+## 4       1524    20                         Angle       38.16114681
+## 5        965    11             Fall from vehicle       24.12259021
+## 6        326     2                      Rear-end        8.10677212
+## 7        260     1                     Sideswipe        6.45081562
+## 8         77     0                Hit pedestrian        1.90311419
+## 9         72     0                    Hit animal        1.77953534
+## 10         6     0     Collision - miscellaneous        0.14829461
+## 11         5     0                    Overturned        0.12357884
+## 12         4     0 Non-collision - miscellaneous        0.09886307
+## 13         1     0       Struck by external load        0.02471577
+##    percent_fatal
+## 1      5.9674503
+## 2      5.1546392
+## 3      4.0983607
+## 4      1.2953368
+## 5      1.1270492
+## 6      0.6097561
+## 7      0.3831418
+## 8      0.0000000
+## 9      0.0000000
+## 10     0.0000000
+## 11     0.0000000
+## 12     0.0000000
+## 13     0.0000000</code></pre>
 <pre class="r"><code>crashDF %&gt;% filter(Crash_Speed_Limit_60kmh == 1) -&gt; tmpDF
 accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
 print(&quot;Speed Zone 60kmh&quot;)</code></pre>
 <pre><code>## [1] &quot;Speed Zone 60kmh&quot;</code></pre>
-<pre class="r"><code>print(accidentTableToDF(accidentTable))</code></pre>
-<pre><code>##                     crash_nature non_fatal fatal percent_fatal
-## 1                        Head-on       196    20     9.2592593
-## 2                     Hit object      1429    88     5.8009229
-## 3                 Hit pedestrian       103     6     5.5045872
-## 4                          Angle      4537    78     1.6901408
-## 5              Fall from vehicle      2607    41     1.5483384
-## 6                      Sideswipe      1017    13     1.2621359
-## 7                       Rear-end      1600    11     0.6828057
-## 8      Collision - miscellaneous        20     0     0.0000000
-## 9                     Hit animal       122     0     0.0000000
-## 10            Hit parked vehicle        81     0     0.0000000
-## 11 Non-collision - miscellaneous         3     0     0.0000000
-## 12                    Overturned        19     0     0.0000000
-## 13       Struck by external load         3     0     0.0000000</code></pre>
+<pre class="r"><code>print(accidentTableToDF(&quot;Crash_Nature&quot;,accidentTable))</code></pre>
+<pre><code>##    non_fatal fatal                  Crash_Nature percent_accidents
+## 1        196    20                       Head-on        1.80090045
+## 2       1429    88                    Hit object       12.64799066
+## 3        103     6                Hit pedestrian        0.90878773
+## 4       4537    78                         Angle       38.47757212
+## 5       2607    41             Fall from vehicle       22.07770552
+## 6       1017    13                     Sideswipe        8.58762715
+## 7       1600    11                      Rear-end       13.43171586
+## 8        122     0                    Hit animal        1.01717525
+## 9         81     0            Hit parked vehicle        0.67533767
+## 10        20     0     Collision - miscellaneous        0.16675004
+## 11        19     0                    Overturned        0.15841254
+## 12         3     0 Non-collision - miscellaneous        0.02501251
+## 13         3     0       Struck by external load        0.02501251
+##    percent_fatal
+## 1      9.2592593
+## 2      5.8009229
+## 3      5.5045872
+## 4      1.6901408
+## 5      1.5483384
+## 6      1.2621359
+## 7      0.6828057
+## 8      0.0000000
+## 9      0.0000000
+## 10     0.0000000
+## 11     0.0000000
+## 12     0.0000000
+## 13     0.0000000</code></pre>
 <pre class="r"><code>crashDF %&gt;% filter(Crash_Speed_Limit_70kmh == 1) -&gt; tmpDF
 accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
 print(&quot;Speed Zone 70kmh&quot;)</code></pre>
 <pre><code>## [1] &quot;Speed Zone 70kmh&quot;</code></pre>
-<pre class="r"><code>print(accidentTableToDF(accidentTable))</code></pre>
-<pre><code>##                     crash_nature non_fatal fatal percent_fatal
-## 1                        Head-on        22     2     8.3333333
-## 2                     Hit object       166    15     8.2872928
-## 3                          Angle       324    19     5.5393586
-## 4              Fall from vehicle       274     6     2.1428571
-## 5                       Rear-end       233     2     0.8510638
-## 6      Collision - miscellaneous         2     0     0.0000000
-## 7                     Hit animal        12     0     0.0000000
-## 8             Hit parked vehicle         6     0     0.0000000
-## 9                 Hit pedestrian        11     0     0.0000000
-## 10 Non-collision - miscellaneous         1     0     0.0000000
-## 11                    Overturned         1     0     0.0000000
-## 12                     Sideswipe       133     0     0.0000000
-## 13       Struck by external load         1     0     0.0000000</code></pre>
+<pre class="r"><code>print(accidentTableToDF(&quot;Crash_Nature&quot;,accidentTable))</code></pre>
+<pre><code>##    non_fatal fatal                  Crash_Nature percent_accidents
+## 1         22     2                       Head-on        1.95121951
+## 2        166    15                    Hit object       14.71544715
+## 3        324    19                         Angle       27.88617886
+## 4        274     6             Fall from vehicle       22.76422764
+## 5        233     2                      Rear-end       19.10569106
+## 6        133     0                     Sideswipe       10.81300813
+## 7         12     0                    Hit animal        0.97560976
+## 8         11     0                Hit pedestrian        0.89430894
+## 9          6     0            Hit parked vehicle        0.48780488
+## 10         2     0     Collision - miscellaneous        0.16260163
+## 11         1     0 Non-collision - miscellaneous        0.08130081
+## 12         1     0                    Overturned        0.08130081
+## 13         1     0       Struck by external load        0.08130081
+##    percent_fatal
+## 1      8.3333333
+## 2      8.2872928
+## 3      5.5393586
+## 4      2.1428571
+## 5      0.8510638
+## 6      0.0000000
+## 7      0.0000000
+## 8      0.0000000
+## 9      0.0000000
+## 10     0.0000000
+## 11     0.0000000
+## 12     0.0000000
+## 13     0.0000000</code></pre>
 <pre class="r"><code>crashDF %&gt;% filter(Crash_Speed_Limit_80to90kmh == 1) -&gt; tmpDF
 accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
 print(&quot;Speed Zone 80-90kmh&quot;)</code></pre>
 <pre><code>## [1] &quot;Speed Zone 80-90kmh&quot;</code></pre>
-<pre class="r"><code>print(accidentTableToDF(accidentTable))</code></pre>
-<pre><code>##                     crash_nature non_fatal fatal percent_fatal
-## 1                        Head-on        66    27     29.032258
-## 2      Collision - miscellaneous        10     1      9.090909
-## 3                     Hit object       433    41      8.649789
-## 4                          Angle       368    32      8.000000
-## 5                       Rear-end       260    11      4.059041
-## 6              Fall from vehicle       727    27      3.580902
-## 7                      Sideswipe       153     5      3.164557
-## 8                     Hit animal        90     1      1.098901
-## 9             Hit parked vehicle        12     0      0.000000
-## 10                Hit pedestrian        10     0      0.000000
-## 11 Non-collision - miscellaneous         1     0      0.000000
-## 12                    Overturned         8     0      0.000000
-## 13       Struck by external load         8     0      0.000000</code></pre>
+<pre class="r"><code>print(accidentTableToDF(&quot;Crash_Nature&quot;,accidentTable))</code></pre>
+<pre><code>##    non_fatal fatal                  Crash_Nature percent_accidents
+## 1         66    27                       Head-on        4.05936272
+## 2         10     1     Collision - miscellaneous        0.48013968
+## 3        433    41                    Hit object       20.68965517
+## 4        368    32                         Angle       17.45962462
+## 5        260    11                      Rear-end       11.82889568
+## 6        727    27             Fall from vehicle       32.91139241
+## 7        153     5                     Sideswipe        6.89655172
+## 8         90     1                    Hit animal        3.97206460
+## 9         12     0            Hit parked vehicle        0.52378874
+## 10        10     0                Hit pedestrian        0.43649062
+## 11         8     0                    Overturned        0.34919249
+## 12         8     0       Struck by external load        0.34919249
+## 13         1     0 Non-collision - miscellaneous        0.04364906
+##    percent_fatal
+## 1      29.032258
+## 2       9.090909
+## 3       8.649789
+## 4       8.000000
+## 5       4.059041
+## 6       3.580902
+## 7       3.164557
+## 8       1.098901
+## 9       0.000000
+## 10      0.000000
+## 11      0.000000
+## 12      0.000000
+## 13      0.000000</code></pre>
 <pre class="r"><code>crashDF %&gt;% filter(Crash_Speed_Limit_100to110kmh == 1) -&gt; tmpDF
 accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
 print(&quot;Speed Zone 100-110kmh&quot;)</code></pre>
 <pre><code>## [1] &quot;Speed Zone 100-110kmh&quot;</code></pre>
-<pre class="r"><code>print(accidentTableToDF(accidentTable))</code></pre>
-<pre><code>##                     crash_nature non_fatal fatal percent_fatal
-## 1                        Head-on        79    39     33.050847
-## 2  Non-collision - miscellaneous         6     1     14.285714
-## 3                          Angle       233    35     13.059701
-## 4      Collision - miscellaneous        17     2     10.526316
-## 5                     Hit object       650    75     10.344828
-## 6             Hit parked vehicle        13     1      7.142857
-## 7                       Rear-end       377    20      5.037783
-## 8        Struck by external load        19     1      5.000000
-## 9                      Sideswipe       215    11      4.867257
-## 10                    Hit animal       284    13      4.377104
-## 11             Fall from vehicle      1044    40      3.690037
-## 12                Hit pedestrian         6     0      0.000000
-## 13                    Overturned        15     0      0.000000</code></pre>
+<pre class="r"><code>print(accidentTableToDF(&quot;Crash_Nature&quot;,accidentTable))</code></pre>
+<pre><code>##    non_fatal fatal                  Crash_Nature percent_accidents
+## 1         79    39                       Head-on         3.6921151
+## 2          6     1 Non-collision - miscellaneous         0.2190238
+## 3        233    35                         Angle         8.3854819
+## 4         17     2     Collision - miscellaneous         0.5944931
+## 5        650    75                    Hit object        22.6846058
+## 6         13     1            Hit parked vehicle         0.4380476
+## 7        377    20                      Rear-end        12.4217772
+## 8         19     1       Struck by external load         0.6257822
+## 9        215    11                     Sideswipe         7.0713392
+## 10       284    13                    Hit animal         9.2928661
+## 11      1044    40             Fall from vehicle        33.9173967
+## 12        15     0                    Overturned         0.4693367
+## 13         6     0                Hit pedestrian         0.1877347
+##    percent_fatal
+## 1      33.050847
+## 2      14.285714
+## 3      13.059701
+## 4      10.526316
+## 5      10.344828
+## 6       7.142857
+## 7       5.037783
+## 8       5.000000
+## 9       4.867257
+## 10      4.377104
+## 11      3.690037
+## 12      0.000000
+## 13      0.000000</code></pre>
 </div>
 <div id="pre-modeling-eda" class="section level1">
 <h1>Pre-modeling EDA</h1>

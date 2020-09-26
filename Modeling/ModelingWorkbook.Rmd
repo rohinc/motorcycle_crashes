@@ -126,71 +126,78 @@ crashDF %>%  count(Crash_Speed_Limit_Fac) %>% rename(total_accidents = n) %>%
 
 Do some breakdown of fatalities
 
-``` {r accidents breakdown}
-accidentTable =  table(crashDF$Crash_Speed_Limit_Fac, crashDF$fatal_accident)
-colnames(accidentTable) <- c("non_fatal", "fatal")
 
-tmpDF <- cbind(speed_zone = row.names(accidentTable), as.data.frame.matrix(accidentTable))
-
-tmpDF %<>% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %>% arrange(-percent_fatal)
-
-tmpDF
-
-```
-
-
-```{r fatalities per crash nature}
-accidentTable =  table(crashDF$Crash_Nature, crashDF$fatal_accident)
-colnames(accidentTable) <- c("non_fatal", "fatal")
-
-tmpDF <- cbind(speed_zone = row.names(accidentTable), as.data.frame.matrix(accidentTable))
-
-tmpDF %<>% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %>% arrange(-percent_fatal)
-
-tmpDF
-
-```
-```{r fatalities per speed zone by crash nature}
-
-accidentTableToDF <-function(accidentTable) {
+``` {r help app for breakdown}
+accidentTableToDF <-function(colName, accidentTable) {
   colnames(accidentTable) <- c("non_fatal", "fatal")
 
-  tmpDF <- cbind(crash_nature = row.names(accidentTable),
-                 as.data.frame.matrix(accidentTable))
+ # tmpDF <- cbind(crash_nature = row.names(accidentTable),
+#                 as.data.frame.matrix(accidentTable))
+  tmpDF <- mutate(as.data.frame.matrix(accidentTable), !!colName := row.names(accidentTable))
 
   total_accidents = sum(tmpDF$fatal + tmpDF$non_fatal)
   tmpDF %<>% mutate( percent_accidents = ((fatal+non_fatal)/(total_accidents))*100 ) 
   tmpDF %<>% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %>%
-    arrange(-percent_fatal)
+    arrange(-percent_fatal, -percent_accidents)
 
 
   return(tmpDF)
   
 }
+```
+
+Total accidents by speed zone
+
+``` {r accidents breakdown}
+accidentTable =  table(crashDF$Crash_Speed_Limit_Fac, crashDF$fatal_accident)
+
+tmpDF <- accidentTableToDF("Crash_Speed_limit", accidentTable)
+
+tmpDF
+
+```
+
+Total accidents by crash nature
+
+```{r fatalities per crash nature}
+accidentTable =  table(crashDF$Crash_Nature, crashDF$fatal_accident)
+colnames(accidentTable) <- c("non_fatal", "fatal")
+
+tmpDF <- accidentTableToDF("Crash_Nature", accidentTable)
+
+tmpDF
+
+```
+
+Accidents by nature for each speed zone.
+
+```{r fatalities per speed zone by crash nature}
+
+
 crashDF %>% filter(Crash_Speed_Limit_0to50kmh == 1) -> tmpDF
 accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
 print("Speed Zone 0-50kmh")
-print(accidentTableToDF(accidentTable))
+print(accidentTableToDF("Crash_Nature", accidentTable))
 
 crashDF %>% filter(Crash_Speed_Limit_60kmh == 1) -> tmpDF
 accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
 print("Speed Zone 60kmh")
-print(accidentTableToDF(accidentTable))
+print(accidentTableToDF("Crash_Nature",accidentTable))
 
 crashDF %>% filter(Crash_Speed_Limit_70kmh == 1) -> tmpDF
 accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
 print("Speed Zone 70kmh")
-print(accidentTableToDF(accidentTable))
+print(accidentTableToDF("Crash_Nature",accidentTable))
 
 crashDF %>% filter(Crash_Speed_Limit_80to90kmh == 1) -> tmpDF
 accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
 print("Speed Zone 80-90kmh")
-print(accidentTableToDF(accidentTable))
+print(accidentTableToDF("Crash_Nature",accidentTable))
 
 crashDF %>% filter(Crash_Speed_Limit_100to110kmh == 1) -> tmpDF
 accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
 print("Speed Zone 100-110kmh")
-print(accidentTableToDF(accidentTable))
+print(accidentTableToDF("Crash_Nature",accidentTable))
       
 ```
 # Pre-modeling EDA
