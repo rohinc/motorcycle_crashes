@@ -390,3 +390,74 @@ cm = confusionMatrix(factor(model4.predictions, levels=c("FALSE","TRUE")), facto
 cm
 
 ```
+
+#  Year ranges
+
+Going to run models against data at interesting date ranges:
+
+* 2017 to pressent
+* 2018 to 2016 inclusive
+* prior to 2018
+
+## 2017 to present
+```{r select records from 2017 on}
+
+crash2017DF <- filter(crashDF, Crash_Year >= 2017)
+
+```
+
+There are `r nrow(crash2017DF)` observations.
+With `r sum(crash2017DF$fatal_accident ==1 )` fatalities
+
+```{r Summary for 2017 to present}
+summary( crash2017DF)
+```
+
+```{r model yearly data }
+
+modelYearlyData <- function( df, year)
+{
+  #  split data into 70% train 30% test.
+  trainSize <- floor(0.7*nrow(df))
+  set.seed(42)
+
+  trainIndexes <- sample(seq_len(nrow(df)), size = trainSize)
+  trainDF  <- df[trainIndexes, ]
+  testDF   <- df[-trainIndexes, ]
+  
+  #logistic regression model
+  yearModel1 <- glm( fatal_accident ~ Crash_Speed_Limit_Num, data=trainDF, family="binomial")
+  print(summary(yearModel1))
+
+  yearModel1.predictions <- predict(yearModel1, newdata = testDF, type="response") >= 0.5
+
+  cm = confusionMatrix(factor(yearModel1.predictions, levels=c("FALSE","TRUE")), 
+                       factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+  print(cm)
+  
+  #ordinal regression model
+  yearModel2<- clm(data=trainDF, fatal_accident_fac ~ Crash_Speed_Limit_Fac,            
+    link="logit")
+  print(summary(yearModel2))
+  
+  yearModel2.predictions <- predict(yearModel2, newdata=testDF, type="class")
+
+  cm = confusionMatrix(yearModel2.predictions$fit, testDF$fatal_accident_fac, positive="TRUE")
+  print(cm)
+  
+  # logistic regression with speed dummy values
+  yearModel3 <- glm( fatal_accident ~ 
+               Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_100to110kmh +            
+               Crash_Speed_Limit_60kmh + Crash_Speed_Limit_70kmh +
+               Crash_Speed_Limit_80to90kmh, 
+               data=trainDF, family="binomial")
+   summary(yearModel3)
+
+   yearModel3.predictions <- predict(yearModel3, newdata = testDF, type="response") >= 0.5
+
+
+   cm = confusionMatrix(factor(yearModel3.predictions, levels=c("FALSE","TRUE")),
+                        factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+   print(cm)
+   
+}
