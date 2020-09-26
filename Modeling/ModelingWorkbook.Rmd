@@ -113,6 +113,82 @@ if( (!forceDfRebuild) & file.exists(dfFileName)) {
 
 ```
 
+# Additional exploration
+
+Accidents per speed zone
+
+``` {r accidents per speed zone}
+crashDF %>%  count(Crash_Speed_Limit_Fac) %>% rename(total_accidents = n) %>%
+  arrange( -total_accidents)
+```
+
+
+
+Do some breakdown of fatalities
+
+``` {r accidents breakdown}
+accidentTable =  table(crashDF$Crash_Speed_Limit_Fac, crashDF$fatal_accident)
+colnames(accidentTable) <- c("non_fatal", "fatal")
+
+tmpDF <- cbind(speed_zone = row.names(accidentTable), as.data.frame.matrix(accidentTable))
+
+tmpDF %<>% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %>% arrange(-percent_fatal)
+
+tmpDF
+
+```
+
+
+```{r fatalities per crash nature}
+accidentTable =  table(crashDF$Crash_Nature, crashDF$fatal_accident)
+colnames(accidentTable) <- c("non_fatal", "fatal")
+
+tmpDF <- cbind(speed_zone = row.names(accidentTable), as.data.frame.matrix(accidentTable))
+
+tmpDF %<>% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %>% arrange(-percent_fatal)
+
+tmpDF
+
+```
+```{r fatalities per speed zone by crash nature}
+
+accidentTableToDF <-function(accidentTable) {
+  colnames(accidentTable) <- c("non_fatal", "fatal")
+
+  tmpDF <- cbind(crash_nature = row.names(accidentTable),
+                 as.data.frame.matrix(accidentTable))
+
+  tmpDF %<>% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %>% arrange(-percent_fatal)
+
+  return(tmpDF)
+  
+}
+crashDF %>% filter(Crash_Speed_Limit_0to50kmh == 1) -> tmpDF
+accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
+print("Speed Zone 0-50kmh")
+print(accidentTableToDF(accidentTable))
+
+crashDF %>% filter(Crash_Speed_Limit_60kmh == 1) -> tmpDF
+accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
+print("Speed Zone 60kmh")
+print(accidentTableToDF(accidentTable))
+
+crashDF %>% filter(Crash_Speed_Limit_70kmh == 1) -> tmpDF
+accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
+print("Speed Zone 70kmh")
+print(accidentTableToDF(accidentTable))
+
+crashDF %>% filter(Crash_Speed_Limit_80to90kmh == 1) -> tmpDF
+accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
+print("Speed Zone 80-90kmh")
+print(accidentTableToDF(accidentTable))
+
+crashDF %>% filter(Crash_Speed_Limit_100to110kmh == 1) -> tmpDF
+accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
+print("Speed Zone 100-110kmh")
+print(accidentTableToDF(accidentTable))
+      
+```
 # Pre-modeling EDA
 
 Probably need to show we looked into some statistical measures before we jump right into the modeling.  This needs to be padded out a bit 
@@ -244,6 +320,8 @@ cm
 
 ```
 
+# Model 2 - ordinal linear regression
+
 Try the same thing but with ordinal linear regression. Similar result as above
 
 ```{r model 2 - ordinal linear regression }
@@ -258,6 +336,8 @@ cm = confusionMatrix(model2.predictions$fit, testDF$fatal_accident_fac, positive
 cm
 ```
 
+
+# Model 3 - logistic regression, dummy speed variables
 
 Back to logistic regression but with dummy variables for speed.
 Model still producing all FALSE values. 
@@ -275,6 +355,27 @@ model3.predictions <- predict(model3, newdata = testDF, type="response") >= 0.5
 
 
 cm = confusionMatrix(factor(model3.predictions, levels=c("FALSE","TRUE")), factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+cm
+
+```
+
+# Model 4 - logistic regression with refined dummy speed variables
+
+As model 3 but drop the 110Km zone.
+
+```{r model4 - logistic regression with refined speed dumy variables}
+
+model4 <- glm( fatal_accident ~ 
+               Crash_Speed_Limit_0to50kmh +             
+               Crash_Speed_Limit_60kmh + Crash_Speed_Limit_70kmh +
+               Crash_Speed_Limit_80to90kmh, 
+               data=trainDF, family="binomial")
+summary(model4)
+
+model4.predictions <- predict(model4, newdata = testDF, type="response") >= 0.5
+
+
+cm = confusionMatrix(factor(model4.predictions, levels=c("FALSE","TRUE")), factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
 cm
 
 ```

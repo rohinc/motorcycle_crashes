@@ -519,6 +519,163 @@ if( (!forceDfRebuild) &amp; file.exists(dfFileName)) {
 ## [73] &quot;Crash_Speed_Limit_70kmh&quot;                 
 ## [74] &quot;Crash_Speed_Limit_80to90kmh&quot;</code></pre>
 </div>
+<div id="additional-exploration" class="section level1">
+<h1>Additional exploration</h1>
+<p>Accidents per speed zone</p>
+<pre class="r"><code>crashDF %&gt;%  count(Crash_Speed_Limit_Fac) %&gt;% rename(total_accidents = n) %&gt;%
+  arrange( -total_accidents)</code></pre>
+<pre><code>## # A tibble: 5 x 2
+##   Crash_Speed_Limit_Fac total_accidents
+##   &lt;ord&gt;                           &lt;int&gt;
+## 1 60kmh                           11994
+## 2 0to50kmh                         4046
+## 3 100to110kmh                      3196
+## 4 80to90kmh                        2291
+## 5 70kmh                            1230</code></pre>
+<p>Do some breakdown of fatalities</p>
+<pre class="r"><code>accidentTable =  table(crashDF$Crash_Speed_Limit_Fac, crashDF$fatal_accident)
+colnames(accidentTable) &lt;- c(&quot;non_fatal&quot;, &quot;fatal&quot;)
+
+tmpDF &lt;- cbind(speed_zone = row.names(accidentTable), as.data.frame.matrix(accidentTable))
+
+tmpDF %&lt;&gt;% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %&gt;% arrange(-percent_fatal)
+
+tmpDF</code></pre>
+<pre><code>##    speed_zone non_fatal fatal percent_fatal
+## 1 100to110kmh      2958   238      7.446809
+## 2   80to90kmh      2146   145      6.329114
+## 3       70kmh      1186    44      3.577236
+## 4       60kmh     11737   257      2.142738
+## 5    0to50kmh      3969    77      1.903114</code></pre>
+<pre class="r"><code>accidentTable =  table(crashDF$Crash_Nature, crashDF$fatal_accident)
+colnames(accidentTable) &lt;- c(&quot;non_fatal&quot;, &quot;fatal&quot;)
+
+tmpDF &lt;- cbind(speed_zone = row.names(accidentTable), as.data.frame.matrix(accidentTable))
+
+tmpDF %&lt;&gt;% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %&gt;% arrange(-percent_fatal)
+
+tmpDF</code></pre>
+<pre><code>##                       speed_zone non_fatal fatal percent_fatal
+## 1                        Head-on       455    93     16.970803
+## 2                     Hit object      3198   252      7.304348
+## 3  Non-collision - miscellaneous        15     1      6.250000
+## 4      Collision - miscellaneous        55     3      5.172414
+## 5        Struck by external load        32     1      3.030303
+## 6                 Hit pedestrian       207     6      2.816901
+## 7                          Angle      6986   184      2.566248
+## 8             Hit parked vehicle       229     6      2.553191
+## 9                     Hit animal       580    14      2.356902
+## 10             Fall from vehicle      5617   125      2.176942
+## 11                     Sideswipe      1778    30      1.659292
+## 12                      Rear-end      2796    46      1.618578
+## 13                    Overturned        48     0      0.000000</code></pre>
+<pre class="r"><code>accidentTableToDF &lt;-function(accidentTable) {
+  colnames(accidentTable) &lt;- c(&quot;non_fatal&quot;, &quot;fatal&quot;)
+
+  tmpDF &lt;- cbind(crash_nature = row.names(accidentTable),
+                 as.data.frame.matrix(accidentTable))
+
+  tmpDF %&lt;&gt;% mutate( percent_fatal = (fatal/(fatal+non_fatal))*100 ) %&gt;% arrange(-percent_fatal)
+
+  return(tmpDF)
+  
+}
+crashDF %&gt;% filter(Crash_Speed_Limit_0to50kmh == 1) -&gt; tmpDF
+accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
+print(&quot;Speed Zone 0-50kmh&quot;)</code></pre>
+<pre><code>## [1] &quot;Speed Zone 0-50kmh&quot;</code></pre>
+<pre class="r"><code>print(accidentTableToDF(accidentTable))</code></pre>
+<pre><code>##                     crash_nature non_fatal fatal percent_fatal
+## 1                     Hit object       520    33     5.9674503
+## 2                        Head-on        92     5     5.1546392
+## 3             Hit parked vehicle       117     5     4.0983607
+## 4                          Angle      1524    20     1.2953368
+## 5              Fall from vehicle       965    11     1.1270492
+## 6                       Rear-end       326     2     0.6097561
+## 7                      Sideswipe       260     1     0.3831418
+## 8      Collision - miscellaneous         6     0     0.0000000
+## 9                     Hit animal        72     0     0.0000000
+## 10                Hit pedestrian        77     0     0.0000000
+## 11 Non-collision - miscellaneous         4     0     0.0000000
+## 12                    Overturned         5     0     0.0000000
+## 13       Struck by external load         1     0     0.0000000</code></pre>
+<pre class="r"><code>crashDF %&gt;% filter(Crash_Speed_Limit_60kmh == 1) -&gt; tmpDF
+accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
+print(&quot;Speed Zone 60kmh&quot;)</code></pre>
+<pre><code>## [1] &quot;Speed Zone 60kmh&quot;</code></pre>
+<pre class="r"><code>print(accidentTableToDF(accidentTable))</code></pre>
+<pre><code>##                     crash_nature non_fatal fatal percent_fatal
+## 1                        Head-on       196    20     9.2592593
+## 2                     Hit object      1429    88     5.8009229
+## 3                 Hit pedestrian       103     6     5.5045872
+## 4                          Angle      4537    78     1.6901408
+## 5              Fall from vehicle      2607    41     1.5483384
+## 6                      Sideswipe      1017    13     1.2621359
+## 7                       Rear-end      1600    11     0.6828057
+## 8      Collision - miscellaneous        20     0     0.0000000
+## 9                     Hit animal       122     0     0.0000000
+## 10            Hit parked vehicle        81     0     0.0000000
+## 11 Non-collision - miscellaneous         3     0     0.0000000
+## 12                    Overturned        19     0     0.0000000
+## 13       Struck by external load         3     0     0.0000000</code></pre>
+<pre class="r"><code>crashDF %&gt;% filter(Crash_Speed_Limit_70kmh == 1) -&gt; tmpDF
+accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
+print(&quot;Speed Zone 70kmh&quot;)</code></pre>
+<pre><code>## [1] &quot;Speed Zone 70kmh&quot;</code></pre>
+<pre class="r"><code>print(accidentTableToDF(accidentTable))</code></pre>
+<pre><code>##                     crash_nature non_fatal fatal percent_fatal
+## 1                        Head-on        22     2     8.3333333
+## 2                     Hit object       166    15     8.2872928
+## 3                          Angle       324    19     5.5393586
+## 4              Fall from vehicle       274     6     2.1428571
+## 5                       Rear-end       233     2     0.8510638
+## 6      Collision - miscellaneous         2     0     0.0000000
+## 7                     Hit animal        12     0     0.0000000
+## 8             Hit parked vehicle         6     0     0.0000000
+## 9                 Hit pedestrian        11     0     0.0000000
+## 10 Non-collision - miscellaneous         1     0     0.0000000
+## 11                    Overturned         1     0     0.0000000
+## 12                     Sideswipe       133     0     0.0000000
+## 13       Struck by external load         1     0     0.0000000</code></pre>
+<pre class="r"><code>crashDF %&gt;% filter(Crash_Speed_Limit_80to90kmh == 1) -&gt; tmpDF
+accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
+print(&quot;Speed Zone 80-90kmh&quot;)</code></pre>
+<pre><code>## [1] &quot;Speed Zone 80-90kmh&quot;</code></pre>
+<pre class="r"><code>print(accidentTableToDF(accidentTable))</code></pre>
+<pre><code>##                     crash_nature non_fatal fatal percent_fatal
+## 1                        Head-on        66    27     29.032258
+## 2      Collision - miscellaneous        10     1      9.090909
+## 3                     Hit object       433    41      8.649789
+## 4                          Angle       368    32      8.000000
+## 5                       Rear-end       260    11      4.059041
+## 6              Fall from vehicle       727    27      3.580902
+## 7                      Sideswipe       153     5      3.164557
+## 8                     Hit animal        90     1      1.098901
+## 9             Hit parked vehicle        12     0      0.000000
+## 10                Hit pedestrian        10     0      0.000000
+## 11 Non-collision - miscellaneous         1     0      0.000000
+## 12                    Overturned         8     0      0.000000
+## 13       Struck by external load         8     0      0.000000</code></pre>
+<pre class="r"><code>crashDF %&gt;% filter(Crash_Speed_Limit_100to110kmh == 1) -&gt; tmpDF
+accidentTable =  table( tmpDF$Crash_Nature, tmpDF$fatal_accident)
+print(&quot;Speed Zone 100-110kmh&quot;)</code></pre>
+<pre><code>## [1] &quot;Speed Zone 100-110kmh&quot;</code></pre>
+<pre class="r"><code>print(accidentTableToDF(accidentTable))</code></pre>
+<pre><code>##                     crash_nature non_fatal fatal percent_fatal
+## 1                        Head-on        79    39     33.050847
+## 2  Non-collision - miscellaneous         6     1     14.285714
+## 3                          Angle       233    35     13.059701
+## 4      Collision - miscellaneous        17     2     10.526316
+## 5                     Hit object       650    75     10.344828
+## 6             Hit parked vehicle        13     1      7.142857
+## 7                       Rear-end       377    20      5.037783
+## 8        Struck by external load        19     1      5.000000
+## 9                      Sideswipe       215    11      4.867257
+## 10                    Hit animal       284    13      4.377104
+## 11             Fall from vehicle      1044    40      3.690037
+## 12                Hit pedestrian         6     0      0.000000
+## 13                    Overturned        15     0      0.000000</code></pre>
+</div>
 <div id="pre-modeling-eda" class="section level1">
 <h1>Pre-modeling EDA</h1>
 <p>Probably need to show we looked into some statistical measures before we jump right into the modeling. This needs to be padded out a bit</p>
@@ -772,6 +929,9 @@ cm</code></pre>
 ##                                           
 ##        &#39;Positive&#39; Class : TRUE            
 ## </code></pre>
+</div>
+<div id="model-2---ordinal-linear-regression" class="section level1">
+<h1>Model 2 - ordinal linear regression</h1>
 <p>Try the same thing but with ordinal linear regression. Similar result as above</p>
 <pre class="r"><code>model2&lt;- clm(data=trainDF, fatal_accident_fac ~ Crash_Speed_Limit_Fac,            
     link=&quot;logit&quot;)
@@ -826,6 +986,9 @@ cm</code></pre>
 ##                                           
 ##        &#39;Positive&#39; Class : TRUE            
 ## </code></pre>
+</div>
+<div id="model-3---logistic-regression-dummy-speed-variables" class="section level1">
+<h1>Model 3 - logistic regression, dummy speed variables</h1>
 <p>Back to logistic regression but with dummy variables for speed. Model still producing all FALSE values.</p>
 <pre class="r"><code>model3 &lt;- glm( fatal_accident ~ 
                Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_100to110kmh +            
@@ -865,6 +1028,75 @@ summary(model3)</code></pre>
 <pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
 ## prediction from a rank-deficient fit may be misleading</code></pre>
 <pre class="r"><code>cm = confusionMatrix(factor(model3.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)), factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
+cm</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE  6592  236
+##      TRUE      0    0
+##                                           
+##                Accuracy : 0.9654          
+##                  95% CI : (0.9608, 0.9696)
+##     No Information Rate : 0.9654          
+##     P-Value [Acc &gt; NIR] : 0.5173          
+##                                           
+##                   Kappa : 0               
+##                                           
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 0.00000         
+##             Specificity : 1.00000         
+##          Pos Pred Value :     NaN         
+##          Neg Pred Value : 0.96544         
+##              Prevalence : 0.03456         
+##          Detection Rate : 0.00000         
+##    Detection Prevalence : 0.00000         
+##       Balanced Accuracy : 0.50000         
+##                                           
+##        &#39;Positive&#39; Class : TRUE            
+## </code></pre>
+</div>
+<div id="model-4---logistic-regression-with-refined-dummy-speed-variables" class="section level1">
+<h1>Model 4 - logistic regression with refined dummy speed variables</h1>
+<p>As model 3 but drop the 110Km zone.</p>
+<pre class="r"><code>model4 &lt;- glm( fatal_accident ~ 
+               Crash_Speed_Limit_0to50kmh +             
+               Crash_Speed_Limit_60kmh + Crash_Speed_Limit_70kmh +
+               Crash_Speed_Limit_80to90kmh, 
+               data=trainDF, family=&quot;binomial&quot;)
+summary(model4)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Speed_Limit_0to50kmh + Crash_Speed_Limit_60kmh + 
+##     Crash_Speed_Limit_70kmh + Crash_Speed_Limit_80to90kmh, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.3898  -0.2673  -0.2078  -0.2078   2.8342  
+## 
+## Coefficients:
+##                             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                 -2.53913    0.08062 -31.495  &lt; 2e-16 ***
+## Crash_Speed_Limit_0to50kmh  -1.45889    0.16267  -8.968  &lt; 2e-16 ***
+## Crash_Speed_Limit_60kmh     -1.28549    0.11049 -11.635  &lt; 2e-16 ***
+## Crash_Speed_Limit_70kmh     -0.77505    0.20260  -3.826  0.00013 ***
+## Crash_Speed_Limit_80to90kmh -0.17630    0.13141  -1.342  0.17974    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 4615.6  on 15928  degrees of freedom
+## Residual deviance: 4431.6  on 15924  degrees of freedom
+## AIC: 4441.6
+## 
+## Number of Fisher Scoring iterations: 6</code></pre>
+<pre class="r"><code>model4.predictions &lt;- predict(model4, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
+
+
+cm = confusionMatrix(factor(model4.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)), factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
 cm</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
