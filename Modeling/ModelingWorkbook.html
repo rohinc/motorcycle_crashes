@@ -1278,9 +1278,9 @@ cm</code></pre>
 
   yearModel1.predictions &lt;- predict(yearModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
 
-  cm = confusionMatrix(factor(yearModel1.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)), 
+  cm &lt;- confusionMatrix(factor(yearModel1.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)), 
                        factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
-  print(cm)
+  #print(cm)
   
   #ordinal regression model
   print(paste(&quot;******  YearModel2 for &quot;, year))
@@ -1290,7 +1290,7 @@ cm</code></pre>
   
   yearModel2.predictions &lt;- predict(yearModel2, newdata=testDF, type=&quot;class&quot;)
 
-  cm = confusionMatrix(yearModel2.predictions$fit, testDF$fatal_accident_fac, positive=&quot;TRUE&quot;)
+  cm &lt;- confusionMatrix(yearModel2.predictions$fit, testDF$fatal_accident_fac, positive=&quot;TRUE&quot;)
   print(cm)
   
   # logistic regression with speed dummy values
@@ -1305,7 +1305,7 @@ cm</code></pre>
    yearModel3.predictions &lt;- predict(yearModel3, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
 
 
-   cm = confusionMatrix(factor(yearModel3.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
+   cm &lt;- confusionMatrix(factor(yearModel3.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
                         factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)),
                         positive=&quot;TRUE&quot; )
    print(cm)
@@ -1324,7 +1324,7 @@ cm</code></pre>
     print(summary(yearModel4))
 
     yearModel4.predictions &lt;- predict(yearModel4, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
-    cm = confusionMatrix(factor(yearModel4.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
+    cm &lt;-  confusionMatrix(factor(yearModel4.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
                          factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
     print(cm)
 
@@ -1562,33 +1562,6 @@ cm</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 6
 ## 
-## Confusion Matrix and Statistics
-## 
-##           Reference
-## Prediction FALSE TRUE
-##      FALSE   657   21
-##      TRUE      0    0
-##                                          
-##                Accuracy : 0.969          
-##                  95% CI : (0.953, 0.9807)
-##     No Information Rate : 0.969          
-##     P-Value [Acc &gt; NIR] : 0.5577         
-##                                          
-##                   Kappa : 0              
-##                                          
-##  Mcnemar&#39;s Test P-Value : 1.275e-05      
-##                                          
-##             Sensitivity : 0.00000        
-##             Specificity : 1.00000        
-##          Pos Pred Value :     NaN        
-##          Neg Pred Value : 0.96903        
-##              Prevalence : 0.03097        
-##          Detection Rate : 0.00000        
-##    Detection Prevalence : 0.00000        
-##       Balanced Accuracy : 0.50000        
-##                                          
-##        &#39;Positive&#39; Class : TRUE           
-##                                          
 ## [1] &quot;******  YearModel2 for  2017to2019&quot;
 ## formula: fatal_accident_fac ~ Crash_Speed_Limit_Fac
 ## data:    trainDF
@@ -1983,33 +1956,6 @@ cm</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 6
 ## 
-## Confusion Matrix and Statistics
-## 
-##           Reference
-## Prediction FALSE TRUE
-##      FALSE  3406  122
-##      TRUE      0    0
-##                                           
-##                Accuracy : 0.9654          
-##                  95% CI : (0.9589, 0.9712)
-##     No Information Rate : 0.9654          
-##     P-Value [Acc &gt; NIR] : 0.5241          
-##                                           
-##                   Kappa : 0               
-##                                           
-##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
-##                                           
-##             Sensitivity : 0.00000         
-##             Specificity : 1.00000         
-##          Pos Pred Value :     NaN         
-##          Neg Pred Value : 0.96542         
-##              Prevalence : 0.03458         
-##          Detection Rate : 0.00000         
-##    Detection Prevalence : 0.00000         
-##       Balanced Accuracy : 0.50000         
-##                                           
-##        &#39;Positive&#39; Class : TRUE            
-##                                           
 ## [1] &quot;******  YearModel2 for  2008to2016&quot;
 ## formula: fatal_accident_fac ~ Crash_Speed_Limit_Fac
 ## data:    trainDF
@@ -2404,33 +2350,6 @@ cm</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 6
 ## 
-## Confusion Matrix and Statistics
-## 
-##           Reference
-## Prediction FALSE TRUE
-##      FALSE  3406  122
-##      TRUE      0    0
-##                                           
-##                Accuracy : 0.9654          
-##                  95% CI : (0.9589, 0.9712)
-##     No Information Rate : 0.9654          
-##     P-Value [Acc &gt; NIR] : 0.5241          
-##                                           
-##                   Kappa : 0               
-##                                           
-##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
-##                                           
-##             Sensitivity : 0.00000         
-##             Specificity : 1.00000         
-##          Pos Pred Value :     NaN         
-##          Neg Pred Value : 0.96542         
-##              Prevalence : 0.03458         
-##          Detection Rate : 0.00000         
-##    Detection Prevalence : 0.00000         
-##       Balanced Accuracy : 0.50000         
-##                                           
-##        &#39;Positive&#39; Class : TRUE            
-##                                           
 ## [1] &quot;******  YearModel2 for  Prior2008&quot;
 ## formula: fatal_accident_fac ~ Crash_Speed_Limit_Fac
 ## data:    trainDF
@@ -2598,10 +2517,19 @@ cm</code></pre>
 <p>Select data by speed zone and then run models on that.</p>
 <div id="to-100km-zone" class="section level2">
 <h2>100 to 100Km zone</h2>
+<pre class="r"><code>df &lt;- filter(crashDF, Crash_Speed_Limit_100to110kmh == 1)
+
+trainTestSets &lt;- genTrainTestSets(df)
+trainDF &lt;- trainTestSets$TrainSet
+print(paste(&quot;100 to 110kmh Train Set size=&quot;, nrow(trainDF)))</code></pre>
+<pre><code>## [1] &quot;100 to 110kmh Train Set size= 2236&quot;</code></pre>
+<pre class="r"><code>testDF &lt;- trainTestSets$TestSet
+print(paste(&quot;100 to 110kmh Test Set size=&quot;, nrow(testDF)))</code></pre>
+<pre><code>## [1] &quot;100 to 110kmh Test Set size= 960&quot;</code></pre>
 </div>
 </div>
-<div id="model-1" class="section level1">
-<h1>model 1</h1>
+<div id="model-1---fatal_accident-crash_nature" class="section level1">
+<h1>model 1 - fatal_accident ~ Crash_Nature</h1>
 <p>Select all observations in the 100 to 110km zone. Run some linear regression models using grash nature.</p>
 <pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
                   Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
@@ -2626,30 +2554,32 @@ cm</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.6030  -0.2334  -0.2271  -0.2200   2.9131  
+## -0.8799  -0.4721  -0.3071  -0.2764   2.5715  
 ## 
 ## Coefficients: (1 not defined because of singularities)
-##                                            Estimate Std. Error z value Pr(&gt;|z|)
-## (Intercept)                              -1.557e+01  3.103e+02  -0.050    0.960
-## Crash_Nature_Angle                        1.198e+01  3.103e+02   0.039    0.969
-## Crash_Nature_Collision_miscellaneous      1.268e+01  3.103e+02   0.041    0.967
-## Crash_Nature_Fall_from_vehicle            1.186e+01  3.103e+02   0.038    0.970
-## Crash_Nature_Head_on                      1.395e+01  3.103e+02   0.045    0.964
-## Crash_Nature_Hit_animal                   1.192e+01  3.103e+02   0.038    0.969
-## Crash_Nature_Hit_object                   1.296e+01  3.103e+02   0.042    0.967
-## Crash_Nature_Hit_parked_vehicle           1.211e+01  3.103e+02   0.039    0.969
-## Crash_Nature_Hit_pedestrian               1.174e+01  3.103e+02   0.038    0.970
-## Crash_Nature_Non_collision_miscellaneous -9.214e-11  6.316e+02   0.000    1.000
-## Crash_Nature_Overturned                  -9.123e-11  3.960e+02   0.000    1.000
-## Crash_Nature_Rear_end                     1.134e+01  3.103e+02   0.037    0.971
-## Crash_Nature_Sideswipe                    1.156e+01  3.103e+02   0.037    0.970
-## Crash_Nature_Struck_by_external_load             NA         NA      NA       NA
+##                                          Estimate Std. Error z value Pr(&gt;|z|)  
+## (Intercept)                               -2.6391     1.0351  -2.550   0.0108 *
+## Crash_Nature_Angle                         0.7673     1.0581   0.725   0.4684  
+## Crash_Nature_Collision_miscellaneous       0.6931     1.2817   0.541   0.5887  
+## Crash_Nature_Fall_from_vehicle            -0.6066     1.0529  -0.576   0.5645  
+## Crash_Nature_Head_on                       1.8898     1.0621   1.779   0.0752 .
+## Crash_Nature_Hit_animal                   -0.6300     1.1044  -0.570   0.5684  
+## Crash_Nature_Hit_object                    0.5012     1.0451   0.480   0.6315  
+## Crash_Nature_Hit_parked_vehicle            0.3365     1.4736   0.228   0.8194  
+## Crash_Nature_Hit_pedestrian              -12.9270   840.2748  -0.015   0.9877  
+## Crash_Nature_Non_collision_miscellaneous -12.9270   594.1645  -0.022   0.9826  
+## Crash_Nature_Overturned                  -12.9270   485.1336  -0.027   0.9787  
+## Crash_Nature_Rear_end                     -0.3918     1.0707  -0.366   0.7144  
+## Crash_Nature_Sideswipe                    -0.1876     1.0905  -0.172   0.8634  
+## Crash_Nature_Struck_by_external_load           NA         NA      NA       NA  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 4662.8  on 15928  degrees of freedom
-## Residual deviance: 4416.2  on 15916  degrees of freedom
-## AIC: 4442.2
+##     Null deviance: 1182.7  on 2235  degrees of freedom
+## Residual deviance: 1096.0  on 2223  degrees of freedom
+## AIC: 1122
 ## 
 ## Number of Fisher Scoring iterations: 14</code></pre>
 <pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5</code></pre>
@@ -2662,32 +2592,32 @@ cm</code></pre>
 ## 
 ##           Reference
 ## Prediction FALSE TRUE
-##      FALSE  6599  229
+##      FALSE   888   72
 ##      TRUE      0    0
 ##                                           
-##                Accuracy : 0.9665          
-##                  95% CI : (0.9619, 0.9706)
-##     No Information Rate : 0.9665          
-##     P-Value [Acc &gt; NIR] : 0.5176          
+##                Accuracy : 0.925           
+##                  95% CI : (0.9065, 0.9409)
+##     No Information Rate : 0.925           
+##     P-Value [Acc &gt; NIR] : 0.5313          
 ##                                           
 ##                   Kappa : 0               
 ##                                           
 ##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
 ##                                           
-##             Sensitivity : 0.00000         
-##             Specificity : 1.00000         
-##          Pos Pred Value :     NaN         
-##          Neg Pred Value : 0.96646         
-##              Prevalence : 0.03354         
-##          Detection Rate : 0.00000         
-##    Detection Prevalence : 0.00000         
-##       Balanced Accuracy : 0.50000         
+##             Sensitivity : 0.000           
+##             Specificity : 1.000           
+##          Pos Pred Value :   NaN           
+##          Neg Pred Value : 0.925           
+##              Prevalence : 0.075           
+##          Detection Rate : 0.000           
+##    Detection Prevalence : 0.000           
+##       Balanced Accuracy : 0.500           
 ##                                           
 ##        &#39;Positive&#39; Class : TRUE            
 ## </code></pre>
 </div>
-<div id="model-2" class="section level1">
-<h1>model 2</h1>
+<div id="model-2-fatal_accident---selected-crash-nature" class="section level1">
+<h1>model 2 fatal_accident - selected Crash Nature</h1>
 <p>Remove some nature of crash predictors that make up low percentage of accidents.</p>
 <pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
                   Crash_Nature_Angle+ 
@@ -2706,26 +2636,26 @@ cm</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.6030  -0.2334  -0.2233  -0.2200   2.9131  
+## -0.8799  -0.4721  -0.3071  -0.2764   2.5715  
 ## 
 ## Coefficients:
 ##                                Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                    -3.67883    0.32019 -11.489  &lt; 2e-16 ***
-## Crash_Nature_Angle              0.08973    0.33195   0.270  0.78692    
-## Crash_Nature_Fall_from_vehicle -0.03071    0.33628  -0.091  0.92723    
-## Crash_Nature_Head_on            2.06622    0.34866   5.926  3.1e-09 ***
-## Crash_Nature_Hit_animal         0.03409    0.44250   0.077  0.93859    
-## Crash_Nature_Hit_object         1.07258    0.33014   3.249  0.00116 ** 
-## Crash_Nature_Rear_end          -0.54976    0.37077  -1.483  0.13814    
-## Crash_Nature_Sideswipe         -0.33098    0.38573  -0.858  0.39086    
+## (Intercept)                     -2.6391     0.5175  -5.099 3.41e-07 ***
+## Crash_Nature_Angle               0.7673     0.5621   1.365 0.172244    
+## Crash_Nature_Fall_from_vehicle  -0.6066     0.5522  -1.098 0.272009    
+## Crash_Nature_Head_on             1.8898     0.5696   3.318 0.000908 ***
+## Crash_Nature_Hit_animal         -0.6300     0.6451  -0.977 0.328792    
+## Crash_Nature_Hit_object          0.5012     0.5372   0.933 0.350833    
+## Crash_Nature_Rear_end           -0.3918     0.5854  -0.669 0.503375    
+## Crash_Nature_Sideswipe          -0.1876     0.6209  -0.302 0.762555    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 4662.8  on 15928  degrees of freedom
-## Residual deviance: 4420.6  on 15921  degrees of freedom
-## AIC: 4436.6
+##     Null deviance: 1182.7  on 2235  degrees of freedom
+## Residual deviance: 1099.2  on 2228  degrees of freedom
+## AIC: 1115.2
 ## 
 ## Number of Fisher Scoring iterations: 6</code></pre>
 <pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
@@ -2736,26 +2666,26 @@ cm</code></pre>
 ## 
 ##           Reference
 ## Prediction FALSE TRUE
-##      FALSE  6599  229
+##      FALSE   888   72
 ##      TRUE      0    0
 ##                                           
-##                Accuracy : 0.9665          
-##                  95% CI : (0.9619, 0.9706)
-##     No Information Rate : 0.9665          
-##     P-Value [Acc &gt; NIR] : 0.5176          
+##                Accuracy : 0.925           
+##                  95% CI : (0.9065, 0.9409)
+##     No Information Rate : 0.925           
+##     P-Value [Acc &gt; NIR] : 0.5313          
 ##                                           
 ##                   Kappa : 0               
 ##                                           
 ##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
 ##                                           
-##             Sensitivity : 0.00000         
-##             Specificity : 1.00000         
-##          Pos Pred Value :     NaN         
-##          Neg Pred Value : 0.96646         
-##              Prevalence : 0.03354         
-##          Detection Rate : 0.00000         
-##    Detection Prevalence : 0.00000         
-##       Balanced Accuracy : 0.50000         
+##             Sensitivity : 0.000           
+##             Specificity : 1.000           
+##          Pos Pred Value :   NaN           
+##          Neg Pred Value : 0.925           
+##              Prevalence : 0.075           
+##          Detection Rate : 0.000           
+##    Detection Prevalence : 0.000           
+##       Balanced Accuracy : 0.500           
 ##                                           
 ##        &#39;Positive&#39; Class : TRUE            
 ## </code></pre>

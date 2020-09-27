@@ -2,7 +2,9 @@
 title: "Workbook to investigate Modeling"
 author: "Team 3"
 date: "25/09/2020"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -460,9 +462,9 @@ modelYearlyData <- function( df, year)
 
   yearModel1.predictions <- predict(yearModel1, newdata = testDF, type="response") >= 0.5
 
-  cm = confusionMatrix(factor(yearModel1.predictions, levels=c("FALSE","TRUE")), 
+  cm <- confusionMatrix(factor(yearModel1.predictions, levels=c("FALSE","TRUE")), 
                        factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
-  print(cm)
+  #print(cm)
   
   #ordinal regression model
   print(paste("******  YearModel2 for ", year))
@@ -472,7 +474,7 @@ modelYearlyData <- function( df, year)
   
   yearModel2.predictions <- predict(yearModel2, newdata=testDF, type="class")
 
-  cm = confusionMatrix(yearModel2.predictions$fit, testDF$fatal_accident_fac, positive="TRUE")
+  cm <- confusionMatrix(yearModel2.predictions$fit, testDF$fatal_accident_fac, positive="TRUE")
   print(cm)
   
   # logistic regression with speed dummy values
@@ -487,7 +489,7 @@ modelYearlyData <- function( df, year)
    yearModel3.predictions <- predict(yearModel3, newdata = testDF, type="response") >= 0.5
 
 
-   cm = confusionMatrix(factor(yearModel3.predictions, levels=c("FALSE","TRUE")),
+   cm <- confusionMatrix(factor(yearModel3.predictions, levels=c("FALSE","TRUE")),
                         factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")),
                         positive="TRUE" )
    print(cm)
@@ -506,7 +508,7 @@ modelYearlyData <- function( df, year)
     print(summary(yearModel4))
 
     yearModel4.predictions <- predict(yearModel4, newdata = testDF, type="response") >= 0.5
-    cm = confusionMatrix(factor(yearModel4.predictions, levels=c("FALSE","TRUE")),
+    cm <-  confusionMatrix(factor(yearModel4.predictions, levels=c("FALSE","TRUE")),
                          factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
     print(cm)
 
@@ -580,7 +582,19 @@ Select data by speed zone and then run models on that.
 
 ##  100 to 100Km zone
 
-# model 1
+```{r set up train test soeft for 100+ zone}
+df <- filter(crashDF, Crash_Speed_Limit_100to110kmh == 1)
+
+trainTestSets <- genTrainTestSets(df)
+trainDF <- trainTestSets$TrainSet
+print(paste("100 to 110kmh Train Set size=", nrow(trainDF)))
+  
+testDF <- trainTestSets$TestSet
+print(paste("100 to 110kmh Test Set size=", nrow(testDF)))
+```
+
+# model 1 - fatal_accident ~ Crash_Nature
+
 Select all observations in the 100 to 110km zone. Run some linear regression models using grash nature.
 
 
@@ -605,7 +619,7 @@ Select all observations in the 100 to 110km zone. Run some linear regression mod
     
 ``` 
 
-# model 2 
+# model 2 fatal_accident - selected Crash Nature
 
 Remove some nature of crash predictors that make up low percentage of accidents.
 
