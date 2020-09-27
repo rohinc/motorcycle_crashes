@@ -2689,6 +2689,691 @@ print(paste(&quot;100 to 110kmh Test Set size=&quot;, nrow(testDF)))</code></pre
 ## </code></pre>
 </div>
 </div>
+<div id="kmh-zone" class="section level2">
+<h2>70kmh Zone</h2>
+<pre class="r"><code>df &lt;- filter(crashDF, Crash_Speed_Limit_70kmh == 1)
+
+trainTestSets &lt;- genTrainTestSets(df)
+trainDF &lt;- trainTestSets$TrainSet
+print(paste(&quot;70kmh Train Set size=&quot;, nrow(trainDF)))</code></pre>
+<pre><code>## [1] &quot;70kmh Train Set size= 860&quot;</code></pre>
+<pre class="r"><code>testDF &lt;- trainTestSets$TestSet
+print(paste(&quot;70kmh Test Set size=&quot;, nrow(testDF)))</code></pre>
+<pre><code>## [1] &quot;70kmh Test Set size= 370&quot;</code></pre>
+<div id="model-1---fatal_accident-crash_nature-1" class="section level3">
+<h3>model 1 - fatal_accident ~ Crash_Nature</h3>
+<p>Select all observations in the 70km zone. Run some linear regression models using crash nature.</p>
+<pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian+
+                  Crash_Nature_Non_collision_miscellaneous+ Crash_Nature_Overturned+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe+
+                  Crash_Nature_Struck_by_external_load, 
+               data=trainDF, family=&quot;binomial&quot;)
+  
+  print(summary(natureModel1))</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + 
+##     Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + 
+##     Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + 
+##     Crash_Nature_Hit_pedestrian + Crash_Nature_Non_collision_miscellaneous + 
+##     Crash_Nature_Overturned + Crash_Nature_Rear_end + Crash_Nature_Sideswipe + 
+##     Crash_Nature_Struck_by_external_load, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.3969  -0.3252  -0.2507  -0.1581   2.9625  
+## 
+## Coefficients: (2 not defined because of singularities)
+##                                            Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                              -1.957e+01  1.065e+03  -0.018    0.985
+## Crash_Nature_Angle                        1.665e+01  1.065e+03   0.016    0.988
+## Crash_Nature_Collision_miscellaneous     -4.967e-10  7.678e+03   0.000    1.000
+## Crash_Nature_Fall_from_vehicle            1.612e+01  1.065e+03   0.015    0.988
+## Crash_Nature_Head_on                     -4.726e-10  2.892e+03   0.000    1.000
+## Crash_Nature_Hit_animal                  -4.569e-10  3.948e+03   0.000    1.000
+## Crash_Nature_Hit_object                   1.706e+01  1.065e+03   0.016    0.987
+## Crash_Nature_Hit_parked_vehicle          -4.712e-10  4.926e+03   0.000    1.000
+## Crash_Nature_Hit_pedestrian              -4.700e-10  4.926e+03   0.000    1.000
+## Crash_Nature_Non_collision_miscellaneous -4.686e-10  1.081e+04   0.000    1.000
+## Crash_Nature_Overturned                  -4.714e-10  1.081e+04   0.000    1.000
+## Crash_Nature_Rear_end                     1.519e+01  1.065e+03   0.014    0.989
+## Crash_Nature_Sideswipe                           NA         NA      NA       NA
+## Crash_Nature_Struck_by_external_load             NA         NA      NA       NA
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 260.29  on 859  degrees of freedom
+## Residual deviance: 240.44  on 848  degrees of freedom
+## AIC: 264.44
+## 
+## Number of Fisher Scoring iterations: 18</code></pre>
+<pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5</code></pre>
+<pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+## prediction from a rank-deficient fit may be misleading</code></pre>
+<pre class="r"><code>    cm = confusionMatrix(factor(natureModel1.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
+                         factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
+    print(cm)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE   356   14
+##      TRUE      0    0
+##                                           
+##                Accuracy : 0.9622          
+##                  95% CI : (0.9373, 0.9792)
+##     No Information Rate : 0.9622          
+##     P-Value [Acc &gt; NIR] : 0.570450        
+##                                           
+##                   Kappa : 0               
+##                                           
+##  Mcnemar&#39;s Test P-Value : 0.000512        
+##                                           
+##             Sensitivity : 0.00000         
+##             Specificity : 1.00000         
+##          Pos Pred Value :     NaN         
+##          Neg Pred Value : 0.96216         
+##              Prevalence : 0.03784         
+##          Detection Rate : 0.00000         
+##    Detection Prevalence : 0.00000         
+##       Balanced Accuracy : 0.50000         
+##                                           
+##        &#39;Positive&#39; Class : TRUE            
+## </code></pre>
+</div>
+<div id="model-2-fatal_accident---selected-crash-nature-1" class="section level3">
+<h3>model 2 fatal_accident - selected Crash Nature</h3>
+<p>Remove some nature of crash predictors that make up low percentage of accidents.</p>
+<pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ 
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe,
+               data=trainDF, family=&quot;binomial&quot;)
+  
+  print(summary(natureModel1))</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Nature_Angle + Crash_Nature_Fall_from_vehicle + 
+##     Crash_Nature_Head_on + Crash_Nature_Hit_animal + Crash_Nature_Hit_object + 
+##     Crash_Nature_Rear_end + Crash_Nature_Sideswipe, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.3969  -0.3252  -0.2507  -0.1581   2.9625  
+## 
+## Coefficients:
+##                                  Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                    -1.957e+01  2.874e+03  -0.007    0.995
+## Crash_Nature_Angle              1.665e+01  2.874e+03   0.006    0.995
+## Crash_Nature_Fall_from_vehicle  1.612e+01  2.874e+03   0.006    0.996
+## Crash_Nature_Head_on            1.433e-09  3.936e+03   0.000    1.000
+## Crash_Nature_Hit_animal         1.439e-09  4.766e+03   0.000    1.000
+## Crash_Nature_Hit_object         1.706e+01  2.874e+03   0.006    0.995
+## Crash_Nature_Rear_end           1.519e+01  2.874e+03   0.005    0.996
+## Crash_Nature_Sideswipe          1.444e-09  3.065e+03   0.000    1.000
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 260.29  on 859  degrees of freedom
+## Residual deviance: 240.44  on 852  degrees of freedom
+## AIC: 256.44
+## 
+## Number of Fisher Scoring iterations: 18</code></pre>
+<pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
+                         factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
+    print(cm)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE   356   14
+##      TRUE      0    0
+##                                           
+##                Accuracy : 0.9622          
+##                  95% CI : (0.9373, 0.9792)
+##     No Information Rate : 0.9622          
+##     P-Value [Acc &gt; NIR] : 0.570450        
+##                                           
+##                   Kappa : 0               
+##                                           
+##  Mcnemar&#39;s Test P-Value : 0.000512        
+##                                           
+##             Sensitivity : 0.00000         
+##             Specificity : 1.00000         
+##          Pos Pred Value :     NaN         
+##          Neg Pred Value : 0.96216         
+##              Prevalence : 0.03784         
+##          Detection Rate : 0.00000         
+##    Detection Prevalence : 0.00000         
+##       Balanced Accuracy : 0.50000         
+##                                           
+##        &#39;Positive&#39; Class : TRUE            
+## </code></pre>
+</div>
+</div>
+<div id="kmh-zone-1" class="section level2">
+<h2>80-90kmh Zone</h2>
+<pre class="r"><code>df &lt;- filter(crashDF, Crash_Speed_Limit_80to90kmh == 1)
+
+trainTestSets &lt;- genTrainTestSets(df)
+trainDF &lt;- trainTestSets$TrainSet
+print(paste(&quot;80to90kmh Train Set size=&quot;, nrow(trainDF)))</code></pre>
+<pre><code>## [1] &quot;80to90kmh Train Set size= 1603&quot;</code></pre>
+<pre class="r"><code>testDF &lt;- trainTestSets$TestSet
+print(paste(&quot;80to90kmh Test Set size=&quot;, nrow(testDF)))</code></pre>
+<pre><code>## [1] &quot;80to90kmh Test Set size= 688&quot;</code></pre>
+<div id="model-1---fatal_accident-crash_nature-2" class="section level3">
+<h3>model 1 - fatal_accident ~ Crash_Nature</h3>
+<p>Select all observations in the 80to90km zone. Run some linear regression models using crash nature.</p>
+<pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian+
+                  Crash_Nature_Non_collision_miscellaneous+ Crash_Nature_Overturned+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe+
+                  Crash_Nature_Struck_by_external_load, 
+               data=trainDF, family=&quot;binomial&quot;)
+  
+  print(summary(natureModel1))</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + 
+##     Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + 
+##     Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + 
+##     Crash_Nature_Hit_pedestrian + Crash_Nature_Non_collision_miscellaneous + 
+##     Crash_Nature_Overturned + Crash_Nature_Rear_end + Crash_Nature_Sideswipe + 
+##     Crash_Nature_Struck_by_external_load, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.8904  -0.3780  -0.2872  -0.2750   2.9198  
+## 
+## Coefficients: (2 not defined because of singularities)
+##                                            Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                              -1.657e+01  9.796e+02  -0.017    0.987
+## Crash_Nature_Angle                        1.396e+01  9.796e+02   0.014    0.989
+## Crash_Nature_Collision_miscellaneous      1.449e+01  9.796e+02   0.015    0.988
+## Crash_Nature_Fall_from_vehicle            1.331e+01  9.796e+02   0.014    0.989
+## Crash_Nature_Head_on                      1.585e+01  9.796e+02   0.016    0.987
+## Crash_Nature_Hit_animal                   1.232e+01  9.796e+02   0.013    0.990
+## Crash_Nature_Hit_object                   1.429e+01  9.796e+02   0.015    0.988
+## Crash_Nature_Hit_parked_vehicle          -7.733e-10  1.200e+03   0.000    1.000
+## Crash_Nature_Hit_pedestrian              -7.740e-10  1.265e+03   0.000    1.000
+## Crash_Nature_Non_collision_miscellaneous         NA         NA      NA       NA
+## Crash_Nature_Overturned                  -7.908e-10  1.549e+03   0.000    1.000
+## Crash_Nature_Rear_end                     1.340e+01  9.796e+02   0.014    0.989
+## Crash_Nature_Sideswipe                    1.306e+01  9.796e+02   0.013    0.989
+## Crash_Nature_Struck_by_external_load             NA         NA      NA       NA
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 753.93  on 1602  degrees of freedom
+## Residual deviance: 694.90  on 1591  degrees of freedom
+## AIC: 718.9
+## 
+## Number of Fisher Scoring iterations: 15</code></pre>
+<pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5</code></pre>
+<pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+## prediction from a rank-deficient fit may be misleading</code></pre>
+<pre class="r"><code>    cm = confusionMatrix(factor(natureModel1.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
+                         factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
+    print(cm)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE   644   44
+##      TRUE      0    0
+##                                           
+##                Accuracy : 0.936           
+##                  95% CI : (0.9151, 0.9532)
+##     No Information Rate : 0.936           
+##     P-Value [Acc &gt; NIR] : 0.54            
+##                                           
+##                   Kappa : 0               
+##                                           
+##  Mcnemar&#39;s Test P-Value : 9.022e-11       
+##                                           
+##             Sensitivity : 0.00000         
+##             Specificity : 1.00000         
+##          Pos Pred Value :     NaN         
+##          Neg Pred Value : 0.93605         
+##              Prevalence : 0.06395         
+##          Detection Rate : 0.00000         
+##    Detection Prevalence : 0.00000         
+##       Balanced Accuracy : 0.50000         
+##                                           
+##        &#39;Positive&#39; Class : TRUE            
+## </code></pre>
+</div>
+<div id="model-2-fatal_accident---selected-crash-nature-2" class="section level3">
+<h3>model 2 fatal_accident - selected Crash Nature</h3>
+<p>Remove some nature of crash predictors that make up low percentage of accidents.</p>
+<pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ 
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe,
+               data=trainDF, family=&quot;binomial&quot;)
+  
+  print(summary(natureModel1))</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Nature_Angle + Crash_Nature_Fall_from_vehicle + 
+##     Crash_Nature_Head_on + Crash_Nature_Hit_animal + Crash_Nature_Hit_object + 
+##     Crash_Nature_Rear_end + Crash_Nature_Sideswipe, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.8904  -0.3780  -0.2750  -0.2750   2.9198  
+## 
+## Coefficients:
+##                                Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                     -3.6636     1.0127  -3.618 0.000297 ***
+## Crash_Nature_Angle               1.0609     1.0389   1.021 0.307186    
+## Crash_Nature_Fall_from_vehicle   0.4075     1.0394   0.392 0.695015    
+## Crash_Nature_Head_on             2.9430     1.0527   2.796 0.005180 ** 
+## Crash_Nature_Hit_animal         -0.5849     1.4279  -0.410 0.682058    
+## Crash_Nature_Hit_object          1.3838     1.0301   1.343 0.179164    
+## Crash_Nature_Rear_end            0.4960     1.0751   0.461 0.644566    
+## Crash_Nature_Sideswipe           0.1570     1.1700   0.134 0.893253    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 753.93  on 1602  degrees of freedom
+## Residual deviance: 697.97  on 1595  degrees of freedom
+## AIC: 713.97
+## 
+## Number of Fisher Scoring iterations: 6</code></pre>
+<pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
+                         factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
+    print(cm)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE   644   44
+##      TRUE      0    0
+##                                           
+##                Accuracy : 0.936           
+##                  95% CI : (0.9151, 0.9532)
+##     No Information Rate : 0.936           
+##     P-Value [Acc &gt; NIR] : 0.54            
+##                                           
+##                   Kappa : 0               
+##                                           
+##  Mcnemar&#39;s Test P-Value : 9.022e-11       
+##                                           
+##             Sensitivity : 0.00000         
+##             Specificity : 1.00000         
+##          Pos Pred Value :     NaN         
+##          Neg Pred Value : 0.93605         
+##              Prevalence : 0.06395         
+##          Detection Rate : 0.00000         
+##    Detection Prevalence : 0.00000         
+##       Balanced Accuracy : 0.50000         
+##                                           
+##        &#39;Positive&#39; Class : TRUE            
+## </code></pre>
+</div>
+</div>
+<div id="kmh-zone-2" class="section level2">
+<h2>60kmh Zone</h2>
+<pre class="r"><code>df &lt;- filter(crashDF, Crash_Speed_Limit_60kmh == 1)
+
+trainTestSets &lt;- genTrainTestSets(df)
+trainDF &lt;- trainTestSets$TrainSet
+print(paste(&quot;60kmh Train Set size=&quot;, nrow(trainDF)))</code></pre>
+<pre><code>## [1] &quot;60kmh Train Set size= 8394&quot;</code></pre>
+<pre class="r"><code>testDF &lt;- trainTestSets$TestSet
+print(paste(&quot;60kmh Test Set size=&quot;, nrow(testDF)))</code></pre>
+<pre><code>## [1] &quot;60kmh Test Set size= 3600&quot;</code></pre>
+<div id="model-1---fatal_accident-crash_nature-3" class="section level3">
+<h3>model 1 - fatal_accident ~ Crash_Nature</h3>
+<p>Select all observations in the 60kmh zone. Run some linear regression models using crash nature.</p>
+<pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian+
+                  Crash_Nature_Non_collision_miscellaneous+ Crash_Nature_Overturned+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe+
+                  Crash_Nature_Struck_by_external_load, 
+               data=trainDF, family=&quot;binomial&quot;)</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre class="r"><code>  print(summary(natureModel1))</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + 
+##     Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + 
+##     Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + 
+##     Crash_Nature_Hit_pedestrian + Crash_Nature_Non_collision_miscellaneous + 
+##     Crash_Nature_Overturned + Crash_Nature_Rear_end + Crash_Nature_Sideswipe + 
+##     Crash_Nature_Struck_by_external_load, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.4660  -0.1787  -0.1787  -0.1675   3.1124  
+## 
+## Coefficients:
+##                                            Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                               2.072e+12  4.276e+13   0.048    0.961
+## Crash_Nature_Angle                       -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Collision_miscellaneous     -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Fall_from_vehicle           -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Head_on                     -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Hit_animal                  -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Hit_object                  -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Hit_parked_vehicle          -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Hit_pedestrian              -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Non_collision_miscellaneous -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Overturned                  -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Rear_end                    -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Sideswipe                   -2.072e+12  4.276e+13  -0.048    0.961
+## Crash_Nature_Struck_by_external_load     -2.072e+12  4.276e+13  -0.048    0.961
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1731.7  on 8393  degrees of freedom
+## Residual deviance: 1623.3  on 8380  degrees of freedom
+## AIC: 1651.3
+## 
+## Number of Fisher Scoring iterations: 25</code></pre>
+<pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
+                         factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
+    print(cm)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE  3522   78
+##      TRUE      0    0
+##                                          
+##                Accuracy : 0.9783         
+##                  95% CI : (0.973, 0.9828)
+##     No Information Rate : 0.9783         
+##     P-Value [Acc &gt; NIR] : 0.5301         
+##                                          
+##                   Kappa : 0              
+##                                          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 0.00000        
+##             Specificity : 1.00000        
+##          Pos Pred Value :     NaN        
+##          Neg Pred Value : 0.97833        
+##              Prevalence : 0.02167        
+##          Detection Rate : 0.00000        
+##    Detection Prevalence : 0.00000        
+##       Balanced Accuracy : 0.50000        
+##                                          
+##        &#39;Positive&#39; Class : TRUE           
+## </code></pre>
+</div>
+<div id="model-2-fatal_accident---selected-crash-nature-3" class="section level3">
+<h3>model 2 fatal_accident - selected Crash Nature</h3>
+<p>Remove some nature of crash predictors that make up low percentage of accidents.</p>
+<pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ 
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe,
+               data=trainDF, family=&quot;binomial&quot;)
+  
+  print(summary(natureModel1))</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Nature_Angle + Crash_Nature_Fall_from_vehicle + 
+##     Crash_Nature_Head_on + Crash_Nature_Hit_animal + Crash_Nature_Hit_object + 
+##     Crash_Nature_Rear_end + Crash_Nature_Sideswipe, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.4652  -0.1789  -0.1789  -0.1675   3.1132  
+## 
+## Coefficients:
+##                                Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                     -3.4532     0.4542  -7.602 2.91e-14 ***
+## Crash_Nature_Angle              -0.6743     0.4757  -1.418   0.1563    
+## Crash_Nature_Fall_from_vehicle  -0.7537     0.4939  -1.526   0.1270    
+## Crash_Nature_Head_on             1.2841     0.5253   2.444   0.0145 *  
+## Crash_Nature_Hit_animal        -14.1129   419.3545  -0.034   0.9732    
+## Crash_Nature_Hit_object          0.6483     0.4730   1.371   0.1705    
+## Crash_Nature_Rear_end           -1.3849     0.5642  -2.455   0.0141 *  
+## Crash_Nature_Sideswipe          -0.8067     0.5547  -1.454   0.1459    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1731.7  on 8393  degrees of freedom
+## Residual deviance: 1631.6  on 8386  degrees of freedom
+## AIC: 1647.6
+## 
+## Number of Fisher Scoring iterations: 16</code></pre>
+<pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
+                         factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
+    print(cm)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE  3522   78
+##      TRUE      0    0
+##                                          
+##                Accuracy : 0.9783         
+##                  95% CI : (0.973, 0.9828)
+##     No Information Rate : 0.9783         
+##     P-Value [Acc &gt; NIR] : 0.5301         
+##                                          
+##                   Kappa : 0              
+##                                          
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16         
+##                                          
+##             Sensitivity : 0.00000        
+##             Specificity : 1.00000        
+##          Pos Pred Value :     NaN        
+##          Neg Pred Value : 0.97833        
+##              Prevalence : 0.02167        
+##          Detection Rate : 0.00000        
+##    Detection Prevalence : 0.00000        
+##       Balanced Accuracy : 0.50000        
+##                                          
+##        &#39;Positive&#39; Class : TRUE           
+## </code></pre>
+</div>
+</div>
+<div id="to50kmh-zone" class="section level2">
+<h2>0to50kmh Zone</h2>
+<pre class="r"><code>df &lt;- filter(crashDF, Crash_Speed_Limit_0to50kmh == 1)
+
+trainTestSets &lt;- genTrainTestSets(df)
+trainDF &lt;- trainTestSets$TrainSet
+print(paste(&quot;0to50kmh Train Set size=&quot;, nrow(trainDF)))</code></pre>
+<pre><code>## [1] &quot;0to50kmh Train Set size= 2831&quot;</code></pre>
+<pre class="r"><code>testDF &lt;- trainTestSets$TestSet
+print(paste(&quot;0to50kmh Test Set size=&quot;, nrow(testDF)))</code></pre>
+<pre><code>## [1] &quot;0to50kmh Test Set size= 1215&quot;</code></pre>
+<div id="model-1---fatal_accident-crash_nature-4" class="section level3">
+<h3>model 1 - fatal_accident ~ Crash_Nature</h3>
+<p>Select all observations in the 0to50kmh zone. Run some linear regression models using crash nature.</p>
+<pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian+
+                  Crash_Nature_Non_collision_miscellaneous+ Crash_Nature_Overturned+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe+
+                  Crash_Nature_Struck_by_external_load, 
+               data=trainDF, family=&quot;binomial&quot;)
+  
+  print(summary(natureModel1))</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Nature_Angle + Crash_Nature_Collision_miscellaneous + 
+##     Crash_Nature_Fall_from_vehicle + Crash_Nature_Head_on + Crash_Nature_Hit_animal + 
+##     Crash_Nature_Hit_object + Crash_Nature_Hit_parked_vehicle + 
+##     Crash_Nature_Hit_pedestrian + Crash_Nature_Non_collision_miscellaneous + 
+##     Crash_Nature_Overturned + Crash_Nature_Rear_end + Crash_Nature_Sideswipe + 
+##     Crash_Nature_Struck_by_external_load, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.3664  -0.1772  -0.1549  -0.1549   3.2953  
+## 
+## Coefficients: (2 not defined because of singularities)
+##                                            Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                              -1.957e+01  8.397e+02  -0.023    0.981
+## Crash_Nature_Angle                        1.515e+01  8.397e+02   0.018    0.986
+## Crash_Nature_Collision_miscellaneous      2.214e-10  5.442e+03   0.000    1.000
+## Crash_Nature_Fall_from_vehicle            1.542e+01  8.397e+02   0.018    0.985
+## Crash_Nature_Head_on                      1.639e+01  8.397e+02   0.020    0.984
+## Crash_Nature_Hit_animal                   2.307e-10  1.779e+03   0.000    1.000
+## Crash_Nature_Hit_object                   1.668e+01  8.397e+02   0.020    0.984
+## Crash_Nature_Hit_parked_vehicle           1.690e+01  8.397e+02   0.020    0.984
+## Crash_Nature_Hit_pedestrian               2.201e-10  1.687e+03   0.000    1.000
+## Crash_Nature_Non_collision_miscellaneous  2.220e-10  6.265e+03   0.000    1.000
+## Crash_Nature_Overturned                   2.215e-10  5.442e+03   0.000    1.000
+## Crash_Nature_Rear_end                     1.414e+01  8.397e+02   0.017    0.987
+## Crash_Nature_Sideswipe                           NA         NA      NA       NA
+## Crash_Nature_Struck_by_external_load             NA         NA      NA       NA
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 526.68  on 2830  degrees of freedom
+## Residual deviance: 486.04  on 2819  degrees of freedom
+## AIC: 510.04
+## 
+## Number of Fisher Scoring iterations: 18</code></pre>
+<pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5</code></pre>
+<pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+## prediction from a rank-deficient fit may be misleading</code></pre>
+<pre class="r"><code>    cm = confusionMatrix(factor(natureModel1.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
+                         factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
+    print(cm)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE  1191   24
+##      TRUE      0    0
+##                                           
+##                Accuracy : 0.9802          
+##                  95% CI : (0.9708, 0.9873)
+##     No Information Rate : 0.9802          
+##     P-Value [Acc &gt; NIR] : 0.554           
+##                                           
+##                   Kappa : 0               
+##                                           
+##  Mcnemar&#39;s Test P-Value : 2.668e-06       
+##                                           
+##             Sensitivity : 0.00000         
+##             Specificity : 1.00000         
+##          Pos Pred Value :     NaN         
+##          Neg Pred Value : 0.98025         
+##              Prevalence : 0.01975         
+##          Detection Rate : 0.00000         
+##    Detection Prevalence : 0.00000         
+##       Balanced Accuracy : 0.50000         
+##                                           
+##        &#39;Positive&#39; Class : TRUE            
+## </code></pre>
+</div>
+<div id="model-2-fatal_accident---selected-crash-nature-4" class="section level3">
+<h3>model 2 fatal_accident - selected Crash Nature</h3>
+<p>Remove some nature of crash predictors that make up low percentage of accidents.</p>
+<pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ 
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe,
+               data=trainDF, family=&quot;binomial&quot;)
+  
+  print(summary(natureModel1))</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = fatal_accident ~ Crash_Nature_Angle + Crash_Nature_Fall_from_vehicle + 
+##     Crash_Nature_Head_on + Crash_Nature_Hit_animal + Crash_Nature_Hit_object + 
+##     Crash_Nature_Rear_end + Crash_Nature_Sideswipe, family = &quot;binomial&quot;, 
+##     data = trainDF)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.3293  -0.1772  -0.1549  -0.1549   3.2953  
+## 
+## Coefficients:
+##                                 Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                      -3.3105     0.4553  -7.271 3.57e-13 ***
+## Crash_Nature_Angle               -1.1064     0.5340  -2.072   0.0383 *  
+## Crash_Nature_Fall_from_vehicle   -0.8355     0.5474  -1.526   0.1269    
+## Crash_Nature_Head_on              0.1325     0.7447   0.178   0.8588    
+## Crash_Nature_Hit_animal         -16.2555  1568.6341  -0.010   0.9917    
+## Crash_Nature_Hit_object           0.4230     0.5100   0.829   0.4069    
+## Crash_Nature_Rear_end            -2.1144     1.1008  -1.921   0.0548 .  
+## Crash_Nature_Sideswipe          -16.2555   839.7475  -0.019   0.9846    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 526.68  on 2830  degrees of freedom
+## Residual deviance: 492.31  on 2823  degrees of freedom
+## AIC: 508.31
+## 
+## Number of Fisher Scoring iterations: 18</code></pre>
+<pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),
+                         factor(testDF$fatal_accident, levels=c(&quot;FALSE&quot;, &quot;TRUE&quot;)), positive=&quot;TRUE&quot; )
+    print(cm)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction FALSE TRUE
+##      FALSE  1191   24
+##      TRUE      0    0
+##                                           
+##                Accuracy : 0.9802          
+##                  95% CI : (0.9708, 0.9873)
+##     No Information Rate : 0.9802          
+##     P-Value [Acc &gt; NIR] : 0.554           
+##                                           
+##                   Kappa : 0               
+##                                           
+##  Mcnemar&#39;s Test P-Value : 2.668e-06       
+##                                           
+##             Sensitivity : 0.00000         
+##             Specificity : 1.00000         
+##          Pos Pred Value :     NaN         
+##          Neg Pred Value : 0.98025         
+##              Prevalence : 0.01975         
+##          Detection Rate : 0.00000         
+##    Detection Prevalence : 0.00000         
+##       Balanced Accuracy : 0.50000         
+##                                           
+##        &#39;Positive&#39; Class : TRUE            
+## </code></pre>
+</div>
+</div>
 </div>
 
 

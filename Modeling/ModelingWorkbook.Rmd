@@ -639,3 +639,243 @@ Remove some nature of crash predictors that make up low percentage of accidents.
     print(cm)
     
 ``` 
+
+##  70kmh Zone
+
+```{r set up train test soeft for 70kmh zone}
+df <- filter(crashDF, Crash_Speed_Limit_70kmh == 1)
+
+trainTestSets <- genTrainTestSets(df)
+trainDF <- trainTestSets$TrainSet
+print(paste("70kmh Train Set size=", nrow(trainDF)))
+  
+testDF <- trainTestSets$TestSet
+print(paste("70kmh Test Set size=", nrow(testDF)))
+```
+
+### model 1 - fatal_accident ~ Crash_Nature
+
+Select all observations in the 70km zone. Run some linear regression models using crash nature.
+
+
+
+```{r model1  all crash nature in 70kmh zone}
+  natureModel1 <- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian+
+                  Crash_Nature_Non_collision_miscellaneous+ Crash_Nature_Overturned+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe+
+                  Crash_Nature_Struck_by_external_load, 
+               data=trainDF, family="binomial")
+  
+  print(summary(natureModel1))
+  
+ natureModel1.predictions <- predict(natureModel1, newdata = testDF, type="response") >= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c("FALSE","TRUE")),
+                         factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+    print(cm)
+    
+``` 
+
+### model 2 fatal_accident - selected Crash Nature
+
+Remove some nature of crash predictors that make up low percentage of accidents.
+
+```{r model1  70kmh - remove low percentage occurances of nature levels}
+  natureModel1 <- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ 
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe,
+               data=trainDF, family="binomial")
+  
+  print(summary(natureModel1))
+  
+ natureModel1.predictions <- predict(natureModel1, newdata = testDF, type="response") >= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c("FALSE","TRUE")),
+                         factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+    print(cm)
+    
+``` 
+
+##  80-90kmh Zone
+
+```{r set up train test soeft for 80 to 90kmh zone}
+df <- filter(crashDF, Crash_Speed_Limit_80to90kmh == 1)
+
+trainTestSets <- genTrainTestSets(df)
+trainDF <- trainTestSets$TrainSet
+print(paste("80to90kmh Train Set size=", nrow(trainDF)))
+  
+testDF <- trainTestSets$TestSet
+print(paste("80to90kmh Test Set size=", nrow(testDF)))
+```
+
+### model 1 - fatal_accident ~ Crash_Nature
+
+Select all observations in the 80to90km zone. Run some linear regression models using crash nature.
+
+
+
+```{r model1  all crash nature in 80to90kmh zone}
+  natureModel1 <- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian+
+                  Crash_Nature_Non_collision_miscellaneous+ Crash_Nature_Overturned+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe+
+                  Crash_Nature_Struck_by_external_load, 
+               data=trainDF, family="binomial")
+  
+  print(summary(natureModel1))
+  
+ natureModel1.predictions <- predict(natureModel1, newdata = testDF, type="response") >= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c("FALSE","TRUE")),
+                         factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+    print(cm)
+    
+``` 
+
+### model 2 fatal_accident - selected Crash Nature
+
+Remove some nature of crash predictors that make up low percentage of accidents.
+
+```{r model1  80-90kmh - remove low percentage occurances of nature levels}
+  natureModel1 <- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ 
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe,
+               data=trainDF, family="binomial")
+  
+  print(summary(natureModel1))
+  
+ natureModel1.predictions <- predict(natureModel1, newdata = testDF, type="response") >= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c("FALSE","TRUE")),
+                         factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+    print(cm)
+    
+``` 
+
+##  60kmh Zone
+
+```{r set up train test soeft for 600kmh zone}
+df <- filter(crashDF, Crash_Speed_Limit_60kmh == 1)
+
+trainTestSets <- genTrainTestSets(df)
+trainDF <- trainTestSets$TrainSet
+print(paste("60kmh Train Set size=", nrow(trainDF)))
+  
+testDF <- trainTestSets$TestSet
+print(paste("60kmh Test Set size=", nrow(testDF)))
+```
+
+### model 1 - fatal_accident ~ Crash_Nature
+
+Select all observations in the 60kmh zone. Run some linear regression models using crash nature.
+
+
+
+```{r model1  all crash nature in 60kmh zone}
+  natureModel1 <- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian+
+                  Crash_Nature_Non_collision_miscellaneous+ Crash_Nature_Overturned+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe+
+                  Crash_Nature_Struck_by_external_load, 
+               data=trainDF, family="binomial")
+  
+  print(summary(natureModel1))
+  
+ natureModel1.predictions <- predict(natureModel1, newdata = testDF, type="response") >= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c("FALSE","TRUE")),
+                         factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+    print(cm)
+    
+``` 
+
+### model 2 fatal_accident - selected Crash Nature
+
+Remove some nature of crash predictors that make up low percentage of accidents.
+
+```{r model1  60kmh - remove low percentage occurances of nature levels}
+  natureModel1 <- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ 
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe,
+               data=trainDF, family="binomial")
+  
+  print(summary(natureModel1))
+  
+ natureModel1.predictions <- predict(natureModel1, newdata = testDF, type="response") >= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c("FALSE","TRUE")),
+                         factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+    print(cm)
+    
+``` 
+
+##  0to50kmh Zone
+
+```{r set up train test soeft for 0to50kmh zone}
+df <- filter(crashDF, Crash_Speed_Limit_0to50kmh == 1)
+
+trainTestSets <- genTrainTestSets(df)
+trainDF <- trainTestSets$TrainSet
+print(paste("0to50kmh Train Set size=", nrow(trainDF)))
+  
+testDF <- trainTestSets$TestSet
+print(paste("0to50kmh Test Set size=", nrow(testDF)))
+```
+
+### model 1 - fatal_accident ~ Crash_Nature
+
+Select all observations in the 0to50kmh zone. Run some linear regression models using crash nature.
+
+
+
+```{r model1  all crash nature in 0to50kmh zone}
+  natureModel1 <- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Hit_parked_vehicle+ Crash_Nature_Hit_pedestrian+
+                  Crash_Nature_Non_collision_miscellaneous+ Crash_Nature_Overturned+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe+
+                  Crash_Nature_Struck_by_external_load, 
+               data=trainDF, family="binomial")
+  
+  print(summary(natureModel1))
+  
+ natureModel1.predictions <- predict(natureModel1, newdata = testDF, type="response") >= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c("FALSE","TRUE")),
+                         factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+    print(cm)
+    
+``` 
+
+### model 2 fatal_accident - selected Crash Nature
+
+Remove some nature of crash predictors that make up low percentage of accidents.
+
+```{r model1  0to50kmh - remove low percentage occurances of nature levels}
+  natureModel1 <- glm( fatal_accident ~ 
+                  Crash_Nature_Angle+ 
+                  Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
+                  Crash_Nature_Hit_animal+ Crash_Nature_Hit_object+
+                  Crash_Nature_Rear_end+ Crash_Nature_Sideswipe,
+               data=trainDF, family="binomial")
+  
+  print(summary(natureModel1))
+  
+ natureModel1.predictions <- predict(natureModel1, newdata = testDF, type="response") >= 0.5
+    cm = confusionMatrix(factor(natureModel1.predictions, levels=c("FALSE","TRUE")),
+                         factor(testDF$fatal_accident, levels=c("FALSE", "TRUE")), positive="TRUE" )
+    print(cm)
+    
+``` 
