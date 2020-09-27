@@ -593,7 +593,7 @@ testDF <- trainTestSets$TestSet
 print(paste("100 to 110kmh Test Set size=", nrow(testDF)))
 ```
 
-# model 1 - fatal_accident ~ Crash_Nature
+### model 1 - fatal_accident ~ Crash_Nature
 
 Select all observations in the 100 to 110km zone. Run some linear regression models using grash nature.
 
@@ -619,7 +619,7 @@ Select all observations in the 100 to 110km zone. Run some linear regression mod
     
 ``` 
 
-# model 2 fatal_accident - selected Crash Nature
+### model 2 fatal_accident - selected Crash Nature
 
 Remove some nature of crash predictors that make up low percentage of accidents.
 

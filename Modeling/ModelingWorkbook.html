@@ -2526,10 +2526,8 @@ print(paste(&quot;100 to 110kmh Train Set size=&quot;, nrow(trainDF)))</code></p
 <pre class="r"><code>testDF &lt;- trainTestSets$TestSet
 print(paste(&quot;100 to 110kmh Test Set size=&quot;, nrow(testDF)))</code></pre>
 <pre><code>## [1] &quot;100 to 110kmh Test Set size= 960&quot;</code></pre>
-</div>
-</div>
-<div id="model-1---fatal_accident-crash_nature" class="section level1">
-<h1>model 1 - fatal_accident ~ Crash_Nature</h1>
+<div id="model-1---fatal_accident-crash_nature" class="section level3">
+<h3>model 1 - fatal_accident ~ Crash_Nature</h3>
 <p>Select all observations in the 100 to 110km zone. Run some linear regression models using grash nature.</p>
 <pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
                   Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
@@ -2616,8 +2614,8 @@ print(paste(&quot;100 to 110kmh Test Set size=&quot;, nrow(testDF)))</code></pre
 ##        &#39;Positive&#39; Class : TRUE            
 ## </code></pre>
 </div>
-<div id="model-2-fatal_accident---selected-crash-nature" class="section level1">
-<h1>model 2 fatal_accident - selected Crash Nature</h1>
+<div id="model-2-fatal_accident---selected-crash-nature" class="section level3">
+<h3>model 2 fatal_accident - selected Crash Nature</h3>
 <p>Remove some nature of crash predictors that make up low percentage of accidents.</p>
 <pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
                   Crash_Nature_Angle+ 
@@ -2689,6 +2687,8 @@ print(paste(&quot;100 to 110kmh Test Set size=&quot;, nrow(testDF)))</code></pre
 ##                                           
 ##        &#39;Positive&#39; Class : TRUE            
 ## </code></pre>
+</div>
+</div>
 </div>
 
 
