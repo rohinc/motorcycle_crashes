@@ -287,15 +287,56 @@ chisq.test(crashDF$Crash_Severity_Fac, crashDF$Crash_Nature, correct=FALSE)
 
 Given the low p value the chi-squared test does imply that the Nature and Severity are dependent.
 
+# Traing and test set
+
+The crash data set will be divided into a training data set (70%) and test data set (30%). However, this won't be a straight split. Because of the small number of fatalities to non-fatalities to ensure a similar proportion in the training and test sets the crash data will first be divided into fatal and non-fatal and each of these subsets will be sampled for their contribution to the training and test sets.
+
+```{r utility function to generate train and test set from a crash dataframe}
+
+genTrainTestSets <- function( df ){
+  # - will return a list element 1 is the train set, element two is the test set
+  # - will split the data ~ 70% to 30% - TODO: should make this a parameter
+  # - the input dataset will be split into fatal and non-fatal observations and 
+  #   the these subsets will divided (as described above) into the train and test sets.
+  #   TODO: make the query for the split a parameter
+  set.seed(42)
+  
+  fatalDF <- filter(df, fatal_accident == 1)
+  nonFatalDF <- filter(df, fatal_accident == 0)
+  
+  # work out how much of the non-fatal data goes into the train and test set
+  trainSize <- floor(0.7*nrow(nonFatalDF))
+  trainIndexes <- sample(seq_len(nrow(nonFatalDF)), size = trainSize)
+  
+  # assign nofatal data to test and train data sets
+  trainDF  <- nonFatalDF[trainIndexes, ]
+  testDF   <- nonFatalDF[-trainIndexes, ]
+  
+  # work out how much of the fatal data goes into the train and test set
+  trainSize <- floor(0.7*nrow(fatalDF))
+  trainIndexes <- sample(seq_len(nrow(fatalDF)), size = trainSize)
+
+  # add fatal data to test and train data set
+  trainDF <- rbind(trainDF, fatalDF[trainIndexes,])
+  testDF  <- rbind(testDF, fatalDF[-trainIndexes,])
+  
+  retList <- list( trainDF, testDF)
+  names(retList) = c("TrainSet", "TestSet")
+  
+  return(retList)
+}
+```
+
 ```{r split into train and test sests }
 
 #  split data into 70% train 30% test.
-trainSize <- floor(0.7*nrow(crashDF))
-set.seed(42)
 
-trainIndexes <- sample(seq_len(nrow(crashDF)), size = trainSize)
-trainDF  <- crashDF[trainIndexes, ]
-testDF   <- crashDF[-trainIndexes, ]
+trainTestSets <- genTrainTestSets(crashDF)
+
+trainDF  <- trainTestSets$TrainSet
+print(paste("nrow Train set=", nrow(trainDF)))
+testDF   <- trainTestSets$TestSet
+print(paste("nrow Test set=", nrow(testDF)))
 ```
 
 
@@ -404,12 +445,13 @@ Going to run models against data at interesting date ranges:
 modelYearlyData <- function( df, year)
 {
   #  split data into 70% train 30% test.
-  trainSize <- floor(0.7*nrow(df))
-  set.seed(42)
-
-  trainIndexes <- sample(seq_len(nrow(df)), size = trainSize)
-  trainDF  <- df[trainIndexes, ]
-  testDF   <- df[-trainIndexes, ]
+  trainTestSets <- genTrainTestSets(df)
+  
+  trainDF <- trainTestSets$TrainSet
+  print(paste("Year ", year, " Train Set size=", nrow(trainDF)))
+  
+  testDF <- trainTestSets$TestSet
+  print(paste("Year ", year, " Test Set size=", nrow(testDF)))
   
   #logistic regression model
   print(paste("********   YearModel1 for ", year))
@@ -472,7 +514,7 @@ modelYearlyData <- function( df, year)
 ```
 
 ## 2017 to present
-```{r select records from 2017 on}
+```{r select records from 2017 t0 2019}
 
 crash2017DF <- filter(crashDF, Crash_Year >= 2017)
 
@@ -484,6 +526,12 @@ With `r sum(crash2017DF$fatal_accident ==1 )` fatalities
 ```{r Summary for 2017 to present}
 summary( crash2017DF)
 ```
+
+```{r model 2017 to 2019}
+modelYearlyData(crash2017DF, "2017to2019")
+```
+
+
 ## 2008 to 2016 Inclusive
 ```{r select records for 2008 to 20016 on}
 
