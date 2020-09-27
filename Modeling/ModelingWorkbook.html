@@ -2603,215 +2603,6 @@ cm</code></pre>
 <div id="model-1" class="section level1">
 <h1>model 1</h1>
 <p>Select all observations in the 100 to 110km zone. Run some linear regression models using grash nature.</p>
-<pre class="r"><code>  df &lt;- filter(crashDF, Crash_Speed_Limit_100to110kmh == 1)
-  summary(df)</code></pre>
-<pre><code>##        X1           crash_id      Crash_Severity       Crash_Year  
-##  Min.   :    5   Min.   :   116   Length:3196        Min.   :2001  
-##  1st Qu.: 6864   1st Qu.: 80450   Class :character   1st Qu.:2005  
-##  Median :13910   Median :162186   Mode  :character   Median :2009  
-##  Mean   :14220   Mean   :167485                      Mean   :2009  
-##  3rd Qu.:21747   3rd Qu.:253007                      3rd Qu.:2014  
-##  Max.   :28322   Max.   :328148                      Max.   :2018  
-##                                                                    
-##  Crash_Month        Crash_Day_Of_Week    Crash_Hour    Crash_Nature      
-##  Length:3196        Length:3196        Min.   : 0.00   Length:3196       
-##  Class :character   Class :character   1st Qu.: 9.00   Class :character  
-##  Mode  :character   Mode  :character   Median :12.00   Mode  :character  
-##                                        Mean   :12.44                     
-##                                        3rd Qu.:16.00                     
-##                                        Max.   :23.00                     
-##                                                                          
-##   Crash_Type        Crash_Longitude_GDA94 Crash_Latitude_GDA94
-##  Length:3196        Min.   :138.0         Min.   :-29.00      
-##  Class :character   1st Qu.:149.4         1st Qu.:-27.56      
-##  Mode  :character   Median :152.4         Median :-26.75      
-##                     Mean   :151.0         Mean   :-25.08      
-##                     3rd Qu.:152.9         3rd Qu.:-23.63      
-##                     Max.   :153.5         Max.   :-11.66      
-##                                                               
-##  Crash_Street        Loc_Suburb        Loc_Local_Government_Area
-##  Length:3196        Length:3196        Length:3196              
-##  Class :character   Class :character   Class :character         
-##  Mode  :character   Mode  :character   Mode  :character         
-##                                                                 
-##                                                                 
-##                                                                 
-##                                                                 
-##  Loc_Post_Code      Loc_Main_Roads_Region Loc_ABS_Remoteness
-##  Length:3196        Length:3196           Length:3196       
-##  Class :character   Class :character      Class :character  
-##  Mode  :character   Mode  :character      Mode  :character  
-##                                                             
-##                                                             
-##                                                             
-##                                                             
-##  Crash_Controlling_Authority Crash_Roadway_Feature Crash_Traffic_Control
-##  Length:3196                 Length:3196           Length:3196          
-##  Class :character            Class :character      Class :character     
-##  Mode  :character            Mode  :character      Mode  :character     
-##                                                                         
-##                                                                         
-##                                                                         
-##                                                                         
-##  Crash_Speed_Limit  Crash_Road_Surface_Condition Crash_Atmospheric_Condition
-##  Length:3196        Length:3196                  Length:3196                
-##  Class :character   Class :character             Class :character           
-##  Mode  :character   Mode  :character             Mode  :character           
-##                                                                             
-##                                                                             
-##                                                                             
-##                                                                             
-##  Crash_Lighting_Condition Crash_Road_Horiz_Align Crash_Road_Vert_Align
-##  Length:3196              Length:3196            Length:3196          
-##  Class :character         Class :character       Class :character     
-##  Mode  :character         Mode  :character       Mode  :character     
-##                                                                       
-##                                                                       
-##                                                                       
-##                                                                       
-##  Crash_DCA_Code  Crash_DCA_Description Crash_DCA_Group_Description
-##  Min.   :  0.0   Length:3196           Length:3196                
-##  1st Qu.:306.0   Class :character      Class :character           
-##  Median :609.0   Mode  :character      Mode  :character           
-##  Mean   :572.4                                                    
-##  3rd Qu.:801.0                                                    
-##  Max.   :905.0                                                    
-##                                                                   
-##  DCA_Key_Approach_Dir Count_Casualty_Fatality Count_Casualty_Hospitalised
-##  Length:3196          Min.   :0.00000         Min.   :0.0000             
-##  Class :character     1st Qu.:0.00000         1st Qu.:0.0000             
-##  Mode  :character     Median :0.00000         Median :1.0000             
-##                       Mean   :0.07822         Mean   :0.7081             
-##                       3rd Qu.:0.00000         3rd Qu.:1.0000             
-##                       Max.   :2.00000         Max.   :5.0000             
-##                                                                          
-##  Count_Casualty_MedicallyTreated Count_Casualty_MinorInjury
-##  Min.   :0.0000                  Min.   :0.000             
-##  1st Qu.:0.0000                  1st Qu.:0.000             
-##  Median :0.0000                  Median :0.000             
-##  Mean   :0.2769                  Mean   :0.097             
-##  3rd Qu.:1.0000                  3rd Qu.:0.000             
-##  Max.   :5.0000                  Max.   :4.000             
-##                                                            
-##  Count_Casualty_Total Count_Unit_Motorcycle_Moped   site_id_1     
-##  Min.   :0.00         Min.   :1.000               Min.   : 27005  
-##  1st Qu.:1.00         1st Qu.:1.000               1st Qu.: 36128  
-##  Median :1.00         Median :1.000               Median : 40237  
-##  Mean   :1.16         Mean   :1.059               Mean   : 38521  
-##  3rd Qu.:1.00         3rd Qu.:1.000               3rd Qu.: 40814  
-##  Max.   :7.00         Max.   :5.000               Max.   :140000  
-##                                                                   
-##  site_name_1          distance_1        site_id_list_2   site_name_2       
-##  Length:3196        Min.   :    46.61   Min.   : 27006   Length:3196       
-##  Class :character   1st Qu.:  3167.74   1st Qu.: 37032   Class :character  
-##  Mode  :character   Median :  5265.77   Median : 40343   Mode  :character  
-##                     Mean   :  6511.86   Mean   : 38770                     
-##                     3rd Qu.:  7829.07   3rd Qu.: 40874                     
-##                     Max.   :135185.90   Max.   :140010                     
-##                                                                            
-##    distance_2       site_id_list_3   site_name_3          distance_3    
-##  Min.   :   515.1   Min.   : 27005   Length:3196        Min.   :  1342  
-##  1st Qu.:  5844.6   1st Qu.: 37092   Class :character   1st Qu.:  7602  
-##  Median :  8335.9   Median : 40284   Mode  :character   Median : 10635  
-##  Mean   : 10191.1   Mean   : 39189                      Mean   : 13259  
-##  3rd Qu.: 11772.8   3rd Qu.: 40878                      3rd Qu.: 15314  
-##  Max.   :135299.1   Max.   :140009                      Max.   :160293  
-##                                                                         
-##       Lat              Lon           rainfall       Crash_Nature_Angle
-##  Min.   :-29.00   Min.   :138.7   Min.   : 0.0000   Min.   :0.00000   
-##  1st Qu.:-27.55   1st Qu.:149.4   1st Qu.: 0.5587   1st Qu.:0.00000   
-##  Median :-26.78   Median :152.4   Median : 1.6683   Median :0.00000   
-##  Mean   :-25.08   Mean   :151.0   Mean   : 2.9392   Mean   :0.08385   
-##  3rd Qu.:-23.63   3rd Qu.:152.9   3rd Qu.: 3.7484   3rd Qu.:0.00000   
-##  Max.   :-11.75   Max.   :153.5   Max.   :56.0714   Max.   :1.00000   
-##                                                                       
-##  Crash_Nature_Collision_miscellaneous Crash_Nature_Fall_from_vehicle
-##  Min.   :0.000000                     Min.   :0.0000                
-##  1st Qu.:0.000000                     1st Qu.:0.0000                
-##  Median :0.000000                     Median :0.0000                
-##  Mean   :0.005945                     Mean   :0.3392                
-##  3rd Qu.:0.000000                     3rd Qu.:1.0000                
-##  Max.   :1.000000                     Max.   :1.0000                
-##                                                                     
-##  Crash_Nature_Head_on Crash_Nature_Hit_animal Crash_Nature_Hit_object
-##  Min.   :0.00000      Min.   :0.00000         Min.   :0.0000         
-##  1st Qu.:0.00000      1st Qu.:0.00000         1st Qu.:0.0000         
-##  Median :0.00000      Median :0.00000         Median :0.0000         
-##  Mean   :0.03692      Mean   :0.09293         Mean   :0.2268         
-##  3rd Qu.:0.00000      3rd Qu.:0.00000         3rd Qu.:0.0000         
-##  Max.   :1.00000      Max.   :1.00000         Max.   :1.0000         
-##                                                                      
-##  Crash_Nature_Hit_parked_vehicle Crash_Nature_Hit_pedestrian
-##  Min.   :0.00000                 Min.   :0.000000           
-##  1st Qu.:0.00000                 1st Qu.:0.000000           
-##  Median :0.00000                 Median :0.000000           
-##  Mean   :0.00438                 Mean   :0.001877           
-##  3rd Qu.:0.00000                 3rd Qu.:0.000000           
-##  Max.   :1.00000                 Max.   :1.000000           
-##                                                             
-##  Crash_Nature_Non_collision_miscellaneous Crash_Nature_Overturned
-##  Min.   :0.00000                          Min.   :0.000000       
-##  1st Qu.:0.00000                          1st Qu.:0.000000       
-##  Median :0.00000                          Median :0.000000       
-##  Mean   :0.00219                          Mean   :0.004693       
-##  3rd Qu.:0.00000                          3rd Qu.:0.000000       
-##  Max.   :1.00000                          Max.   :1.000000       
-##                                                                  
-##  Crash_Nature_Rear_end Crash_Nature_Sideswipe
-##  Min.   :0.0000        Min.   :0.00000       
-##  1st Qu.:0.0000        1st Qu.:0.00000       
-##  Median :0.0000        Median :0.00000       
-##  Mean   :0.1242        Mean   :0.07071       
-##  3rd Qu.:0.0000        3rd Qu.:0.00000       
-##  Max.   :1.0000        Max.   :1.00000       
-##                                              
-##  Crash_Nature_Struck_by_external_load            Crash_Severity_Fac
-##  Min.   :0.000000                     Property_damage_only:  29    
-##  1st Qu.:0.000000                     Minor_injury        : 195    
-##  Median :0.000000                     Medical_treatment   : 673    
-##  Mean   :0.006258                     Hospitalisation     :2061    
-##  3rd Qu.:0.000000                     Fatal               : 238    
-##  Max.   :1.000000                                                  
-##                                                                    
-##  Crash_Severity_Num fatal_accident  fatal_accident_fac
-##  Min.   :1.000      Mode :logical   FALSE:2958        
-##  1st Qu.:3.000      FALSE:2958      TRUE : 238        
-##  Median :4.000      TRUE :238                         
-##  Mean   :3.715                                        
-##  3rd Qu.:4.000                                        
-##  Max.   :5.000                                        
-##                                                       
-##           Crash_Nature_Fac Crash_Nature_Num Crash_Speed_Limit_Fac
-##  Fall from vehicle:1084    Min.   : 1.000   0to50kmh   :   0     
-##  Hit object       : 725    1st Qu.: 3.000   60kmh      :   0     
-##  Rear-end         : 397    Median : 5.000   70kmh      :   0     
-##  Hit animal       : 297    Mean   : 5.495   80to90kmh  :   0     
-##  Angle            : 268    3rd Qu.: 6.000   100to110kmh:3196     
-##  Sideswipe        : 226    Max.   :13.000                        
-##  (Other)          : 199                                          
-##  Crash_Speed_Limit_Num Crash_Speed_Limit_0to50kmh Crash_Speed_Limit_100to110kmh
-##  Min.   :5             Min.   :0                  Min.   :1                    
-##  1st Qu.:5             1st Qu.:0                  1st Qu.:1                    
-##  Median :5             Median :0                  Median :1                    
-##  Mean   :5             Mean   :0                  Mean   :1                    
-##  3rd Qu.:5             3rd Qu.:0                  3rd Qu.:1                    
-##  Max.   :5             Max.   :0                  Max.   :1                    
-##                                                                                
-##  Crash_Speed_Limit_60kmh Crash_Speed_Limit_70kmh Crash_Speed_Limit_80to90kmh
-##  Min.   :0               Min.   :0               Min.   :0                  
-##  1st Qu.:0               1st Qu.:0               1st Qu.:0                  
-##  Median :0               Median :0               Median :0                  
-##  Mean   :0               Mean   :0               Mean   :0                  
-##  3rd Qu.:0               3rd Qu.:0               3rd Qu.:0                  
-##  Max.   :0               Max.   :0               Max.   :0                  
-## </code></pre>
-<pre class="r"><code>  #  split data into 70% train 30% test.
-  trainSize &lt;- floor(0.7*nrow(df))
-  set.seed(42)
-
-  trainIndexes &lt;- sample(seq_len(nrow(df)), size = trainSize)
-  trainDF  &lt;- df[trainIndexes, ]
-  testDF   &lt;- df[-trainIndexes, ]</code></pre>
 <pre class="r"><code>  natureModel1 &lt;- glm( fatal_accident ~ 
                   Crash_Nature_Angle+ Crash_Nature_Collision_miscellaneous+
                   Crash_Nature_Fall_from_vehicle+ Crash_Nature_Head_on+
@@ -2835,47 +2626,30 @@ cm</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.9005  -0.4993  -0.3029  -0.2810   2.5501  
+## -0.6030  -0.2334  -0.2271  -0.2200   2.9131  
 ## 
 ## Coefficients: (1 not defined because of singularities)
-##                                           Estimate Std. Error z value Pr(&gt;|z|)
-## (Intercept)                               -2.30259    1.04881  -2.195   0.0281
-## Crash_Nature_Angle                         0.40113    1.07237   0.374   0.7084
-## Crash_Nature_Collision_miscellaneous       0.51083    1.29743   0.394   0.6938
-## Crash_Nature_Fall_from_vehicle            -0.90937    1.06577  -0.853   0.3935
-## Crash_Nature_Head_on                       1.49165    1.07712   1.385   0.1661
-## Crash_Nature_Hit_animal                   -0.75612    1.09759  -0.689   0.4909
-## Crash_Nature_Hit_object                    0.28325    1.05777   0.268   0.7889
-## Crash_Nature_Hit_parked_vehicle           -0.09531    1.48017  -0.064   0.9487
-## Crash_Nature_Hit_pedestrian              -13.26348  840.27481  -0.016   0.9874
-## Crash_Nature_Non_collision_miscellaneous   1.60944    1.61245   0.998   0.3182
-## Crash_Nature_Overturned                  -13.26348  460.23831  -0.029   0.9770
-## Crash_Nature_Rear_end                     -0.51954    1.07992  -0.481   0.6305
-## Crash_Nature_Sideswipe                    -0.51747    1.10351  -0.469   0.6391
-## Crash_Nature_Struck_by_external_load            NA         NA      NA       NA
-##                                           
-## (Intercept)                              *
-## Crash_Nature_Angle                        
-## Crash_Nature_Collision_miscellaneous      
-## Crash_Nature_Fall_from_vehicle            
-## Crash_Nature_Head_on                      
-## Crash_Nature_Hit_animal                   
-## Crash_Nature_Hit_object                   
-## Crash_Nature_Hit_parked_vehicle           
-## Crash_Nature_Hit_pedestrian               
-## Crash_Nature_Non_collision_miscellaneous  
-## Crash_Nature_Overturned                   
-## Crash_Nature_Rear_end                     
-## Crash_Nature_Sideswipe                    
-## Crash_Nature_Struck_by_external_load      
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+##                                            Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                              -1.557e+01  3.103e+02  -0.050    0.960
+## Crash_Nature_Angle                        1.198e+01  3.103e+02   0.039    0.969
+## Crash_Nature_Collision_miscellaneous      1.268e+01  3.103e+02   0.041    0.967
+## Crash_Nature_Fall_from_vehicle            1.186e+01  3.103e+02   0.038    0.970
+## Crash_Nature_Head_on                      1.395e+01  3.103e+02   0.045    0.964
+## Crash_Nature_Hit_animal                   1.192e+01  3.103e+02   0.038    0.969
+## Crash_Nature_Hit_object                   1.296e+01  3.103e+02   0.042    0.967
+## Crash_Nature_Hit_parked_vehicle           1.211e+01  3.103e+02   0.039    0.969
+## Crash_Nature_Hit_pedestrian               1.174e+01  3.103e+02   0.038    0.970
+## Crash_Nature_Non_collision_miscellaneous -9.214e-11  6.316e+02   0.000    1.000
+## Crash_Nature_Overturned                  -9.123e-11  3.960e+02   0.000    1.000
+## Crash_Nature_Rear_end                     1.134e+01  3.103e+02   0.037    0.971
+## Crash_Nature_Sideswipe                    1.156e+01  3.103e+02   0.037    0.970
+## Crash_Nature_Struck_by_external_load             NA         NA      NA       NA
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 1232.7  on 2236  degrees of freedom
-## Residual deviance: 1151.5  on 2224  degrees of freedom
-## AIC: 1177.5
+##     Null deviance: 4662.8  on 15928  degrees of freedom
+## Residual deviance: 4416.2  on 15916  degrees of freedom
+## AIC: 4442.2
 ## 
 ## Number of Fisher Scoring iterations: 14</code></pre>
 <pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5</code></pre>
@@ -2888,23 +2662,23 @@ cm</code></pre>
 ## 
 ##           Reference
 ## Prediction FALSE TRUE
-##      FALSE   897   62
+##      FALSE  6599  229
 ##      TRUE      0    0
 ##                                           
-##                Accuracy : 0.9353          
-##                  95% CI : (0.9179, 0.9501)
-##     No Information Rate : 0.9353          
-##     P-Value [Acc &gt; NIR] : 0.5337          
+##                Accuracy : 0.9665          
+##                  95% CI : (0.9619, 0.9706)
+##     No Information Rate : 0.9665          
+##     P-Value [Acc &gt; NIR] : 0.5176          
 ##                                           
 ##                   Kappa : 0               
 ##                                           
-##  Mcnemar&#39;s Test P-Value : 9.408e-15       
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
 ##                                           
 ##             Sensitivity : 0.00000         
 ##             Specificity : 1.00000         
 ##          Pos Pred Value :     NaN         
-##          Neg Pred Value : 0.93535         
-##              Prevalence : 0.06465         
+##          Neg Pred Value : 0.96646         
+##              Prevalence : 0.03354         
 ##          Detection Rate : 0.00000         
 ##    Detection Prevalence : 0.00000         
 ##       Balanced Accuracy : 0.50000         
@@ -2932,26 +2706,26 @@ cm</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -0.8576  -0.4993  -0.3399  -0.2810   2.5501  
+## -0.6030  -0.2334  -0.2233  -0.2200   2.9131  
 ## 
 ## Coefficients:
 ##                                Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                     -2.2618     0.4699  -4.813 1.49e-06 ***
-## Crash_Nature_Angle               0.3603     0.5204   0.692   0.4887    
-## Crash_Nature_Fall_from_vehicle  -0.9502     0.5067  -1.875   0.0607 .  
-## Crash_Nature_Head_on             1.4508     0.5301   2.737   0.0062 ** 
-## Crash_Nature_Hit_animal         -0.7969     0.5706  -1.397   0.1625    
-## Crash_Nature_Hit_object          0.2424     0.4896   0.495   0.6205    
-## Crash_Nature_Rear_end           -0.5604     0.5358  -1.046   0.2956    
-## Crash_Nature_Sideswipe          -0.5583     0.5819  -0.959   0.3373    
+## (Intercept)                    -3.67883    0.32019 -11.489  &lt; 2e-16 ***
+## Crash_Nature_Angle              0.08973    0.33195   0.270  0.78692    
+## Crash_Nature_Fall_from_vehicle -0.03071    0.33628  -0.091  0.92723    
+## Crash_Nature_Head_on            2.06622    0.34866   5.926  3.1e-09 ***
+## Crash_Nature_Hit_animal         0.03409    0.44250   0.077  0.93859    
+## Crash_Nature_Hit_object         1.07258    0.33014   3.249  0.00116 ** 
+## Crash_Nature_Rear_end          -0.54976    0.37077  -1.483  0.13814    
+## Crash_Nature_Sideswipe         -0.33098    0.38573  -0.858  0.39086    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 1232.7  on 2236  degrees of freedom
-## Residual deviance: 1155.7  on 2229  degrees of freedom
-## AIC: 1171.7
+##     Null deviance: 4662.8  on 15928  degrees of freedom
+## Residual deviance: 4420.6  on 15921  degrees of freedom
+## AIC: 4436.6
 ## 
 ## Number of Fisher Scoring iterations: 6</code></pre>
 <pre class="r"><code> natureModel1.predictions &lt;- predict(natureModel1, newdata = testDF, type=&quot;response&quot;) &gt;= 0.5
@@ -2962,23 +2736,23 @@ cm</code></pre>
 ## 
 ##           Reference
 ## Prediction FALSE TRUE
-##      FALSE   897   62
+##      FALSE  6599  229
 ##      TRUE      0    0
 ##                                           
-##                Accuracy : 0.9353          
-##                  95% CI : (0.9179, 0.9501)
-##     No Information Rate : 0.9353          
-##     P-Value [Acc &gt; NIR] : 0.5337          
+##                Accuracy : 0.9665          
+##                  95% CI : (0.9619, 0.9706)
+##     No Information Rate : 0.9665          
+##     P-Value [Acc &gt; NIR] : 0.5176          
 ##                                           
 ##                   Kappa : 0               
 ##                                           
-##  Mcnemar&#39;s Test P-Value : 9.408e-15       
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
 ##                                           
 ##             Sensitivity : 0.00000         
 ##             Specificity : 1.00000         
 ##          Pos Pred Value :     NaN         
-##          Neg Pred Value : 0.93535         
-##              Prevalence : 0.06465         
+##          Neg Pred Value : 0.96646         
+##              Prevalence : 0.03354         
 ##          Detection Rate : 0.00000         
 ##    Detection Prevalence : 0.00000         
 ##       Balanced Accuracy : 0.50000         

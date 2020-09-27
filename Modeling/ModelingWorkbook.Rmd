@@ -583,19 +583,7 @@ Select data by speed zone and then run models on that.
 # model 1
 Select all observations in the 100 to 110km zone. Run some linear regression models using grash nature.
 
-```{r set up dat set and train and test sets}
 
-  df <- filter(crashDF, Crash_Speed_Limit_100to110kmh == 1)
-  summary(df)
-  
-  #  split data into 70% train 30% test.
-  trainSize <- floor(0.7*nrow(df))
-  set.seed(42)
-
-  trainIndexes <- sample(seq_len(nrow(df)), size = trainSize)
-  trainDF  <- df[trainIndexes, ]
-  testDF   <- df[-trainIndexes, ]
-```
 
 ```{r model1  all crash nature}
   natureModel1 <- glm( fatal_accident ~ 
