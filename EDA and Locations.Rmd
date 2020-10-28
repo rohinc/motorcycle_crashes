@@ -1,0 +1,461 @@
+---
+title: "Location and Road Features"
+author: "William Feng 13786355"
+date: "14/09/2020"
+output: html_document
+---
+
+# Getting the data directly from the GitHub Repo 
+```{r, message=FALSE, warning=FALSE}
+setwd("~/motorcycle_crashes")
+
+library(readr)
+locations_station <- read_csv("weather/locations_station.csv")
+station_list <- read_csv("weather/station_list.csv")
+monthly_avg <- read_csv("weather/monthly_avg.csv")
+```
+
+```{r, message=FALSE}
+library(dplyr)
+station_list <- filter(station_list, 
+                       station_list$STA=='QLD') 
+
+# Removing useless variables like ID columns.
+station_list <- station_list[, -c(2:5, 8)]
+monthly_avg <- monthly_avg[, -c(3)]
+locations_station <- locations_station[, -c(13,14,18:21,23:25,27,28,47,49:53)]
+
+# Merging weather station list with average monthly rainfall data. First, make the primary keys. 
+
+monthly_avg <- monthly_avg %>% 
+  rename('Site' = 'bom_id') 
+station_rain <- full_join(station_list, 
+                          monthly_avg, 
+                          by = "Site")
+station_rain <- na.omit(station_rain)
+
+# Joining the data set by year, month and site name.
+main <- full_join(locations_station, 
+                  station_rain, 
+                  by = c("Crash_Year" = "Year", 
+                         "Crash_Month" = "Month_name",
+                         "site_id_1" = "Site"))
+
+main <- na.omit(main) 
+
+# Filter data to only fatal accidents
+fataldata <- filter(main, main$Crash_Severity=="Fatal")
+```
+
+# Exploratory Data Analysis
+
+```{r, Proportion of crash severity}
+severity <- as.data.frame(table(main$Crash_Severity))
+
+ggplot(severity, aes(x = reorder(Var1, -Freq),
+                 y = Freq)) + 
+  geom_bar(stat = "identity", 
+           fill = c("#FFDDDD","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF"),
+           colour="black") + 
+  labs(x = "Crash Severity", 
+       y = "Number of Accidents", 
+       title = "Severity of Motorcycle Accidents", 
+       subtitle = "(2001-2018)") +
+  geom_text(aes(label = paste(round((Freq*100/22757),1),"%"), 
+                y = Freq), 
+            vjust=-0.5, 
+            size=3.5, 
+            position = position_dodge(0.9)) + 
+  scale_y_continuous(breaks = c(0, 2000, 4000, 6000, 8000, 10000, 12000, 14000), limits = c(0,14000)) + 
+  theme_bw()
+```
+
+# Main Crash Hour
+```{r Crash hour time }
+hour <- as.data.frame(table(main$Crash_Hour))
+
+library(ggplot2)
+ggplot(hour, aes(x = Var1, y = Freq, color=Var1)) + 
+  geom_bar(stat = "identity", fill=c("#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#FFDDDD","#CCEEFF","#CCEEFF","#FFDDDD","#CCEEFF","#CCEEFF",	"#FFDDDD","#FFDDDD","#FFDDDD","#FFDDDD","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF",	"#CCEEFF", "#CCEEFF"), 
+           colour="black") +
+  labs(x = "Time of Day (hrs)", 
+       y = "Number of Accidents", 
+       title = "Motorcycle Accidents over 24 Hours", 
+       subtitle = "(2001-2018). Red highlighted columns show increase in crashes", 
+       caption = "Times are shown in 24-hour format") +
+  geom_text(aes(label = Freq, 
+                y = Freq), 
+            vjust=-0.2, 
+            size=3.5, 
+            position = position_dodge(0.9),
+            colour = "black") +
+  theme_bw()
+```
+# Fatality only crash hour
+```{r}
+fatalhour <- as.data.frame(table(fataldata$Crash_Hour))
+
+library(ggplot2)
+ggplot(fatalhour, aes(x = Var1, y = Freq, color=Var1)) + 
+  geom_bar(stat = "identity", fill=c("#FFDDDD","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF","#FFDDDD","#CCEEFF","#CCEEFF",	"#FFDDDD","#FFDDDD","#FFDDDD","#FFDDDD","#CCEEFF","#CCEEFF","#CCEEFF","#CCEEFF",	"#FFDDDD", "#CCEEFF"), 
+           colour="black") +
+  labs(x = "Time of Day (hrs)", 
+       y = "Number of Fatal Accidents", 
+       title = "Fatal Accidents over 24 Hours", 
+       subtitle = "(2001-2018)", 
+       caption = "Times are shown in 24-hour format") +
+  geom_text(aes(label = Freq, 
+                y = Freq), 
+            vjust=-0.2, 
+            size=3.5, 
+            position = position_dodge(0.9),
+            colour = "black") +
+  theme_bw()
+```
+# main dataset by speed zone
+```{r}
+fatalspeed <- as.data.frame(table(fataldata$Crash_Speed_Limit))
+
+library(ggplot2)
+ggplot(fatalspeed, aes(x = Var1, y = Freq, color=Var1)) + 
+ geom_bar(stat = "identity", 
+           colour="black") +
+  labs(x = "Time of Day (hrs)", 
+       y = "Number of Fatal Accidents", 
+       title = "Fatal Accidents over 24 Hours", 
+       subtitle = "(2001-2018)", 
+       caption = "Times are shown in 24-hour format") +
+  geom_text(aes(label = Freq, 
+                y = Freq), 
+            vjust=-0.2, 
+            size=3.5, 
+            position = position_dodge(0.9),
+            colour = "black") +
+  theme_bw()
+```
+
+# Extracting road types (main)
+```{r}
+library(stringr)
+substring_last <- str_extract_all(main$Crash_Street,"\\w+$") 
+v <- as.character(substring_last)
+sort(table(v)*100/22757, decreasing = TRUE)
+```
+
+Most common crash sites 
+1. Road - 11288 = 49.60%
+2. St - 5343 = 23.47$
+3. Hwy - 2422 = 10.64%
+4. Dr - 1183 = 5.19%
+5. Ave - 623 = 2.73%
+6. Tce - 208 = 0.91%
+7. Pde - 178 = 0.78%
+8. Ramp - 148 = 0.65%
+9. Ct - 131 = 0.57%
+10. Blvd - 127 = 0.55%
+
+```{r Crash locations}
+type <- as.data.frame(table(v))
+
+type2 <- type[with(type,order(-Freq)),]
+type2 <- type2[1:5,]
+
+type2$v <- c("Road", "Street", "Highway", "Drive", "Avenue")
+
+library(ggplot2)
+ggplot(type2, aes(x = reorder(v, -Freq), 
+                  y = Freq)) + 
+  geom_bar(stat = "identity", 
+           fill = "#CCEEFF", 
+           colour="black") +
+  labs(x = "Road Type", 
+       y = "Number of Accidents", 
+       title = "Top 5 Most Common Motorcycle Crash Locations", 
+       subtitle = "(2001-2018)") +
+  geom_text(aes(label = paste(round((Freq*100/22757),1),"%"), 
+                y = Freq), 
+            vjust=-0.5, 
+            size=3.5, 
+            position = position_dodge(0.9)) +
+  scale_y_continuous(breaks = c(0, 2000, 4000, 6000, 8000, 10000, 12000), limits = c(0,12000)) +
+  theme_bw()
+```
+# Fatal only data
+
+```{r}
+library(stringr)
+substring_last <- str_extract_all(fataldata$Crash_Street,"\\w+$") 
+v2 <- as.character(substring_last)
+sort(table(v2)*100/761, decreasing = TRUE)
+```
+
+Most common crash sites 
+1. Road 59%
+2. Hwy 16%
+3. St 11%
+4. Dr 4.6%
+5. Ave 1.5%
+
+```{r Crash locations}
+type2 <- as.data.frame(table(v2))
+
+type3 <- type[with(type,order(-Freq)),]
+type3 <- type3[1:5,]
+
+type3$v2 <- c("Road", "Highway", "Street", "Drive", "Avenue")
+
+library(ggplot2)
+ggplot(type3, aes(x = reorder(v2, -Freq), 
+                  y = Freq)) + 
+  geom_bar(stat = "identity", 
+           fill = "#CCEEFF", 
+           colour="black") +
+  labs(x = "Road Type", 
+       y = "Number of Fatalities", 
+       title = "Top 5 Most Common Motorcycle Crash Locations", 
+       subtitle = "(2001-2018)") +
+  geom_text(aes(label = paste(round((Freq*100/761),1),"%"), 
+                y = Freq), 
+            vjust=-0.5, 
+            size=3.5, 
+            position = position_dodge(0.9)) +
+  scale_y_continuous(breaks = c(0, 100, 200, 300, 400, 500), limits = c(0,500)) +
+  theme_bw()
+```
+
+```{r Road feature type}
+features <- as.data.frame(table(main$Crash_Roadway_Feature))
+
+features$Var1 <- c("Bikeway","Bridge", "Forestry Road", "Five way", "Cross Intersection", "Interchange", "Multiple Road", "Roundabout", "T-Junction","Y-Junction", "Median Opening","Merge Lane", "No Feature", "Other", "Railway")
+
+features2 <- features[with(features,order(-Freq)),]
+features2 <- features2[1:5,]
+
+ggplot(features2, 
+       aes(x = reorder(Var1, -Freq), 
+           y = Freq)) + 
+  geom_bar(stat = "identity", 
+           fill = "#CCEEFF",
+           colour="black") +
+  labs(x = "Road Feature", 
+       y = "Number of Accidents", 
+       title = "Top 5 Most Common Motorcycle Crash Road Features", 
+       subtitle = "(2001-2018)") +
+  geom_text(aes(label = paste(round((Freq*100/22757),1),"%"), 
+                y = Freq), 
+            vjust=-0.5, 
+            size=3.5, 
+            position = position_dodge(1)) +
+    scale_y_continuous(breaks = c(0, 2000, 4000, 6000, 8000,10000, 12000), limits = c(0,12500)) +
+  theme_bw()
+```
+
+```{r}
+features <- as.data.frame(table(main$Crash_Roadway_Feature))
+
+features$Var1 <- c("Bikeway","Bridge", "Forestry Road", "Five way", "Cross Intersection", "Interchange", "Multiple Road", "Roundabout", "T-Junction","Y-Junction", "Median Opening","Merge Lane", "No Feature", "Other", "Railway")
+
+features2 <- features[with(features,order(-Freq)),]
+features2 <- features2[1:5,]
+
+ggplot(features2, 
+       aes(x = reorder(Var1, -Freq), 
+           y = Freq)) + 
+  geom_bar(stat = "identity", 
+           fill = "#CCEEFF",
+           colour="black") +
+  labs(x = "Road Feature", 
+       y = "Number of Accidents", 
+       title = "Top 5 Most Common Motorcycle Crash Road Features", 
+       subtitle = "(2001-2018)") +
+  geom_text(aes(label = paste(round((Freq*100/22757),1),"%"), 
+                y = Freq), 
+            vjust=-0.5, 
+            size=3.5, 
+            position = position_dodge(1)) +
+    scale_y_continuous(breaks = c(0, 2000, 4000, 6000, 8000,10000, 12000), limits = c(0,12500)) +
+  theme_bw()
+```
+# fatality only featureless roads
+```{r}
+library(ggplot2)
+features2 <- as.data.frame(table(fataldata$Crash_Roadway_Feature))
+
+features2$Var1 <- c("Bikeway","Bridge", "Forestry Road", "Cross Intersection", "Interchange", "Roundabout", "T-Junction", "Median Opening","Merge Lane", "No Feature", "Railway")
+
+features3 <- features2[with(features2,order(-Freq)),]
+features3 <- features3[1:5,]
+
+ggplot(features3, 
+       aes(x = reorder(Var1, -Freq), 
+           y = Freq)) + 
+  geom_bar(stat = "identity", 
+           fill = "#CCEEFF",
+           colour="black") +
+  labs(x = "Road Feature", 
+       y = "Number of Fatal Accidents", 
+       title = "Fatal accidents by road feature", 
+       subtitle = "(2001-2018)") +
+  geom_text(aes(label = paste(round((Freq*100/761),1),"%"), 
+                y = Freq), 
+            vjust=-0.5, 
+            size=3.5, 
+            position = position_dodge(1)) +
+    scale_y_continuous(breaks = c(0, 100, 200, 300, 400, 500, 600), limits = c(0,600)) +
+  theme_bw()
+```
+
+
+# Crash nature 
+```{r, include = FALSE}
+nature <- as.data.frame(table(main$Crash_Nature))
+
+library(ggplot2)
+ggplot(nature, aes(x = reorder(Var1, Freq), 
+                 y = Freq)) + 
+  geom_bar(stat = "identity", 
+           fill = "#CCEEFF", 
+           colour="black") +
+  labs(x = "Nature of Crash", 
+       y = "Number of Accidents", 
+       title = "Crash Nature", 
+       subtitle = "Based on data from 2001-2018") +
+  geom_text(aes(label = Freq, 
+                y = Freq), 
+            vjust=-0.2, 
+            size=3.5, 
+            position = position_dodge(0.9)) +
+  theme_bw() +
+  coord_flip()
+```
+
+
+```{r Crash group description, include=FALSE, eval=FALSE}
+description <- as.data.frame(table(main$Crash_DCA_Group_Description))
+
+description2 <- description[with(description,order(-Freq)),]
+description2 <- description2[1:5,]
+
+library(ggplot2)
+ggplot(description2, aes(x = reorder(Var1, Freq), 
+                 y = Freq)) + 
+  geom_bar(stat = "identity", 
+           fill = "#CCEEFF", 
+           colour="black") +
+  labs(x = "Reason of Crash", 
+       y = "Number of Accidents", 
+       title = "Top 5 Causes of Crashes", 
+       subtitle = "(2001-2018)") +
+  geom_text(aes(label = paste(round((Freq*100/22757),1),"%"), 
+                y = Freq), 
+            hjust=-0.1, 
+            size=3.5, 
+            position = position_dodge(1)) +
+  scale_y_continuous(limits = c(0,3500)) + 
+  theme_bw() +
+  coord_flip()
+```
+
+# Leaflet map - heat map 
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(leaflet)
+library(leaflet.extras)
+library(RColorBrewer)
+
+motorcycle <- awesomeIcons(
+  icon = 'motorcycle',
+  iconColor = 'orange',
+  markerColor = "black",
+  library = 'fa'
+)
+
+m <- leaflet(main) %>%
+  addProviderTiles(providers$Stamen.Toner, group = "Black and White") %>%
+  
+  addTiles(options = providerTileOptions(noWrap = TRUE), group="Colour") %>%
+  
+  addMiniMap(tiles = providers$Stamen.Toner) %>%
+  
+  addHeatmap(
+    lng = ~Crash_Longitude_GDA94,
+    lat = ~Crash_Latitude_GDA94,
+    radius = 15,
+    blur = 25,
+    gradient = "Oranges",
+    cellSize = 25,
+    intensity = 7,
+    group = "Fatalities2"
+) %>%
+
+ addLayersControl(
+   overlayGroups = c("Accidents"),
+   baseGroups = c("Black and White", "Colour"),
+   options = layersControlOptions(collapsed = FALSE)
+ )
+```
+
+```{r}
+m
+```
+
+
+# Featureless Roads Investigation 
+```{r}
+inv <- filter(main, main$Crash_Roadway_Feature == "No Roadway Feature")
+
+inv2 <- as.data.frame(table(inv$Crash_DCA_Group_Description))
+
+featurelessreason <- inv2[with(inv2,order(-Freq)),]
+featurelessreason <- featurelessreason[1:10,]
+
+ggplot(featurelessreason, aes(x = reorder(Var1, -Freq), 
+                 y = Freq)) + 
+  geom_bar(stat = "identity", 
+           fill = "#CCEEFF", 
+           colour="black") +
+  labs(x = "Reason of Crash", 
+       y = "Number of Accidents", 
+       title = "Top 10 Causes of Crashes on Featureless Roads", 
+       subtitle = "(2001-2018)") +
+  geom_text(aes(label = paste(round((Freq*100/22757),1),"%"),  
+                y = Freq), 
+            vjust=-0.5,
+            size=3.5, 
+            position = position_dodge(0.5)) +
+   scale_y_continuous(limits = c(0,2000)) +
+  theme_bw() +
+   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+# fatal data only
+```{r}
+inv2 <- filter(fataldata, fataldata$Crash_Roadway_Feature == "No Roadway Feature")
+
+inv3 <- as.data.frame(table(inv2$Crash_DCA_Group_Description))
+
+featurelessreason2 <- inv3[with(inv3,order(-Freq)),]
+featurelessreason2 <- featurelessreason2[1:11,]
+
+library(ggplot2)
+ggplot(featurelessreason2, aes(x = reorder(Var1, -Freq), 
+                 y = Freq)) + 
+  geom_bar(stat = "identity", 
+           fill = "#CCEEFF", 
+           colour="black") +
+  labs(x = "Reason of Crash", 
+       y = "Number of Accidents", 
+       title = "Top 10 Causes of Crashes on Featureless Roads", 
+       subtitle = "(2001-2018)") +
+  geom_text(aes(label = paste(round((Freq*100/761),1),"%"),  
+                y = Freq), 
+            vjust=-0.5,
+            #hjust=-0.1,
+            size=3.5, 
+            position = position_dodge(0.5)) +
+   scale_y_continuous(limits = c(0,200)) +
+  theme_bw() +
+   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
