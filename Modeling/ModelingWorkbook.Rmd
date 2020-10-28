@@ -1,6 +1,6 @@
 ---
 title: "Workbook to investigate Modeling"
-author: "Team 3"
+author: "Paul Gittings for Team 3"
 date: "25/09/2020"
 output:
   html_document: default
